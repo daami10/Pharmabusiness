@@ -1,18 +1,18 @@
 const fs = require('fs');
 
-const token   = process.env.AIRTABLE_TOKEN  || '';
-const base    = process.env.AIRTABLE_BASE   || '';
-const gemini  = process.env.GEMINI_KEY      || '';
+const supabaseUrl  = process.env.SUPABASE_URL      || '';
+const supabaseKey  = process.env.SUPABASE_ANON_KEY  || '';
+const gemini       = process.env.GEMINI_KEY         || '';
 
-if (!token || !base || !gemini) {
-  console.error('ERROR: Faltan variables de entorno (AIRTABLE_TOKEN, AIRTABLE_BASE, GEMINI_KEY)');
+if (!supabaseUrl || !supabaseKey) {
+  console.error('ERROR: Faltan variables de entorno (SUPABASE_URL, SUPABASE_ANON_KEY)');
   process.exit(1);
 }
 
 let html = fs.readFileSync('index.html', 'utf8');
-html = html.replace(/__AIRTABLE_TOKEN__/g, token);
-html = html.replace(/__AIRTABLE_BASE__/g,  base);
-html = html.replace(/__GEMINI_KEY__/g,     gemini);
+html = html.replace(/__SUPABASE_URL__/g,      supabaseUrl);
+html = html.replace(/__SUPABASE_ANON_KEY__/g, supabaseKey);
+html = html.replace(/__GEMINI_KEY__/g,        gemini);
 
 fs.mkdirSync('dist', { recursive: true });
 fs.writeFileSync('dist/index.html', html);
