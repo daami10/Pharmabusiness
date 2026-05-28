@@ -1918,7 +1918,10 @@ function renderCalListFiltered() {
 
   let filtered = calListCurrentRecs;
   if (calListFilter !== 'total') {
-    filtered = calListCurrentRecs.filter(r => getVencStatus(r.fields.FechaVencimiento, r.fields.Pagada) === calListFilter);
+    filtered = calListCurrentRecs.filter(r => {
+      const s = getVencStatus(r.fields.FechaVencimiento, r.fields.Pagada);
+      return calListFilter === 'pending' ? (s === 'pending' || s === 'neardue') : s === calListFilter;
+    });
   }
 
   if (!filtered.length) {
