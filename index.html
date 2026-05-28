@@ -1998,6 +1998,7 @@ async function markAsPaid(id) {
     const idx = allFacturas.findIndex(r=>r.id===id);
     if (idx !== -1) allFacturas[idx] = updated;
     filterFacturas();
+    renderCalendar();
   } catch(e) { alert('Error: '+e.message); }
 }
 
@@ -2007,6 +2008,7 @@ async function markAsUnpaid(id) {
     const idx = allFacturas.findIndex(r=>r.id===id);
     if (idx !== -1) allFacturas[idx] = updated;
     filterFacturas();
+    renderCalendar();
   } catch(e) { alert('Error: '+e.message); }
 }
 
