@@ -328,7 +328,7 @@
   <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
     <div class="glass-card rounded-2xl p-5 shadow-2xl glass-card-hover"><p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Total Invertido</p><p id="kpi-total" class="text-2xl font-black text-white leading-none">—</p></div>
     <div class="glass-card rounded-2xl p-5 shadow-2xl glass-card-hover"><p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Nº Facturas</p><p id="kpi-count" class="text-2xl font-black text-white leading-none">—</p></div>
-    <div onclick="showRankingModal()" class="glass-card rounded-2xl p-5 shadow-2xl glass-card-hover cursor-pointer hover:border-[#00f2fe]/40 hover:scale-[1.01] transition-all select-none" title="Ver ranking detallado de laboratorios"><p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Top Proveedor</p><p id="kpi-top" class="text-2xl font-black text-white leading-none truncate">—</p></div>
+    <div id="kpi-top-card" onclick="showRankingModal()" class="glass-card rounded-2xl p-5 shadow-2xl glass-card-hover select-none transition-all duration-300"><p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Top Proveedor</p><p id="kpi-top" class="text-2xl font-black text-white leading-none truncate">—</p></div>
     <div class="glass-card rounded-2xl p-5 shadow-2xl glass-card-hover"><p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Promedio / Factura</p><p id="kpi-avg" class="text-2xl font-black text-white leading-none">—</p></div>
   </div>
   <!-- KPIs por categoría -->
@@ -968,7 +968,7 @@
     <div class="flex items-center justify-between mb-4 shrink-0">
       <div class="flex items-center gap-3">
         <span class="w-3.5 h-3.5 rounded-full bg-[#00f2fe] shadow-[0_0_12px_rgba(0,242,254,0.8)]"></span>
-        <h3 class="text-xl font-black text-slate-100 tracking-tight">Ranking de Gasto por Laboratorio</h3>
+        <h3 id="ranking-modal-title-text" class="text-xl font-black text-slate-100 tracking-tight">Ranking de Gasto por Laboratorio</h3>
       </div>
       <button onclick="closeRankingModal()" class="text-slate-400 hover:text-white hover:bg-white/5 p-1 rounded-lg transition-colors">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -987,7 +987,7 @@
     </div>
 
     <div class="mt-5 pt-4 border-t border-white/5 flex justify-between items-center shrink-0">
-      <span class="text-xs text-slate-500 font-bold uppercase tracking-wider">Total Acumulado Laboratorios:</span>
+      <span id="ranking-modal-total-label" class="text-xs text-slate-500 font-bold uppercase tracking-wider">Total Acumulado Laboratorios:</span>
       <span id="ranking-modal-total" class="text-lg font-black text-[#00f2fe] drop-shadow-[0_0_8px_rgba(0,242,254,0.3)]">0,00 €</span>
     </div>
   </div>
@@ -1664,6 +1664,7 @@ function setAnalisisTipo(tipo) {
     if (card) card.classList.toggle('ring-gray-400',   t === tipo && tipo === 'Otro');
     if (card) card.classList.toggle('ring-orange-400', t === tipo && tipo === 'Trabajadores');
   });
+  updateTopCardClickable();
   applyAnalisisFilter();
 }
 
@@ -1874,6 +1875,7 @@ function renderAnalisisCharts(records) {
   document.getElementById('kpi-count').textContent = facturasChart.length;
   document.getElementById('kpi-top').textContent = sorted[0]?.[0]||'—';
   document.getElementById('kpi-avg').textContent = fmt(avg);
+  updateTopCardClickable();
 
   const allLabs = sorted;
   const genPalette = n => { const base=['#2563EB','#059669','#7C3AED','#EA580C','#0891B2','#DC2626','#CA8A04','#0F766E','#9333EA','#BE185D']; return Array.from({length:n},(_,i)=>i<base.length?base[i]:`hsl(${(i*137.5)%360},65%,50%)`); };
@@ -2680,18 +2682,39 @@ async function modalMarkAsUnpaid(id) {
 // ─── Modal Ranking Laboratorios ───────────────────────────────────────────────
 let currentRankingRecords = [];
 
+function updateTopCardClickable() {
+  const card = document.getElementById('kpi-top-card');
+  if (!card) return;
+  const isClickable = (activeAnalisisTipo === 'Laboratorio' || activeAnalisisTipo === 'Otro');
+  if (isClickable) {
+    card.className = 'glass-card rounded-2xl p-5 shadow-2xl glass-card-hover select-none transition-all duration-300 cursor-pointer hover:border-[#00f2fe]/40 hover:scale-[1.01]';
+    card.setAttribute('title', activeAnalisisTipo === 'Laboratorio' ? 'Ver ranking de gasto por laboratorio' : 'Ver ranking de gasto por proveedor (Otros)');
+  } else {
+    card.className = 'glass-card rounded-2xl p-5 shadow-2xl glass-card-hover select-none transition-all duration-300';
+    card.removeAttribute('title');
+  }
+}
+
 function showRankingModal() {
-  // Filtramos todas las facturas de tipo 'Laboratorio' (excluyendo abonos para ver el gasto bruto por laboratorio detallado)
-  const labInvoices = allFacturas.filter(r => r.fields.Tipo === 'Laboratorio');
-  
-  if (!labInvoices.length) {
-    alert("No hay facturas de laboratorios registradas para mostrar en el ranking.");
+  // Solo permitir abrir si está seleccionada la pestaña de Laboratorio u Otros
+  if (activeAnalisisTipo !== 'Laboratorio' && activeAnalisisTipo !== 'Otro') {
     return;
   }
   
-  // Agrupar por laboratorio y sumar los importes
+  const targetTipo = activeAnalisisTipo;
+  const isLab = targetTipo === 'Laboratorio';
+  
+  // Filtrar facturas de la categoría seleccionada (excluyendo abonos)
+  const invoices = allFacturas.filter(r => r.fields.Tipo === targetTipo);
+  
+  if (!invoices.length) {
+    alert(`No hay facturas de ${isLab ? 'laboratorios' : 'otros proveedores'} registradas.`);
+    return;
+  }
+  
+  // Agrupar por nombre (Laboratorio) y sumar los importes
   const sums = {};
-  labInvoices.forEach(r => {
+  invoices.forEach(r => {
     const name = r.fields.Laboratorio || 'Sin nombre';
     sums[name] = (sums[name] || 0) + (r.fields.Importe || 0);
   });
@@ -2701,6 +2724,11 @@ function showRankingModal() {
     .map(([name, amount]) => ({ name, amount }))
     .sort((a, b) => b.amount - a.amount);
     
+  // Configurar títulos y textos dinámicos en el modal
+  document.getElementById('ranking-modal-title-text').textContent = isLab ? 'Ranking de Gasto por Laboratorio' : 'Ranking de Gasto - Otros Proveedores';
+  document.getElementById('ranking-modal-search').placeholder = isLab ? 'Buscar por laboratorio...' : 'Buscar por proveedor...';
+  document.getElementById('ranking-modal-total-label').textContent = isLab ? 'Total Acumulado Laboratorios:' : 'Total Acumulado Otros Proveedores:';
+  
   // Limpiar el campo de búsqueda del modal
   document.getElementById('ranking-modal-search').value = '';
   
@@ -2722,25 +2750,26 @@ document.getElementById('ranking-modal').onclick = e => {
 function renderRankingModalListFiltered() {
   const query = document.getElementById('ranking-modal-search').value.toLowerCase().trim();
   const listContainer = document.getElementById('ranking-modal-list');
+  const isLab = activeAnalisisTipo === 'Laboratorio';
   
   const filtered = currentRankingRecords.filter(r => 
     r.name.toLowerCase().includes(query)
   );
   
   if (!filtered.length) {
-    listContainer.innerHTML = '<div class="py-12 text-center text-slate-500 text-sm">No se encontraron laboratorios.</div>';
+    listContainer.innerHTML = `<div class="py-12 text-center text-slate-500 text-sm">No se encontraron ${isLab ? 'laboratorios' : 'proveedores'}.</div>`;
     document.getElementById('ranking-modal-total').textContent = '0,00 €';
     return;
   }
   
-  // Calcular la suma total global de laboratorios para obtener porcentajes exactos basados en el total
-  const totalGlobalLabs = currentRankingRecords.reduce((sum, r) => sum + r.amount, 0);
+  // Calcular la suma total global de la categoría activa para obtener porcentajes exactos
+  const totalGlobal = currentRankingRecords.reduce((sum, r) => sum + r.amount, 0);
   
   listContainer.innerHTML = filtered.map(r => {
     // Encontrar la posición global para mantener el puesto correcto en el ranking
     const globalIndex = currentRankingRecords.findIndex(g => g.name === r.name);
     const rank = globalIndex + 1;
-    const percentage = totalGlobalLabs > 0 ? (r.amount / totalGlobalLabs) * 100 : 0;
+    const percentage = totalGlobal > 0 ? (r.amount / totalGlobal) * 100 : 0;
     
     // Insignias premium para los top 3
     let rankBadge = '';
