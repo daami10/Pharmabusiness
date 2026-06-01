@@ -34,23 +34,23 @@
   <style>
     body {
       font-family: 'Outfit', 'Inter', sans-serif;
-      background: radial-gradient(circle at top left, #111827, #090d16 85%);
+      background: radial-gradient(circle at top left, #0e1e38, #050a12 90%);
       color: #f1f5f9;
     }
     .glass-card {
-      background: rgba(17, 24, 39, 0.45);
+      background: linear-gradient(135deg, rgba(13, 27, 50, 0.7) 0%, rgba(8, 14, 25, 0.8) 100%);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(0, 242, 254, 0.15);
+      box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5), 0 0 15px rgba(0, 242, 254, 0.04);
     }
     .glass-card-hover {
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .glass-card-hover:hover {
-      border-color: rgba(255, 255, 255, 0.12);
+      border-color: rgba(0, 242, 254, 0.35);
       transform: translateY(-2px);
-      box-shadow: 0 16px 48px 0 rgba(0, 0, 0, 0.55);
+      box-shadow: 0 16px 48px 0 rgba(0, 0, 0, 0.65), 0 0 25px rgba(0, 242, 254, 0.08);
     }
     .tab-active {
       color: #00f2fe !important;
@@ -85,8 +85,8 @@
     }
   </style>
 </head>
-<body class="bg-[#090d16] text-[#f1f5f9] antialiased min-h-screen"><!-- HEADER -->
-<header class="bg-[#0f172a]/70 backdrop-blur-md border-b border-white/5 sticky top-0 z-40 shadow-2xl">
+<body class="bg-[#050a12] text-[#f1f5f9] antialiased min-h-screen"><!-- HEADER -->
+<header class="bg-[#0d1b32]/80 backdrop-blur-md border-b border-[#00f2fe]/10 sticky top-0 z-40 shadow-2xl shadow-black/40">
   <div class="max-w-7xl mx-auto px-6 flex items-center justify-between h-16">
     <div class="flex items-center gap-2.5 shrink-0">
       <div class="w-9 h-9 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl grid place-items-center shadow-lg shadow-blue-500/20">
