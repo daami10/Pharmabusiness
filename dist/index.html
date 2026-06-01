@@ -964,10 +964,10 @@
 
 <!-- DYNAMIC LABORATORY RANKING MODAL -->
 <div id="ranking-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
-  <div class="glass-card rounded-2xl p-8 shadow-2xl w-full max-w-lg border border-white/10 fade-in flex flex-col max-h-[80vh]">
+  <div class="rounded-2xl p-8 w-full max-w-lg fade-in flex flex-col max-h-[80vh] border border-[#00f2fe]/20" style="background: linear-gradient(135deg, #0b1528 0%, #060a12 100%); box-shadow: 0 0 25px rgba(0, 242, 254, 0.12), 0 12px 40px rgba(0, 0, 0, 0.65);">
     <div class="flex items-center justify-between mb-4 shrink-0">
       <div class="flex items-center gap-3">
-        <span class="w-3.5 h-3.5 rounded-full bg-[#00f2fe] shadow-[0_0_12px_rgba(0,242,254,0.8)]"></span>
+        <span class="w-3.5 h-3.5 rounded-full bg-[#00f2fe] shadow-[0_0_12px_rgba(0,242,254,0.8)] animate-pulse"></span>
         <h3 id="ranking-modal-title-text" class="text-xl font-black text-slate-100 tracking-tight">Ranking de Gasto por Laboratorio</h3>
       </div>
       <button onclick="closeRankingModal()" class="text-slate-400 hover:text-white hover:bg-white/5 p-1 rounded-lg transition-colors">
@@ -977,8 +977,8 @@
     
     <!-- Search Bar in Modal -->
     <div class="relative mb-5 shrink-0">
-      <svg class="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-      <input id="ranking-modal-search" type="text" placeholder="Buscar por laboratorio..." oninput="renderRankingModalListFiltered()" autocomplete="off" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-white/5 focus:border-[#00f2fe]/40 focus:ring-0 focus:outline-none text-sm bg-slate-950/40 text-slate-100 placeholder-slate-500 transition-all">
+      <svg class="w-4 h-4 text-[#00f2fe] absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      <input id="ranking-modal-search" type="text" placeholder="Buscar por laboratorio..." oninput="renderRankingModalListFiltered()" autocomplete="off" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-blue-500/20 focus:border-[#00f2fe]/50 focus:ring-0 focus:outline-none text-sm bg-slate-950/60 text-slate-100 placeholder-slate-500 transition-all">
     </div>
 
     <!-- Scrollable content -->
@@ -986,7 +986,7 @@
       <!-- JavaScript will inject rankings here -->
     </div>
 
-    <div class="mt-5 pt-4 border-t border-white/5 flex justify-between items-center shrink-0">
+    <div class="mt-5 pt-4 border-t border-blue-950/50 flex justify-between items-center shrink-0">
       <span id="ranking-modal-total-label" class="text-xs text-slate-500 font-bold uppercase tracking-wider">Total Acumulado Laboratorios:</span>
       <span id="ranking-modal-total" class="text-lg font-black text-[#00f2fe] drop-shadow-[0_0_8px_rgba(0,242,254,0.3)]">0,00 €</span>
     </div>
@@ -2784,7 +2784,7 @@ function renderRankingModalListFiltered() {
     }
     
     return `
-      <div class="py-3.5 border-b border-white/5 hover:bg-white/[0.02] px-2 rounded-xl transition-all duration-150">
+      <div class="py-3.5 border-b border-blue-950/40 hover:bg-blue-950/20 px-2.5 rounded-xl transition-all duration-150">
         <div class="flex items-center justify-between gap-3 mb-1.5">
           <div class="flex items-center gap-3 min-w-0">
             ${rankBadge}
@@ -2796,7 +2796,7 @@ function renderRankingModalListFiltered() {
           </div>
         </div>
         <!-- Progress Bar -->
-        <div class="w-full bg-slate-950/60 rounded-full h-2 overflow-hidden border border-white/5">
+        <div class="w-full bg-[#050a12]/80 rounded-full h-2 overflow-hidden border border-blue-950/50">
           <div class="bg-gradient-to-r from-blue-500 to-[#00f2fe] h-full rounded-full" style="width: ${percentage}%"></div>
         </div>
       </div>
