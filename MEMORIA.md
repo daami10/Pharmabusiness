@@ -80,6 +80,7 @@ Para desplegar el proyecto en Vercel, es necesario configurar las siguientes var
 | :--- | :--- | :--- | :--- |
 | **0** | *Antes de hoy* | Migración exitosa de Airtable a Supabase. Configuración de tablas, triggers de autenticación y RLS en la base de datos. Creación de gráficos en la pestaña Análisis. | Completado |
 | **1** | `2026-06-01` | Creación de **`MEMORIA.md`** para persistencia de contexto. Corrección de **fuga de datos en el cierre de sesión (`signOut`)** en `index.html`. Rediseño estético total a **Dark Mode Premium & Glassmorphism** (Header, Calendario, KPIs vibrantes, Tablas y todos los Modales de la app). Compilación final exitosa para producción en Vercel. | Completado |
+| **2** | `2026-06-01` | Integración del **modal interactivo de ranking de gasto** para la tarjeta **Top Proveedor** en la pestaña de Análisis (activo en categorías de Laboratorio y Otros, con insignias premium, porcentajes relativos y barras de progreso en degradado de azul a cian). Rediseño completo de la aplicación al estilo **Sleek Midnight Blue (Medianoche Eléctrico)** con degradado marino, bordes de neón cian y glows unificados. | Completado |
 
 ---
 
