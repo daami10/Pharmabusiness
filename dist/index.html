@@ -328,7 +328,7 @@
   <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
     <div class="glass-card rounded-2xl p-5 shadow-2xl glass-card-hover"><p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Total Invertido</p><p id="kpi-total" class="text-2xl font-black text-white leading-none">—</p></div>
     <div class="glass-card rounded-2xl p-5 shadow-2xl glass-card-hover"><p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Nº Facturas</p><p id="kpi-count" class="text-2xl font-black text-white leading-none">—</p></div>
-    <div class="glass-card rounded-2xl p-5 shadow-2xl glass-card-hover"><p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Top Proveedor</p><p id="kpi-top" class="text-2xl font-black text-white leading-none truncate">—</p></div>
+    <div onclick="showRankingModal()" class="glass-card rounded-2xl p-5 shadow-2xl glass-card-hover cursor-pointer hover:border-[#00f2fe]/40 hover:scale-[1.01] transition-all select-none" title="Ver ranking detallado de laboratorios"><p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Top Proveedor</p><p id="kpi-top" class="text-2xl font-black text-white leading-none truncate">—</p></div>
     <div class="glass-card rounded-2xl p-5 shadow-2xl glass-card-hover"><p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Promedio / Factura</p><p id="kpi-avg" class="text-2xl font-black text-white leading-none">—</p></div>
   </div>
   <!-- KPIs por categoría -->
@@ -958,6 +958,37 @@
     <div class="mt-4 pt-4 border-t border-white/5 flex justify-between items-center shrink-0">
       <span class="text-xs text-slate-500 font-bold uppercase tracking-wider">Suma total en este estado:</span>
       <span id="venc-modal-total" class="text-lg font-black text-[#00f2fe] drop-shadow-[0_0_8px_rgba(0,242,254,0.3)]">0,00 €</span>
+    </div>
+  </div>
+</div>
+
+<!-- DYNAMIC LABORATORY RANKING MODAL -->
+<div id="ranking-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
+  <div class="glass-card rounded-2xl p-8 shadow-2xl w-full max-w-lg border border-white/10 fade-in flex flex-col max-h-[80vh]">
+    <div class="flex items-center justify-between mb-4 shrink-0">
+      <div class="flex items-center gap-3">
+        <span class="w-3.5 h-3.5 rounded-full bg-[#00f2fe] shadow-[0_0_12px_rgba(0,242,254,0.8)]"></span>
+        <h3 class="text-xl font-black text-slate-100 tracking-tight">Ranking de Gasto por Laboratorio</h3>
+      </div>
+      <button onclick="closeRankingModal()" class="text-slate-400 hover:text-white hover:bg-white/5 p-1 rounded-lg transition-colors">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    
+    <!-- Search Bar in Modal -->
+    <div class="relative mb-5 shrink-0">
+      <svg class="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      <input id="ranking-modal-search" type="text" placeholder="Buscar por laboratorio..." oninput="renderRankingModalListFiltered()" autocomplete="off" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-white/5 focus:border-[#00f2fe]/40 focus:ring-0 focus:outline-none text-sm bg-slate-950/40 text-slate-100 placeholder-slate-500 transition-all">
+    </div>
+
+    <!-- Scrollable content -->
+    <div id="ranking-modal-list" class="overflow-y-auto flex-1 pr-1 space-y-1.5" style="max-height: 48vh;">
+      <!-- JavaScript will inject rankings here -->
+    </div>
+
+    <div class="mt-5 pt-4 border-t border-white/5 flex justify-between items-center shrink-0">
+      <span class="text-xs text-slate-500 font-bold uppercase tracking-wider">Total Acumulado Laboratorios:</span>
+      <span id="ranking-modal-total" class="text-lg font-black text-[#00f2fe] drop-shadow-[0_0_8px_rgba(0,242,254,0.3)]">0,00 €</span>
     </div>
   </div>
 </div>
@@ -2644,6 +2675,107 @@ async function modalMarkAsUnpaid(id) {
     renderVencModalListFiltered();
     updateCalStats();
   } catch(e) { alert('Error: ' + e.message); }
+}
+
+// ─── Modal Ranking Laboratorios ───────────────────────────────────────────────
+let currentRankingRecords = [];
+
+function showRankingModal() {
+  // Filtramos todas las facturas de tipo 'Laboratorio' (excluyendo abonos para ver el gasto bruto por laboratorio detallado)
+  const labInvoices = allFacturas.filter(r => r.fields.Tipo === 'Laboratorio');
+  
+  if (!labInvoices.length) {
+    alert("No hay facturas de laboratorios registradas para mostrar en el ranking.");
+    return;
+  }
+  
+  // Agrupar por laboratorio y sumar los importes
+  const sums = {};
+  labInvoices.forEach(r => {
+    const name = r.fields.Laboratorio || 'Sin nombre';
+    sums[name] = (sums[name] || 0) + (r.fields.Importe || 0);
+  });
+  
+  // Ordenar de mayor a menor gasto
+  currentRankingRecords = Object.entries(sums)
+    .map(([name, amount]) => ({ name, amount }))
+    .sort((a, b) => b.amount - a.amount);
+    
+  // Limpiar el campo de búsqueda del modal
+  document.getElementById('ranking-modal-search').value = '';
+  
+  // Mostrar el modal
+  document.getElementById('ranking-modal').classList.remove('hidden');
+  
+  renderRankingModalListFiltered();
+}
+
+function closeRankingModal() {
+  document.getElementById('ranking-modal').classList.add('hidden');
+}
+
+// Cerrar al hacer clic fuera del contenido del modal
+document.getElementById('ranking-modal').onclick = e => {
+  if (e.target === document.getElementById('ranking-modal')) closeRankingModal();
+};
+
+function renderRankingModalListFiltered() {
+  const query = document.getElementById('ranking-modal-search').value.toLowerCase().trim();
+  const listContainer = document.getElementById('ranking-modal-list');
+  
+  const filtered = currentRankingRecords.filter(r => 
+    r.name.toLowerCase().includes(query)
+  );
+  
+  if (!filtered.length) {
+    listContainer.innerHTML = '<div class="py-12 text-center text-slate-500 text-sm">No se encontraron laboratorios.</div>';
+    document.getElementById('ranking-modal-total').textContent = '0,00 €';
+    return;
+  }
+  
+  // Calcular la suma total global de laboratorios para obtener porcentajes exactos basados en el total
+  const totalGlobalLabs = currentRankingRecords.reduce((sum, r) => sum + r.amount, 0);
+  
+  listContainer.innerHTML = filtered.map(r => {
+    // Encontrar la posición global para mantener el puesto correcto en el ranking
+    const globalIndex = currentRankingRecords.findIndex(g => g.name === r.name);
+    const rank = globalIndex + 1;
+    const percentage = totalGlobalLabs > 0 ? (r.amount / totalGlobalLabs) * 100 : 0;
+    
+    // Insignias premium para los top 3
+    let rankBadge = '';
+    if (rank === 1) {
+      rankBadge = '<span class="flex items-center justify-center w-6 h-6 rounded-full bg-yellow-500/20 text-yellow-400 text-xs font-black ring-1 ring-yellow-500/30 shrink-0">1º</span>';
+    } else if (rank === 2) {
+      rankBadge = '<span class="flex items-center justify-center w-6 h-6 rounded-full bg-slate-300/20 text-slate-300 text-xs font-black ring-1 ring-slate-300/30 shrink-0">2º</span>';
+    } else if (rank === 3) {
+      rankBadge = '<span class="flex items-center justify-center w-6 h-6 rounded-full bg-amber-600/20 text-amber-500 text-xs font-black ring-1 ring-amber-500/30 shrink-0">3º</span>';
+    } else {
+      rankBadge = `<span class="flex items-center justify-center w-6 h-6 rounded-full bg-white/5 text-slate-400 text-xs font-bold shrink-0">${rank}º</span>`;
+    }
+    
+    return `
+      <div class="py-3.5 border-b border-white/5 hover:bg-white/[0.02] px-2 rounded-xl transition-all duration-150">
+        <div class="flex items-center justify-between gap-3 mb-1.5">
+          <div class="flex items-center gap-3 min-w-0">
+            ${rankBadge}
+            <span class="text-sm font-extrabold text-white truncate">${esc(r.name)}</span>
+          </div>
+          <div class="text-right shrink-0">
+            <span class="text-sm font-black text-white">${r.amount.toLocaleString('es-ES', {minimumFractionDigits: 2})} €</span>
+            <span class="text-2xs text-[#00f2fe] font-bold bg-[#00f2fe]/10 border border-[#00f2fe]/20 px-1.5 py-0.5 rounded ml-1.5 shrink-0">${percentage.toFixed(1)}%</span>
+          </div>
+        </div>
+        <!-- Progress Bar -->
+        <div class="w-full bg-slate-950/60 rounded-full h-2 overflow-hidden border border-white/5">
+          <div class="bg-gradient-to-r from-blue-500 to-[#00f2fe] h-full rounded-full" style="width: ${percentage}%"></div>
+        </div>
+      </div>
+    `;
+  }).join('');
+  
+  const sumFiltered = filtered.reduce((s, r) => s + r.amount, 0);
+  document.getElementById('ranking-modal-total').textContent = sumFiltered.toLocaleString('es-ES', {minimumFractionDigits: 2}) + ' €';
 }
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
