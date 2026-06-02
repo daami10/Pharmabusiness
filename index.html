@@ -1003,7 +1003,7 @@
 <!-- DYNAMIC OFFSCREEN PDF TEMPLATE CONTAINER -->
 <div id="pdf-template-container" class="hidden absolute left-[-9999px] top-[-9999px]" style="width: 794px; background: #ffffff; color: #1e293b; font-family: 'Outfit', 'Inter', sans-serif;">
   <!-- PAGE 1: RESUMEN EJECUTIVO Y KPIS -->
-  <div id="pdf-page-1" class="p-10 flex flex-col justify-between" style="min-height: 1120px; box-sizing: border-box;">
+  <div id="pdf-page-1" class="p-10 flex flex-col justify-between" style="height: 1120px; max-height: 1120px; box-sizing: border-box; overflow: hidden;">
     <div>
       <!-- Header -->
       <div class="flex justify-between items-center border-b border-blue-900/10 pb-6 mb-8">
@@ -1109,7 +1109,7 @@
   </div>
 
   <!-- PAGE 2: EVOLUCION Y RANKING DETALLADO -->
-  <div id="pdf-page-2" class="p-10 flex flex-col justify-between" style="min-height: 1120px; box-sizing: border-box; page-break-before: always;">
+  <div id="pdf-page-2" class="p-10 flex flex-col justify-between" style="height: 1120px; max-height: 1120px; box-sizing: border-box; overflow: hidden; page-break-before: always;">
     <div>
       <!-- Header Page 2 -->
       <div class="flex justify-between items-center border-b border-blue-900/10 pb-6 mb-8">
