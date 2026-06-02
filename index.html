@@ -2971,10 +2971,10 @@ async function exportAnalysisPDF() {
         `;
       }).join('');
     }
-    
     // Disparar html2pdf
     const element = document.getElementById('pdf-template-container');
-    element.classList.remove('hidden'); // temporalmente visible para html2pdf
+    element.classList.remove('hidden');
+    element.classList.remove('absolute', 'left-[-9999px]', 'top-[-9999px]');
     
     const options = {
       margin: 0,
@@ -2985,12 +2985,14 @@ async function exportAnalysisPDF() {
     };
     
     await html2pdf().from(element).set(options).save();
-    element.classList.add('hidden'); // volver a ocultar
     
   } catch (error) {
     console.error('Error al generar PDF:', error);
     alert('Error al generar el reporte PDF: ' + error.message);
   } finally {
+    const element = document.getElementById('pdf-template-container');
+    element.classList.add('hidden');
+    element.classList.add('absolute', 'left-[-9999px]', 'top-[-9999px]');
     btn.innerHTML = originalText;
     btn.disabled = false;
   }
