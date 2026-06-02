@@ -152,11 +152,6 @@
         <button onclick="toggleSidebar()" class="lg:hidden p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-colors">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
         </button>
-        <!-- Modern Rounded Search bar in Header -->
-        <div class="relative w-48 sm:w-64 md:w-80">
-          <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-          <input id="search-facturas" type="text" placeholder="Buscar laboratorio, factura..." oninput="filterFacturas()" autocomplete="off" class="w-full pl-10 pr-4 py-2 rounded-full border border-[#00f2fe]/10 focus:border-[#00f2fe]/40 focus:ring-0 focus:outline-none text-xs bg-slate-950/40 text-slate-100 placeholder-slate-500 transition-all shadow-inner">
-        </div>
       </div>
 
       <!-- Right: Profile Info -->
@@ -269,6 +264,11 @@
   </div>
 
   <div class="flex flex-wrap items-center gap-3 mb-5">
+    <!-- Buscador de Facturas -->
+    <div class="relative w-full sm:w-64">
+      <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      <input id="search-facturas" type="text" placeholder="Buscar laboratorio, factura..." oninput="filterFacturas()" autocomplete="off" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-white/5 focus:border-[#00f2fe]/40 focus:ring-0 focus:outline-none text-sm bg-slate-900 text-slate-100 placeholder-slate-500 transition-all">
+    </div>
     <select id="filter-mes" onchange="filterFacturas()" class="px-4 py-2.5 rounded-xl border border-white/5 focus:border-[#00f2fe]/40 focus:ring-0 focus:outline-none text-sm bg-slate-900 text-slate-300 transition-all cursor-pointer">
       <option value="" class="bg-[#0f172a]">Todos los meses</option>
       <option value="01" class="bg-[#0f172a]">Enero</option><option value="02" class="bg-[#0f172a]">Febrero</option><option value="03" class="bg-[#0f172a]">Marzo</option>
