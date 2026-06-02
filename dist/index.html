@@ -2275,8 +2275,11 @@ function renderAnalisisCharts(records) {
   if (desde) { fisFilt = fisFilt.filter(f=>(f.fecha||'')>=desde); }
   if (hasta) { fisFilt = fisFilt.filter(f=>(f.fecha||'')<=hasta); }
   
-  // Filtrar solo los efectivamente pagados (mes actual o pasados) para el gasto ejecutado
-  const paidFisFilt = fisFilt.filter(f => !isFuturePeriod(f.fecha));
+  // Si hay filtros de fecha activos, permitimos simular e incluir previsiones futuras.
+  // Si no hay filtros de fecha, ocultamos las previsiones futuras del acumulado.
+  const isFilteringDates = !!(desde || hasta);
+  const paidFisFilt = fisFilt.filter(f => isFilteringDates || !isFuturePeriod(f.fecha));
+  
   const totalFiscal = paidFisFilt.reduce((s,r)=>s+Number(r.importe),0);
   const countFiscal = paidFisFilt.length;
   document.getElementById('kpi-fiscalidad-total').textContent = fmt(totalFiscal);
