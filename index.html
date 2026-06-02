@@ -1957,12 +1957,22 @@ async function loadAnalisis(force) {
     try { records = await sbGet(); allFacturas = records; } catch(e) { return; }
   }
   if (!allSeguros.length && !allNominas.length || force) {
-    const [sRes, nRes] = await Promise.all([
-      sb.from('seguros_sociales').select('*'),
-      sb.from('nominas').select('*')
-    ]);
-    allSeguros = sRes.data || [];
-    allNominas = nRes.data || [];
+    try {
+      const [sRes, nRes] = await Promise.all([
+        sb.from('seguros_sociales').select('*'),
+        sb.from('nominas').select('*')
+      ]);
+      if (sRes.error) throw sRes.error;
+      if (nRes.error) throw nRes.error;
+      allSeguros = sRes.data || [];
+      allNominas = nRes.data || [];
+    } catch (e) {
+      console.error('Error al cargar datos del análisis:', e);
+      document.getElementById('analisis-empty').classList.remove('hidden');
+      document.getElementById('analisis-empty').textContent = 'Error al cargar los datos de análisis: ' + e.message;
+      document.getElementById('analisis-charts').classList.add('hidden');
+      return;
+    }
   }
   if (!records.length) { document.getElementById('analisis-empty').classList.remove('hidden'); document.getElementById('analisis-charts').classList.add('hidden'); return; }
   document.getElementById('analisis-empty').classList.add('hidden');
@@ -2463,18 +2473,36 @@ async function loadTrabajadores() {
   document.getElementById('nominas-table').classList.add('hidden');
   document.getElementById('nominas-empty').classList.add('hidden');
 
-  const [tRes, sRes, nRes] = await Promise.all([
-    sb.from('trabajadores').select('*').order('nombre'),
-    sb.from('seguros_sociales').select('*').order('fecha', { ascending: false }),
-    sb.from('nominas').select('*').order('fecha', { ascending: false })
-  ]);
+  try {
+    const [tRes, sRes, nRes] = await Promise.all([
+      sb.from('trabajadores').select('*').order('nombre'),
+      sb.from('seguros_sociales').select('*').order('fecha', { ascending: false }),
+      sb.from('nominas').select('*').order('fecha', { ascending: false })
+    ]);
 
-  allTrabajadores = tRes.data || [];
-  allSeguros = sRes.data || [];
-  allNominas = nRes.data || [];
+    if (tRes.error) throw tRes.error;
+    if (sRes.error) throw sRes.error;
+    if (nRes.error) throw nRes.error;
 
-  renderSeguros();
-  renderNominas();
+    allTrabajadores = tRes.data || [];
+    allSeguros = sRes.data || [];
+    allNominas = nRes.data || [];
+
+    renderSeguros();
+    renderNominas();
+  } catch (e) {
+    console.error('Error al cargar trabajadores:', e);
+    document.getElementById('seguros-loading').classList.add('hidden');
+    document.getElementById('nominas-loading').classList.add('hidden');
+    
+    const segEmpty = document.getElementById('seguros-empty');
+    segEmpty.textContent = 'Error al cargar los datos: ' + e.message;
+    segEmpty.classList.remove('hidden');
+    
+    const nomEmpty = document.getElementById('nominas-empty');
+    nomEmpty.textContent = 'Error al cargar los datos: ' + e.message;
+    nomEmpty.classList.remove('hidden');
+  }
 }
 
 function toggleSegurosGroup(safeKey) {
