@@ -129,6 +129,10 @@
           <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
           Abonos
         </button>
+        <button id="tab-btn-fiscalidad" onclick="switchTab('fiscalidad')" class="tab-btn w-full flex items-center gap-3.5 px-4 py-3.5 text-sm font-semibold rounded-xl text-slate-400 border border-transparent hover:text-white hover:bg-white/5 transition-all duration-200">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+          Fiscalidad
+        </button>
         <button id="tab-btn-trabajadores" onclick="switchTab('trabajadores')" class="tab-btn w-full flex items-center gap-3.5 px-4 py-3.5 text-sm font-semibold rounded-xl text-slate-400 border border-transparent hover:text-white hover:bg-white/5 transition-all duration-200">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
           Trabajadores
@@ -399,9 +403,10 @@
     <button id="analisis-btn-Laboratorio" onclick="setAnalisisTipo('Laboratorio')" class="analisis-tipo-btn px-4 py-1.5 rounded-xl text-xs font-bold transition-all bg-white/5 border border-white/5 text-slate-300 hover:bg-white/10">Laboratorios</button>
     <button id="analisis-btn-FedeFarma" onclick="setAnalisisTipo('FedeFarma')" class="analisis-tipo-btn px-4 py-1.5 rounded-xl text-xs font-bold transition-all bg-white/5 border border-white/5 text-slate-300 hover:bg-white/10">FedeFarma</button>
     <button id="analisis-btn-Otro" onclick="setAnalisisTipo('Otro')" class="analisis-tipo-btn px-4 py-1.5 rounded-xl text-xs font-bold transition-all bg-white/5 border border-white/5 text-slate-300 hover:bg-white/10">Otros</button>
+    <button id="analisis-btn-Fiscalidad" onclick="setAnalisisTipo('Fiscalidad')" class="analisis-tipo-btn px-4 py-1.5 rounded-xl text-xs font-bold transition-all bg-white/5 border border-white/5 text-slate-300 hover:bg-white/10">Fiscalidad</button>
     <button id="analisis-btn-Trabajadores" onclick="setAnalisisTipo('Trabajadores')" class="analisis-tipo-btn px-4 py-1.5 rounded-xl text-xs font-bold transition-all bg-white/5 border border-white/5 text-slate-300 hover:bg-white/10">Trabajadores</button>
   </div>
-  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+  <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
     <div id="analisis-card-Laboratorio" onclick="setAnalisisTipo('Laboratorio')" class="bg-gradient-to-br from-blue-500/10 to-blue-950/5 border border-blue-500/20 rounded-2xl p-5 shadow-2xl cursor-pointer hover:border-blue-500/40 hover:bg-blue-500/15 transition-all select-none glass-card">
       <div class="flex items-center gap-2 mb-2">
         <span class="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_6px_rgba(59,130,246,0.5)]"></span>
@@ -425,6 +430,14 @@
       </div>
       <p id="kpi-otro-total" class="text-2xl font-black text-slate-200 leading-none">—</p>
       <p id="kpi-otro-count" class="text-2xs text-slate-500 font-bold uppercase tracking-wider mt-1.5">— facturas</p>
+    </div>
+    <div id="analisis-card-Fiscalidad" onclick="setAnalisisTipo('Fiscalidad')" class="bg-gradient-to-br from-emerald-500/10 to-emerald-950/5 border border-emerald-500/20 rounded-2xl p-5 shadow-2xl cursor-pointer hover:border-emerald-500/40 hover:bg-emerald-500/15 transition-all select-none glass-card">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.5)]"></span>
+        <p class="text-xs font-bold text-emerald-400 uppercase tracking-wider">Fiscalidad</p>
+      </div>
+      <p id="kpi-fiscalidad-total" class="text-2xl font-black text-emerald-400 leading-none">—</p>
+      <p id="kpi-fiscalidad-count" class="text-2xs text-slate-500 font-bold uppercase tracking-wider mt-1.5">— pagos</p>
     </div>
     <div id="analisis-card-Trabajadores" onclick="setAnalisisTipo('Trabajadores')" class="bg-gradient-to-br from-orange-500/10 to-orange-950/5 border border-orange-500/20 rounded-2xl p-5 shadow-2xl cursor-pointer hover:border-orange-500/40 hover:bg-orange-500/15 transition-all select-none glass-card">
       <div class="flex items-center gap-2 mb-2">
@@ -489,6 +502,106 @@
     </div>
   </div>
 </section>
+
+<!-- TAB: FISCALIDAD -->
+<section id="tab-fiscalidad" class="hidden max-w-7xl mx-auto px-6 py-8 fade-in">
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <h1 class="text-3xl font-extrabold text-white tracking-tight">Fiscalidad y Tasas</h1>
+      <p class="text-sm text-slate-400 mt-1">Registro de impuestos y cuotas de la actividad farmacéutica</p>
+    </div>
+    <button onclick="openFiscalModal()" class="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 text-white px-5 py-3 rounded-xl font-bold text-sm transition-all duration-300 shadow-lg shadow-blue-500/20 hover:shadow-blue-500/30 hover:scale-[1.02]">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+      Añadir Impuesto
+    </button>
+  </div>
+
+  <!-- Detailed breakdown bar -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+    <div class="bg-gradient-to-br from-blue-500/10 to-indigo-900/5 border border-blue-500/20 rounded-2xl p-4.5 shadow-xl glass-card">
+      <p class="text-xs font-bold text-blue-400 uppercase tracking-wider mb-1">Total Impuestos</p>
+      <p id="kpi-fiscal-total" class="text-3xl font-black text-white leading-none">0,00 €</p>
+    </div>
+    <div class="bg-gradient-to-br from-orange-500/10 to-orange-900/5 border border-orange-500/20 rounded-2xl p-4.5 shadow-xl glass-card">
+      <p class="text-xs font-bold text-orange-400 uppercase tracking-wider mb-1">IVA / IRPF</p>
+      <p id="kpi-fiscal-iva" class="text-2xl font-bold text-orange-500 leading-none">0,00 €</p>
+    </div>
+    <div class="bg-gradient-to-br from-purple-500/10 to-purple-900/5 border border-purple-500/20 rounded-2xl p-4.5 shadow-xl glass-card">
+      <p class="text-xs font-bold text-purple-400 uppercase tracking-wider mb-1">Cuotas Autónomo</p>
+      <p id="kpi-fiscal-autonomo" class="text-2xl font-bold text-purple-500 leading-none">0,00 €</p>
+    </div>
+    <div class="bg-gradient-to-br from-emerald-500/10 to-emerald-900/5 border border-emerald-500/20 rounded-2xl p-4.5 shadow-xl glass-card">
+      <p class="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-1">Renta / Sociedades</p>
+      <p id="kpi-fiscal-renta" class="text-2xl font-bold text-emerald-500 leading-none">0,00 €</p>
+    </div>
+  </div>
+
+  <!-- TABLE: FISCALIDAD -->
+  <div class="glass-card rounded-2xl border border-white/5 overflow-hidden shadow-2xl">
+    <div id="fiscal-loading" class="hidden py-16 text-center text-slate-400 text-sm">
+      <svg class="w-6 h-6 animate-spin mx-auto mb-3 text-[#00f2fe]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+      Cargando impuestos...
+    </div>
+    <div id="fiscal-empty" class="py-16 text-center">
+      <svg class="w-12 h-12 text-slate-600 mx-auto mb-3" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+      <p class="text-slate-400 font-bold">Sin impuestos registrados</p>
+      <p class="text-xs text-slate-500 mt-1">Haz clic en "Añadir Impuesto" para empezar a clasificar tus gastos fiscales</p>
+    </div>
+    <table id="fiscal-table" class="hidden w-full">
+      <thead class="bg-slate-950/40 border-b border-white/5">
+        <tr>
+          <th class="text-left text-xs font-bold text-slate-400 uppercase tracking-wider px-6 py-4">Concepto / Tipo</th>
+          <th class="text-right text-xs font-bold text-slate-400 uppercase tracking-wider px-6 py-4">Importe</th>
+          <th class="text-left text-xs font-bold text-slate-400 uppercase tracking-wider px-6 py-4">Notas</th>
+          <th class="px-6 py-4 w-12"></th>
+        </tr>
+      </thead>
+      <tbody id="fiscal-tbody" class="divide-y divide-white/5"></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- MODAL: Nuevo Impuesto / Fiscalidad -->
+<div id="fiscal-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
+  <div class="glass-card rounded-2xl shadow-2xl w-full max-w-md border border-white/10">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-slate-950/20">
+      <h3 class="text-base font-bold text-slate-100">Nuevo Gasto Fiscal</h3>
+      <button onclick="closeFiscalModal()" class="p-2 rounded-lg hover:bg-white/5 text-slate-400 hover:text-white transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="px-6 py-5 space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-slate-300 mb-1.5">Concepto</label>
+        <select id="fiscal-concepto" class="w-full px-4 py-2.5 rounded-xl border border-white/5 bg-slate-950/40 text-slate-100 placeholder-slate-500 focus:border-[#00f2fe]/40 focus:ring-0 focus:outline-none text-sm transition-all cursor-pointer">
+          <option value="Cuota de Autónomos" class="bg-[#0f172a]">Cuota de Autónomos</option>
+          <option value="IVA" class="bg-[#0f172a]">Declaración de IVA</option>
+          <option value="IRPF" class="bg-[#0f172a]">Declaración de IRPF</option>
+          <option value="Declaración de la Renta" class="bg-[#0f172a]">Declaración de la Renta</option>
+          <option value="Impuesto de Sociedades" class="bg-[#0f172a]">Impuesto de Sociedades</option>
+          <option value="Tasas Municipales" class="bg-[#0f172a]">Tasas / Arbitrios Municipales</option>
+          <option value="Otros" class="bg-[#0f172a]">Otros Impuestos / Tasas</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-slate-300 mb-1.5">Mes</label>
+        <input id="fiscal-fecha" type="month" class="w-full px-4 py-2.5 rounded-xl border border-white/5 bg-slate-950/40 text-slate-100 placeholder-slate-500 focus:border-[#00f2fe]/40 focus:ring-0 focus:outline-none text-sm transition-all">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-slate-300 mb-1.5">Importe (€)</label>
+        <input id="fiscal-importe" type="number" min="0.01" step="0.01" placeholder="0,00" class="w-full px-4 py-2.5 rounded-xl border border-white/5 bg-slate-950/40 text-slate-100 placeholder-slate-500 focus:border-[#00f2fe]/40 focus:ring-0 focus:outline-none text-sm transition-all">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-slate-300 mb-1.5">Notas (opcional)</label>
+        <input id="fiscal-notas" type="text" placeholder="Observaciones..." class="w-full px-4 py-2.5 rounded-xl border border-white/5 bg-slate-950/40 text-slate-100 placeholder-slate-500 focus:border-[#00f2fe]/40 focus:ring-0 focus:outline-none text-sm transition-all">
+      </div>
+    </div>
+    <div class="px-6 pb-5 flex gap-3">
+      <button onclick="closeFiscalModal()" class="flex-1 px-4 py-2.5 rounded-xl border border-white/5 text-sm font-semibold text-slate-400 hover:bg-white/5 hover:text-white transition-colors bg-transparent">Cancelar</button>
+      <button onclick="saveFiscal()" class="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 text-white text-sm font-semibold transition-all shadow-md hover:scale-[1.01]">Guardar</button>
+    </div>
+  </div>
+</div>
 
 <!-- TAB: TRABAJADORES -->
 <section id="tab-trabajadores" class="hidden max-w-7xl mx-auto px-6 py-8 fade-in">
@@ -877,7 +990,7 @@
             </linearGradient>
           </defs>
           <!-- Outlined Rounded Medical Cross -->
-          <path d="M9 3H15V6.5C15 7.3 15.7 8 16.5 8H20V14H16.5C15.7 14 15 14.7 15 15.5V19H9V15.5C9 14.7 8.3 14 7.5 14H4V8H7.5C8.3 8 9 7.3 9 6.5V3Z" stroke="url(#cross-grad-onb)" stroke-width="2.5" />
+          <path d="M9 3H15V6.5C15 7.3 15.7 8 16.5 8H20V14H16.5C15.7 14 15 14.7 15 15.5V19H9V15.5C9 14.7 8.3 14 7.5 14H4V8H7.5C8.3 8 9 7.3 9 6.5V3Z" stroke="url(#cross-grad-onb)" />
           <!-- Pulse/Heartbeat line inside -->
           <path d="M7 11.5H9.5L10.8 8L12.8 15L14.2 11.5H17" stroke="url(#cross-grad-onb)" stroke-width="2" />
         </svg>
@@ -1323,6 +1436,7 @@ function clearSessionState() {
   allTrabajadores = [];
   allSeguros = [];
   allNominas = [];
+  allFiscalidad = [];
 
   // Reset active filter variables
   activeTipo = '';
@@ -1452,7 +1566,7 @@ async function sbPatch(id, fields) {
 }
 
 // ─── Tabs ─────────────────────────────────────────────────────────────────────
-const TABS = ['facturas', 'analisis', 'abonos', 'trabajadores'];
+const TABS = ['facturas', 'analisis', 'abonos', 'fiscalidad', 'trabajadores'];
 function switchTab(tab) {
   TABS.forEach(t => {
     document.getElementById('tab-' + t).classList.toggle('hidden', t !== tab);
@@ -1464,6 +1578,7 @@ function switchTab(tab) {
   if (tab === 'analisis') loadAnalisis(false);
   if (tab === 'facturas' && !allFacturas.length) loadFacturas();
   if (tab === 'abonos') renderAbonos();
+  if (tab === 'fiscalidad') loadFiscalidad();
   if (tab === 'trabajadores') loadTrabajadores();
 }
 
@@ -1906,30 +2021,41 @@ function checkBudgetAlerts(records) {
 // ─── Filtro de categoría en Análisis ──────────────────────────────────────────
 function setAnalisisTipo(tipo) {
   activeAnalisisTipo = tipo;
-  const cfgs = {
-    '':             {btn:'analisis-btn-total',        bg:'bg-gray-800',   text:'text-white'},
-    'Laboratorio':  {btn:'analisis-btn-Laboratorio',  bg:'bg-blue-600',   text:'text-white'},
-    'FedeFarma':    {btn:'analisis-btn-FedeFarma',    bg:'bg-purple-600', text:'text-white'},
-    'Otro':         {btn:'analisis-btn-Otro',          bg:'bg-gray-600',   text:'text-white'},
-    'Trabajadores': {btn:'analisis-btn-Trabajadores',  bg:'bg-orange-500', text:'text-white'},
+  
+  const activeClasses = ['bg-gradient-to-r', 'from-blue-500', 'to-indigo-600', 'border-blue-400/20', 'text-white', 'shadow-lg'];
+  const inactiveClasses = ['bg-white/5', 'border-white/5', 'text-slate-300', 'hover:bg-white/10'];
+  
+  const buttonIds = {
+    '': 'analisis-btn-total',
+    'Laboratorio': 'analisis-btn-Laboratorio',
+    'FedeFarma': 'analisis-btn-FedeFarma',
+    'Otro': 'analisis-btn-Otro',
+    'Fiscalidad': 'analisis-btn-Fiscalidad',
+    'Trabajadores': 'analisis-btn-Trabajadores'
   };
-  document.querySelectorAll('.analisis-tipo-btn').forEach(b => {
-    b.classList.remove('bg-gray-800','bg-blue-600','bg-purple-600','bg-gray-600','bg-orange-500','text-white','shadow-sm');
-    b.classList.add('bg-gray-100','text-gray-600');
+
+  Object.entries(buttonIds).forEach(([t, btnId]) => {
+    const btn = document.getElementById(btnId);
+    if (!btn) return;
+    if (t === tipo) {
+      btn.classList.add(...activeClasses);
+      btn.classList.remove(...inactiveClasses);
+    } else {
+      btn.classList.remove(...activeClasses);
+      btn.classList.add(...inactiveClasses);
+    }
   });
-  const active = cfgs[tipo];
-  if (active) {
-    const btn = document.getElementById(active.btn);
-    btn.classList.remove('bg-gray-100','text-gray-600');
-    btn.classList.add(active.bg, active.text, 'shadow-sm');
-  }
-  ['Laboratorio','FedeFarma','Otro','Trabajadores'].forEach(t => {
+
+  ['Laboratorio','FedeFarma','Otro','Fiscalidad','Trabajadores'].forEach(t => {
     const card = document.getElementById('analisis-card-' + t);
-    if (card) card.classList.toggle('ring-2', t === tipo);
-    if (card) card.classList.toggle('ring-blue-400',   t === tipo && tipo === 'Laboratorio');
-    if (card) card.classList.toggle('ring-purple-400', t === tipo && tipo === 'FedeFarma');
-    if (card) card.classList.toggle('ring-gray-400',   t === tipo && tipo === 'Otro');
-    if (card) card.classList.toggle('ring-orange-400', t === tipo && tipo === 'Trabajadores');
+    if (card) {
+      card.classList.toggle('ring-2', t === tipo);
+      card.classList.toggle('ring-blue-500', t === tipo && tipo === 'Laboratorio');
+      card.classList.toggle('ring-purple-500', t === tipo && tipo === 'FedeFarma');
+      card.classList.toggle('ring-slate-400', t === tipo && tipo === 'Otro');
+      card.classList.toggle('ring-emerald-500', t === tipo && tipo === 'Fiscalidad');
+      card.classList.toggle('ring-orange-500', t === tipo && tipo === 'Trabajadores');
+    }
   });
   updateTopCardClickable();
   applyAnalisisFilter();
@@ -2048,16 +2174,18 @@ async function loadAnalisis(force) {
   if (!records.length || force) {
     try { records = await sbGet(); allFacturas = records; } catch(e) { return; }
   }
-  if (!allSeguros.length && !allNominas.length || force) {
+  if (!allSeguros.length && !allNominas.length && !allFiscalidad.length || force) {
     try {
-      const [sRes, nRes] = await Promise.all([
+      const [sRes, nRes, fRes] = await Promise.all([
         sb.from('seguros_sociales').select('*'),
-        sb.from('nominas').select('*')
+        sb.from('nominas').select('*'),
+        sb.from('fiscalidad').select('*')
       ]);
       if (sRes.error) throw sRes.error;
       if (nRes.error) throw nRes.error;
       allSeguros = sRes.data || [];
       allNominas = nRes.data || [];
+      allFiscalidad = fRes.error ? [] : (fRes.data || []);
     } catch (e) {
       console.error('Error al cargar datos del análisis:', e);
       document.getElementById('analisis-empty').classList.remove('hidden');
@@ -2121,6 +2249,39 @@ function renderAnalisisCharts(records) {
   document.getElementById('kpi-trab-total').textContent = fmt(totalTrab);
   document.getElementById('kpi-trab-count').textContent = countTrab + ' entrada' + (countTrab!==1?'s':'');
 
+  // KPI Fiscalidad: cuotas autónomo + impuestos (con filtro de fechas aplicado)
+  let fisFilt = allFiscalidad;
+  if (desde) { fisFilt = fisFilt.filter(f=>(f.fecha||'')>=desde); }
+  if (hasta) { fisFilt = fisFilt.filter(f=>(f.fecha||'')<=hasta); }
+  const totalFiscal = fisFilt.reduce((s,r)=>s+Number(r.importe),0);
+  const countFiscal = fisFilt.length;
+  document.getElementById('kpi-fiscalidad-total').textContent = fmt(totalFiscal);
+  document.getElementById('kpi-fiscalidad-count').textContent = countFiscal + ' pago' + (countFiscal!==1?'s':'');
+
+  // Si el filtro activo es Fiscalidad, mostrar sus gráficas y salir
+  if (activeAnalisisTipo === 'Fiscalidad') {
+    const genPalette2 = n => { const base=['#2563EB','#059669','#7C3AED','#EA580C','#0891B2','#DC2626','#CA8A04','#0F766E','#9333EA','#BE185D']; return Array.from({length:n},(_,i)=>i<base.length?base[i]:`hsl(${(i*137.5)%360},65%,50%)`); };
+    document.getElementById('kpi-total').textContent = fmt(totalFiscal);
+    document.getElementById('kpi-count').textContent = countFiscal;
+    const conceptTotals = {};
+    fisFilt.forEach(f => { conceptTotals[f.concepto] = (conceptTotals[f.concepto]||0) + Number(f.importe); });
+    const topConcept = Object.entries(conceptTotals).sort((a,b)=>b[1]-a[1])[0]?.[0] || '—';
+    document.getElementById('kpi-top').textContent = topConcept;
+    document.getElementById('kpi-avg').textContent = fmt(countFiscal ? totalFiscal/countFiscal : 0);
+    
+    const breakdown = {};
+    fisFilt.forEach(f => { breakdown[f.concepto] = (breakdown[f.concepto]||0) + Number(f.importe); });
+    const bEntries = Object.entries(breakdown).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]);
+    mkChart('chart-labs','bar',{labels:bEntries.map(([l])=>l),datasets:[{label:'€',data:bEntries.map(([,v])=>v),backgroundColor:'rgba(16,185,129,0.8)',borderRadius:6,borderSkipped:false}]},{plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>v.toLocaleString('es-ES')+'€',font:{size:11}}},x:{ticks:{font:{size:11}}}}});
+    if (bEntries.length) mkChart('chart-donut','doughnut',{labels:bEntries.map(([l])=>l),datasets:[{data:bEntries.map(([,v])=>v),backgroundColor:genPalette2(bEntries.length),borderWidth:2,borderColor:'#fff',hoverOffset:6}]},{plugins:{legend:{position:'bottom',labels:{font:{size:11},padding:10}}},cutout:'65%'});
+    const byMonthFis = {};
+    fisFilt.forEach(f => { if(f.fecha){const k=f.fecha.slice(0,7); byMonthFis[k]=(byMonthFis[k]||0)+Number(f.importe);} });
+    const mFis = Object.entries(byMonthFis).sort(([a],[b])=>a.localeCompare(b));
+    mkChart('chart-monthly','bar',{labels:mFis.map(([k])=>{const[y,m]=k.split('-');return new Date(y,m-1).toLocaleDateString('es-ES',{month:'short',year:'2-digit'});}),datasets:[{label:'€',data:mFis.map(([,v])=>v),backgroundColor:'rgba(16,185,129,0.7)',borderRadius:4}]},{plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>v.toLocaleString('es-ES')+'€',font:{size:11}}},x:{ticks:{font:{size:11}}}}});
+    document.getElementById('abono-charts').classList.add('hidden');
+    return;
+  }
+
   // Si el filtro activo es Trabajadores, mostrar sus gráficas y salir
   if (activeAnalisisTipo === 'Trabajadores') {
     const genPalette2 = n => { const base=['#2563EB','#059669','#7C3AED','#EA580C','#0891B2','#DC2626','#CA8A04','#0F766E','#9333EA','#BE185D']; return Array.from({length:n},(_,i)=>i<base.length?base[i]:`hsl(${(i*137.5)%360},65%,50%)`); };
@@ -2142,7 +2303,7 @@ function renderAnalisisCharts(records) {
   }
 
   // Gráficas: usan facturasChart (filtrado por categoría si hay una activa)
-  const trabExtra = !activeAnalisisTipo ? totalTrab : 0;
+  const trabExtra = !activeAnalisisTipo ? (totalTrab + totalFiscal) : 0;
   const total = facturasChart.reduce((s,r)=>s+(r.fields.Importe||0),0) + trabExtra;
   const avg = facturasChart.length ? (facturasChart.reduce((s,r)=>s+(r.fields.Importe||0),0)) / facturasChart.length : 0;
   const byLab = {};
@@ -2553,6 +2714,7 @@ async function markAsUnpaid(id) {
 let allTrabajadores = [];
 let allSeguros = [];
 let allNominas = [];
+let allFiscalidad = [];
 
 async function loadTrabajadores() {
   const { data: { user } } = await sb.auth.getUser();
@@ -2818,6 +2980,191 @@ async function deleteNomina(id) {
   if (error) { alert('Error: ' + error.message); return; }
   allNominas = allNominas.filter(n => n.id !== id);
   renderNominas();
+}
+
+// ─── Fiscalidad ───────────────────────────────────────────────────────────────
+async function loadFiscalidad() {
+  const { data: { user } } = await sb.auth.getUser();
+  if (!user) return;
+
+  document.getElementById('fiscal-loading').classList.remove('hidden');
+  document.getElementById('fiscal-table').classList.add('hidden');
+  document.getElementById('fiscal-empty').classList.add('hidden');
+
+  try {
+    const { data, error } = await sb.from('fiscalidad').select('*').order('fecha', { ascending: false });
+    
+    if (error) throw error;
+
+    allFiscalidad = data || [];
+    renderFiscalidad();
+  } catch (e) {
+    console.error('Error al cargar fiscalidad:', e);
+    document.getElementById('fiscal-loading').classList.add('hidden');
+    const fEmpty = document.getElementById('fiscal-empty');
+    
+    fEmpty.innerHTML = `
+      <div class="max-w-md mx-auto p-6 bg-amber-500/10 border border-amber-500/20 rounded-2xl text-center">
+        <svg class="w-12 h-12 text-amber-500 mx-auto mb-3" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+        <p class="text-amber-200 font-bold text-sm">Pendiente Crear Tabla en Supabase</p>
+        <p class="text-xs text-amber-400/80 mt-1.5 leading-relaxed">
+          Para activar este módulo, copia y ejecuta la siguiente consulta SQL en tu editor de Supabase:
+        </p>
+        <pre class="bg-black/40 text-[10px] text-slate-300 font-mono p-3 rounded-lg mt-3 text-left overflow-x-auto select-all border border-white/5">
+CREATE TABLE fiscalidad (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id),
+  concepto TEXT NOT NULL,
+  fecha DATE NOT NULL,
+  importe NUMERIC(12,2) NOT NULL,
+  notas TEXT,
+  created_at TIMESTAMPTZ DEFAULT now()
+);</pre>
+      </div>
+    `;
+    fEmpty.classList.remove('hidden');
+  }
+}
+
+function toggleFiscalGroup(safeKey) {
+  const rows = document.querySelectorAll('.fiscal-row-' + safeKey);
+  const chevron = document.getElementById('chevron-fiscal-' + safeKey);
+  const isHidden = rows.length && rows[0].classList.contains('hidden');
+  rows.forEach(r => r.classList.toggle('hidden', !isHidden));
+  if (chevron) chevron.classList.toggle('-rotate-90', !isHidden);
+}
+
+function renderFiscalidad() {
+  document.getElementById('fiscal-loading').classList.add('hidden');
+  if (!allFiscalidad.length) {
+    document.getElementById('fiscal-empty').innerHTML = `
+      <svg class="w-12 h-12 text-slate-600 mx-auto mb-3" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+      <p class="text-slate-400 font-bold">Sin impuestos registrados</p>
+      <p class="text-xs text-slate-500 mt-1">Haz clic en "Añadir Impuesto" para empezar a clasificar tus gastos fiscales</p>
+    `;
+    document.getElementById('fiscal-empty').classList.remove('hidden');
+    document.getElementById('fiscal-table').classList.add('hidden');
+    
+    document.getElementById('kpi-fiscal-total').textContent = '0,00 €';
+    document.getElementById('kpi-fiscal-iva').textContent = '0,00 €';
+    document.getElementById('kpi-fiscal-autonomo').textContent = '0,00 €';
+    document.getElementById('kpi-fiscal-renta').textContent = '0,00 €';
+    return;
+  }
+  document.getElementById('fiscal-empty').classList.add('hidden');
+  document.getElementById('fiscal-table').classList.remove('hidden');
+
+  let totalImpuestos = 0;
+  let totalIvaIrpf = 0;
+  let totalAutonomo = 0;
+  let totalRentaSoc = 0;
+
+  allFiscalidad.forEach(f => {
+    const imp = Number(f.importe);
+    totalImpuestos += imp;
+    if (f.concepto === 'Cuota de Autónomos') {
+      totalAutonomo += imp;
+    } else if (f.concepto === 'IVA' || f.concepto === 'IRPF') {
+      totalIvaIrpf += imp;
+    } else if (f.concepto === 'Declaración de la Renta' || f.concepto === 'Impuesto de Sociedades') {
+      totalRentaSoc += imp;
+    }
+  });
+
+  document.getElementById('kpi-fiscal-total').textContent = totalImpuestos.toLocaleString('es-ES', {minimumFractionDigits:2}) + ' €';
+  document.getElementById('kpi-fiscal-iva').textContent = totalIvaIrpf.toLocaleString('es-ES', {minimumFractionDigits:2}) + ' €';
+  document.getElementById('kpi-fiscal-autonomo').textContent = totalAutonomo.toLocaleString('es-ES', {minimumFractionDigits:2}) + ' €';
+  document.getElementById('kpi-fiscal-renta').textContent = totalRentaSoc.toLocaleString('es-ES', {minimumFractionDigits:2}) + ' €';
+
+  const groups = {};
+  allFiscalidad.forEach(f => {
+    const key = f.fecha ? f.fecha.slice(0, 7) : '0000-00';
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(f);
+  });
+
+  const sortedKeys = Object.keys(groups).sort((a,b) => b.localeCompare(a));
+  const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+  const tbody = document.getElementById('fiscal-tbody');
+  tbody.innerHTML = sortedKeys.map((key, groupIdx) => {
+    const groupRecords = groups[key];
+    const isOpen = groupIdx === 0;
+    const [yr, mo] = key.split('-');
+    const mesLabel = mo && mo !== '00' ? MESES[parseInt(mo,10)-1] + ' ' + yr : 'Sin fecha';
+    const gTotal = groupRecords.reduce((s, r) => s + Number(r.importe), 0);
+    const gCount = groupRecords.length + ' pago' + (groupRecords.length !== 1 ? 's' : '');
+    const safeKey = key.replace('-','_');
+
+    const headerRow = `<tr class="bg-white/5 cursor-pointer select-none hover:bg-white/10 transition-colors" onclick="toggleFiscalGroup('${safeKey}')">
+      <td colspan="4" class="px-6 py-3.5 border-b border-white/5">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <svg id="chevron-fiscal-${safeKey}" class="w-4 h-4 text-slate-400 transition-transform${isOpen?'':' -rotate-90'}" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+            <span class="font-bold text-slate-200 text-sm capitalize">${mesLabel}</span>
+            <span class="text-xs text-slate-500 font-bold bg-white/5 border border-white/5 px-2 py-0.5 rounded">${gCount}</span>
+          </div>
+          <span class="font-extrabold text-sm text-[#00f2fe]">${gTotal.toLocaleString('es-ES',{minimumFractionDigits:2})} €</span>
+        </div>
+      </td>
+    </tr>`;
+
+    const dataRows = groupRecords.map(f => {
+      const imp = Number(f.importe).toLocaleString('es-ES', {minimumFractionDigits:2}) + ' €';
+      return `<tr class="fiscal-row-${safeKey} hover:bg-white/5 transition-colors border-b border-white/5${isOpen?'':' hidden'}">
+        <td class="px-6 py-4 text-sm font-semibold text-slate-200">${esc(f.concepto)}</td>
+        <td class="px-6 py-4 text-sm font-extrabold text-right text-white">${imp}</td>
+        <td class="px-6 py-4 text-sm text-slate-400">${esc(f.notas || '')}</td>
+        <td class="px-6 py-4 text-right">
+          <button onclick="deleteFiscal('${f.id}')" class="text-slate-400 hover:text-red-400 p-1.5 rounded-xl hover:bg-white/5 transition-all"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+        </td>
+      </tr>`;
+    }).join('');
+
+    return headerRow + dataRows;
+  }).join('');
+}
+
+function openFiscalModal() {
+  const now = new Date();
+  document.getElementById('fiscal-fecha').value = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+  document.getElementById('fiscal-importe').value = '';
+  document.getElementById('fiscal-notas').value = '';
+  document.getElementById('fiscal-modal').classList.remove('hidden');
+}
+
+function closeFiscalModal() {
+  document.getElementById('fiscal-modal').classList.add('hidden');
+}
+
+async function saveFiscal() {
+  const concepto = document.getElementById('fiscal-concepto').value;
+  const fecha = document.getElementById('fiscal-fecha').value;
+  const importe = parseFloat(document.getElementById('fiscal-importe').value) || 0;
+  const notas = document.getElementById('fiscal-notas').value.trim();
+
+  if (!fecha || !importe) { alert('Introduce el mes y el importe.'); return; }
+
+  const { data: { user } } = await sb.auth.getUser();
+  const { data, error } = await sb.from('fiscalidad').insert([{ user_id: user.id, concepto, fecha: fecha + '-01', importe, notas }]).select().single();
+  
+  if (error) { alert('Error: ' + error.message); return; }
+
+  allFiscalidad.unshift(data);
+  renderFiscalidad();
+  
+  if (activeTab === 'analisis') loadAnalisis(true);
+
+  closeFiscalModal();
+}
+
+async function deleteFiscal(id) {
+  if (!confirm('¿Eliminar esta entrada fiscal?')) return;
+  const { error } = await sb.from('fiscalidad').delete().eq('id', id);
+  if (error) { alert('Error: ' + error.message); return; }
+  allFiscalidad = allFiscalidad.filter(f => f.id !== id);
+  renderFiscalidad();
+  if (activeTab === 'analisis') loadAnalisis(true);
 }
 
 // ─── Modal Vencimientos Interactivo ───────────────────────────────────────────
