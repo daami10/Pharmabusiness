@@ -2111,9 +2111,17 @@ function setAnalisisTipo(tipo) {
 function applyAnalisisFilter() {
   const desde = document.getElementById('analisis-desde').value;
   const hasta = document.getElementById('analisis-hasta').value;
+  
+  let hastaLimit = hasta;
+  if (desde && !hasta) {
+    const [yr, mo] = desde.split('-');
+    const lastDay = new Date(parseInt(yr, 10), parseInt(mo, 10), 0).getDate();
+    hastaLimit = `${yr}-${mo}-${String(lastDay).padStart(2, '0')}`;
+  }
+
   let filtered = allFacturas;
   if (desde) filtered = filtered.filter(r => (r.fields.FechaVencimiento || r.fields.Fecha || '') >= desde);
-  if (hasta) filtered = filtered.filter(r => (r.fields.FechaVencimiento || r.fields.Fecha || '') <= hasta);
+  if (hastaLimit) filtered = filtered.filter(r => (r.fields.FechaVencimiento || r.fields.Fecha || '') <= hastaLimit);
   const info = document.getElementById('analisis-filter-info');
   if (desde || hasta) {
     const nF = filtered.filter(r=>r.fields.Tipo!=='Abono').length;
@@ -2249,9 +2257,17 @@ async function loadAnalisis(force) {
   document.getElementById('analisis-charts').classList.remove('hidden');
   const desde = document.getElementById('analisis-desde').value;
   const hasta = document.getElementById('analisis-hasta').value;
+  
+  let hastaLimit = hasta;
+  if (desde && !hasta) {
+    const [yr, mo] = desde.split('-');
+    const lastDay = new Date(parseInt(yr, 10), parseInt(mo, 10), 0).getDate();
+    hastaLimit = `${yr}-${mo}-${String(lastDay).padStart(2, '0')}`;
+  }
+
   let filtered = records;
   if (desde) filtered = filtered.filter(r => (r.fields.FechaVencimiento || r.fields.Fecha || '') >= desde);
-  if (hasta) filtered = filtered.filter(r => (r.fields.FechaVencimiento || r.fields.Fecha || '') <= hasta);
+  if (hastaLimit) filtered = filtered.filter(r => (r.fields.FechaVencimiento || r.fields.Fecha || '') <= hastaLimit);
   renderAnalisisCharts(filtered);
 }
 
@@ -2291,9 +2307,17 @@ function renderAnalisisCharts(records) {
   // KPI Trabajadores: seguros + nóminas (con filtro de fechas aplicado)
   const desde = document.getElementById('analisis-desde').value;
   const hasta = document.getElementById('analisis-hasta').value;
+  
+  let hastaLimit = hasta;
+  if (desde && !hasta) {
+    const [yr, mo] = desde.split('-');
+    const lastDay = new Date(parseInt(yr, 10), parseInt(mo, 10), 0).getDate();
+    hastaLimit = `${yr}-${mo}-${String(lastDay).padStart(2, '0')}`;
+  }
+
   let segFilt = allSeguros, nomFilt = allNominas;
   if (desde) { segFilt = segFilt.filter(s=>(s.fecha||'')>=desde); nomFilt = nomFilt.filter(n=>(n.fecha||'')>=desde); }
-  if (hasta) { segFilt = segFilt.filter(s=>(s.fecha||'')<=hasta); nomFilt = nomFilt.filter(n=>(n.fecha||'')<=hasta); }
+  if (hastaLimit) { segFilt = segFilt.filter(s=>(s.fecha||'')<=hastaLimit); nomFilt = nomFilt.filter(n=>(n.fecha||'')<=hastaLimit); }
   const totalTrab = segFilt.reduce((s,r)=>s+Number(r.importe),0) + nomFilt.reduce((s,r)=>s+Number(r.importe),0);
   const countTrab = segFilt.length + nomFilt.length;
   document.getElementById('kpi-trab-total').textContent = fmt(totalTrab);
@@ -2302,7 +2326,7 @@ function renderAnalisisCharts(records) {
   // KPI Fiscalidad: cuotas autónomo + impuestos (con filtro de fechas aplicado)
   let fisFilt = allFiscalidad;
   if (desde) { fisFilt = fisFilt.filter(f=>(f.fecha||'')>=desde); }
-  if (hasta) { fisFilt = fisFilt.filter(f=>(f.fecha||'')<=hasta); }
+  if (hastaLimit) { fisFilt = fisFilt.filter(f=>(f.fecha||'')<=hastaLimit); }
   
   // Si hay filtros de fecha activos, permitimos simular e incluir previsiones futuras.
   // Si no hay filtros de fecha, ocultamos las previsiones futuras del acumulado.
