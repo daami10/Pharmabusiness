@@ -450,6 +450,31 @@
   </div>
   <div id="analisis-empty" class="hidden glass-card rounded-2xl border border-white/5 py-16 text-center text-slate-400 text-sm shadow-2xl">Agrega facturas o abonos primero para ver el análisis.</div>
   <div id="analisis-charts">
+    <!-- Consolidated summary card -->
+    <div id="analisis-consolidado-card" class="mb-6 bg-gradient-to-br from-blue-500/10 to-[#00f2fe]/5 border border-blue-500/20 rounded-2xl p-6 shadow-2xl glass-card">
+      <h3 class="text-base font-extrabold text-white mb-4 flex items-center gap-2">
+        <svg class="w-5 h-5 text-[#00f2fe]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        Resumen de Gastos Consolidado del Rango
+      </h3>
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="bg-white/5 border border-white/5 p-4 rounded-xl">
+          <p class="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Facturas Proveedores</p>
+          <p id="cons-facturas-total" class="text-lg font-black text-white">0,00 €</p>
+        </div>
+        <div class="bg-white/5 border border-white/5 p-4 rounded-xl">
+          <p class="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Impuestos y Tasas</p>
+          <p id="cons-fiscalidad-total" class="text-lg font-black text-emerald-400">0,00 €</p>
+        </div>
+        <div class="bg-white/5 border border-white/5 p-4 rounded-xl">
+          <p class="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Trabajadores y Nóminas</p>
+          <p id="cons-trabajadores-total" class="text-lg font-black text-orange-400">0,00 €</p>
+        </div>
+        <div class="bg-gradient-to-r from-blue-500/20 to-indigo-500/20 border border-blue-500/40 p-4 rounded-xl">
+          <p class="text-xs text-blue-300 font-bold uppercase tracking-wider mb-1">Gastos Totales Rango</p>
+          <p id="cons-gastos-total" class="text-lg font-black text-[#00f2fe]">0,00 €</p>
+        </div>
+      </div>
+    </div>
     <div class="grid lg:grid-cols-5 gap-6 mb-6">
       <div class="lg:col-span-3 glass-card rounded-2xl p-6 shadow-2xl">
         <h3 class="text-sm font-bold text-slate-200 mb-4">Gasto por Laboratorio</h3>
@@ -2215,7 +2240,11 @@ async function loadAnalisis(force) {
       return;
     }
   }
-  if (!records.length) { document.getElementById('analisis-empty').classList.remove('hidden'); document.getElementById('analisis-charts').classList.add('hidden'); return; }
+  if (!records.length && !allSeguros.length && !allNominas.length && !allFiscalidad.length) {
+    document.getElementById('analisis-empty').classList.remove('hidden');
+    document.getElementById('analisis-charts').classList.add('hidden');
+    return;
+  }
   document.getElementById('analisis-empty').classList.add('hidden');
   document.getElementById('analisis-charts').classList.remove('hidden');
   const desde = document.getElementById('analisis-desde').value;
@@ -2232,14 +2261,14 @@ function renderAnalisisCharts(records) {
   const facturasChart = activeAnalisisTipo ? facturas.filter(r => (r.fields.Tipo || 'Otro') === activeAnalisisTipo) : facturas;
   const abonoChartsEl = document.getElementById('abono-charts');
 
-  if (!facturas.length && !abonos.length) {
-    document.getElementById('analisis-empty').classList.remove('hidden');
-    document.getElementById('analisis-charts').classList.add('hidden');
-    abonoChartsEl.classList.add('hidden');
-    return;
-  }
+  const hasFacturas = (facturas.length > 0 || abonos.length > 0);
   document.getElementById('analisis-empty').classList.add('hidden');
   document.getElementById('analisis-charts').classList.remove('hidden');
+  abonoChartsEl.classList.toggle('hidden', !hasFacturas);
+  
+  // Ocultar fila de graficas de laboratorios si no hay facturas
+  const labsChartsGrid = document.getElementById('chart-labs').parentElement.parentElement;
+  if (labsChartsGrid) labsChartsGrid.classList.toggle('hidden', !hasFacturas);
 
   const budgets = getBudgets();
   const fmt = v => v.toLocaleString('es-ES',{minimumFractionDigits:2})+' €';
@@ -2284,6 +2313,17 @@ function renderAnalisisCharts(records) {
   const countFiscal = paidFisFilt.length;
   document.getElementById('kpi-fiscalidad-total').textContent = fmt(totalFiscal);
   document.getElementById('kpi-fiscalidad-count').textContent = countFiscal + ' pago' + (countFiscal!==1?'s':'');
+
+  // Calcular e inyectar valores para el "Resumen de Gastos Consolidado"
+  const totalFacturasCons = facturas.reduce((sum, r) => sum + (r.fields.Importe || 0), 0) - abonos.reduce((sum, r) => sum + (r.fields.Importe || 0), 0);
+  const totalFiscalCons = totalFiscal;
+  const totalTrabajadoresCons = totalTrab;
+  const totalGastosConsolidado = totalFacturasCons + totalFiscalCons + totalTrabajadoresCons;
+
+  document.getElementById('cons-facturas-total').textContent = fmt(totalFacturasCons);
+  document.getElementById('cons-fiscalidad-total').textContent = fmt(totalFiscalCons);
+  document.getElementById('cons-trabajadores-total').textContent = fmt(totalTrabajadoresCons);
+  document.getElementById('cons-gastos-total').textContent = fmt(totalGastosConsolidado);
 
   // Si el filtro activo es Fiscalidad, mostrar sus gráficas y salir
   if (activeAnalisisTipo === 'Fiscalidad') {
