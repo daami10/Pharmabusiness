@@ -2845,12 +2845,13 @@ async function modalMarkAsUnpaid(id) {
       if (modalRecordIdx === -1) currentVencModalRecords.push(updated);
     } else {
       if (modalRecordIdx !== -1) currentVencModalRecords.splice(modalRecordIdx, 1);
-    }
-    
     filterFacturas();
     renderCalendar();
     renderVencModalListFiltered();
     updateCalStats();
+  } catch(e) { alert('Error: ' + e.message); }
+}
+
 // ─── Exportación a PDF de Análisis ───────────────────────────────────────────
 async function exportAnalysisPDF() {
   const btn = document.querySelector('[onclick="exportAnalysisPDF()"]');
