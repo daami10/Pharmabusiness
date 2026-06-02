@@ -1502,11 +1502,15 @@ function setTipoFilter(tipo) {
   activeTipo = tipo;
   document.querySelectorAll('.tipo-btn').forEach(btn => {
     const active = btn.id === 'tipo-btn-' + tipo;
-    btn.classList.toggle('bg-blue-600', active);
-    btn.classList.toggle('text-white', active);
-    btn.classList.toggle('shadow-sm', active);
-    btn.classList.toggle('bg-gray-100', !active);
-    btn.classList.toggle('text-gray-600', !active);
+    const activeClasses = ['bg-gradient-to-r', 'from-blue-500', 'to-indigo-600', 'border-blue-400/20', 'text-white', 'shadow-lg', 'shadow-blue-500/10'];
+    const inactiveClasses = ['bg-white/5', 'border-white/5', 'text-slate-300'];
+    if (active) {
+      btn.classList.add(...activeClasses);
+      btn.classList.remove(...inactiveClasses);
+    } else {
+      btn.classList.remove(...activeClasses);
+      btn.classList.add(...inactiveClasses);
+    }
   });
   filterFacturas();
 }
@@ -1645,7 +1649,7 @@ function renderTable(records) {
   const m = document.getElementById('filter-mes')?.value || '';
   const minVal = document.getElementById('filter-importe-min')?.value || '';
   const maxVal = document.getElementById('filter-importe-max')?.value || '';
-  const hasFilter = !!(s || m || minVal || maxVal || activeTipo || activeVencStatus);
+  const hasFilter = !!(s || m || minVal || maxVal);
 
   document.getElementById('facturas-tbody').innerHTML = sortedKeys.map((key, groupIdx) => {
     const groupRecords = groups[key];
