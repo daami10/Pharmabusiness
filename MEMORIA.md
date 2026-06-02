@@ -1,4 +1,4 @@
-# 🧠 MEMORIA DEL PROYECTO: PharmaBusiness
+# 🧠 MEMORIA DEL PROYECTO: GFarma
 
 Este archivo funciona como la **memoria persistente a largo plazo** del proyecto. Está diseñado para que cualquier asistente de IA (o tú mismo) lo lea al inicio de cada sesión y comprenda inmediatamente el estado actual del desarrollo, las decisiones de diseño, la estructura técnica y las tareas pendientes.
 
@@ -8,7 +8,7 @@ Este archivo funciona como la **memoria persistente a largo plazo** del proyecto
 ---
 
 ## 📌 1. Descripción General
-**PharmaBusiness** es una aplicación web de página única (SPA) diseñada para la gestión farmacéutica. Permite centralizar y analizar los gastos de laboratorios y proveedores, supervisar vencimientos de facturas en un calendario mensual interactivo, gestionar abonos/devoluciones y administrar la información laboral del personal (nóminas y seguros sociales).
+**GFarma** es una aplicación web de página única (SPA) diseñada para la gestión farmacéutica. Permite centralizar y analizar los gastos de laboratorios y proveedores, supervisar vencimientos de facturas en un calendario mensual interactivo, gestionar abonos/devoluciones y administrar la información laboral del personal (nóminas y seguros sociales).
 
 ---
 
