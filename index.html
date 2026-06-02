@@ -29,6 +29,7 @@
           integrity="sha256-DiMmxoaAcr7BWSdgxnKQQ8ruopYKK0bO5qIZKqxqv/A="
           crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ZOJKrApgIBGUEokyHK2g1mO5OM5qjMCV0+48f3spi3ywIrtWzuzHOoFLF214lo15wEUAHRtHE5xg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
@@ -309,10 +310,16 @@
       <h1 class="text-3xl font-extrabold text-white tracking-tight">Análisis de Inversiones</h1>
       <p class="text-sm text-slate-400 mt-1">Gasto acumulado por laboratorio y evolución temporal</p>
     </div>
-    <button onclick="loadAnalisis(true)" class="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-white/5 hover:border-white/10 text-sm text-slate-300 hover:text-white hover:bg-white/5 bg-slate-900/40 transition-all duration-200">
-      <svg class="w-4 h-4 text-[#00f2fe]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-      Actualizar
-    </button>
+    <div class="flex items-center gap-2.5">
+      <button onclick="exportAnalysisPDF()" class="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-blue-500/20 hover:border-[#00f2fe]/40 text-sm text-[#00f2fe] hover:text-white bg-blue-950/20 hover:bg-gradient-to-r hover:from-blue-500 hover:to-[#00f2fe] transition-all duration-300 shadow-md">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        Exportar PDF
+      </button>
+      <button onclick="loadAnalisis(true)" class="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-white/5 hover:border-white/10 text-sm text-slate-300 hover:text-white hover:bg-white/5 bg-slate-900/40 transition-all duration-200">
+        <svg class="w-4 h-4 text-[#00f2fe]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+        Actualizar
+      </button>
+    </div>
   </div>
   <!-- Date range filter -->
   <div class="flex flex-wrap items-center gap-3 mb-6 bg-slate-900/30 border border-white/5 rounded-2xl px-5 py-4 shadow-2xl">
@@ -989,6 +996,174 @@
     <div class="mt-5 pt-4 border-t border-blue-950/50 flex justify-between items-center shrink-0">
       <span id="ranking-modal-total-label" class="text-xs text-slate-500 font-bold uppercase tracking-wider">Total Acumulado Laboratorios:</span>
       <span id="ranking-modal-total" class="text-lg font-black text-[#00f2fe] drop-shadow-[0_0_8px_rgba(0,242,254,0.3)]">0,00 €</span>
+    </div>
+  </div>
+</div>
+
+<!-- DYNAMIC OFFSCREEN PDF TEMPLATE CONTAINER -->
+<div id="pdf-template-container" class="hidden absolute left-[-9999px] top-[-9999px]" style="width: 794px; background: #ffffff; color: #1e293b; font-family: 'Outfit', 'Inter', sans-serif;">
+  <!-- PAGE 1: RESUMEN EJECUTIVO Y KPIS -->
+  <div id="pdf-page-1" class="p-10 flex flex-col justify-between" style="min-height: 1120px; box-sizing: border-box;">
+    <div>
+      <!-- Header -->
+      <div class="flex justify-between items-center border-b border-blue-900/10 pb-6 mb-8">
+        <div>
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-lg grid place-items-center shadow shadow-blue-500/20">
+              <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg>
+            </div>
+            <span class="text-lg font-black tracking-tight text-slate-800">Pharma<span class="text-blue-600">Business</span></span>
+          </div>
+          <p class="text-2xs text-slate-500 font-bold uppercase tracking-wider mt-1">Gestión Farmacéutica Integrada</p>
+        </div>
+        <div class="text-right">
+          <h2 class="text-sm font-black text-slate-800 uppercase tracking-wider">Reporte de Inversiones</h2>
+          <p id="pdf-date-range" class="text-xs font-bold text-blue-600 mt-1"></p>
+          <p id="pdf-gen-date" class="text-3xs text-slate-400 mt-0.5"></p>
+        </div>
+      </div>
+
+      <!-- Resumen Ejecutivo -->
+      <div class="mb-8">
+        <h3 class="text-sm font-black text-slate-800 uppercase tracking-wider mb-2 border-l-4 border-blue-600 pl-3">Resumen del Periodo</h3>
+        <p class="text-xs text-slate-600 leading-relaxed">
+          Este informe consolida detalladamente la actividad financiera y las adquisiciones registradas durante el rango de fechas indicado. Proporciona una visión integral de la distribución del gasto, los abonos aplicados y la eficiencia operativa de reposición con laboratorios y otros proveedores homologados.
+        </p>
+      </div>
+
+      <!-- KPIs Grid -->
+      <div class="grid grid-cols-4 gap-4 mb-10">
+        <div class="border border-blue-900/10 rounded-xl p-4 bg-slate-50">
+          <p class="text-3xs font-bold text-slate-500 uppercase tracking-wider mb-1">Total Invertido</p>
+          <p id="pdf-kpi-total" class="text-base font-black text-slate-800 leading-none"></p>
+        </div>
+        <div class="border border-blue-900/10 rounded-xl p-4 bg-slate-50">
+          <p class="text-3xs font-bold text-slate-500 uppercase tracking-wider mb-1">Nº Facturas</p>
+          <p id="pdf-kpi-count" class="text-base font-black text-slate-800 leading-none"></p>
+        </div>
+        <div class="border border-blue-900/10 rounded-xl p-4 bg-slate-50">
+          <p class="text-3xs font-bold text-slate-500 uppercase tracking-wider mb-1">Top Proveedor</p>
+          <p id="pdf-kpi-top" class="text-base font-black text-blue-600 leading-none truncate"></p>
+        </div>
+        <div class="border border-blue-900/10 rounded-xl p-4 bg-slate-50">
+          <p class="text-3xs font-bold text-slate-500 uppercase tracking-wider mb-1">Promedio / Factura</p>
+          <p id="pdf-kpi-avg" class="text-base font-black text-slate-800 leading-none"></p>
+        </div>
+      </div>
+
+      <!-- Categorias Breakdown Grid -->
+      <div class="grid grid-cols-2 gap-6 mb-8">
+        <!-- Distribution Table -->
+        <div class="border border-blue-900/10 rounded-xl p-5">
+          <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider mb-4 border-b border-blue-900/5 pb-2">Distribución del Gasto</h4>
+          <div class="space-y-3">
+            <div class="flex justify-between items-center text-xs">
+              <span class="font-bold text-slate-600 flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-blue-600 shrink-0"></span>Laboratorios</span>
+              <span id="pdf-cat-lab-total" class="font-extrabold text-slate-800"></span>
+            </div>
+            <div class="flex justify-between items-center text-xs">
+              <span class="font-bold text-slate-600 flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-indigo-600 shrink-0"></span>FedeFarma</span>
+              <span id="pdf-cat-fede-total" class="font-extrabold text-slate-800"></span>
+            </div>
+            <div class="flex justify-between items-center text-xs">
+              <span class="font-bold text-slate-600 flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-slate-400 shrink-0"></span>Otros Proveedores</span>
+              <span id="pdf-cat-otro-total" class="font-extrabold text-slate-800"></span>
+            </div>
+            <div class="flex justify-between items-center text-xs border-t border-blue-900/5 pt-2">
+              <span class="font-bold text-slate-600 flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-orange-500 shrink-0"></span>Seguros/Impuestos y Personal</span>
+              <span id="pdf-cat-trab-total" class="font-extrabold text-slate-800"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Abonos y Net Balance -->
+        <div class="border border-blue-900/10 rounded-xl p-5 flex flex-col justify-between">
+          <div>
+            <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider mb-4 border-b border-blue-900/5 pb-2">Abonos y Devoluciones</h4>
+            <div class="space-y-3">
+              <div class="flex justify-between items-center text-xs">
+                <span class="font-bold text-slate-600">Total Abonado</span>
+                <span id="pdf-abonos-total" class="font-extrabold text-emerald-600"></span>
+              </div>
+              <div class="flex justify-between items-center text-xs">
+                <span class="font-bold text-slate-600">Nº Abonos</span>
+                <span id="pdf-abonos-count" class="font-extrabold text-slate-800"></span>
+              </div>
+            </div>
+          </div>
+          <div class="bg-blue-50 border border-blue-200/50 rounded-lg p-3 mt-4">
+            <div class="flex justify-between items-center">
+              <span class="text-2xs font-bold text-blue-700 uppercase tracking-wider">Balance Neto</span>
+              <span id="pdf-balance-neto" class="text-sm font-black text-slate-800"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer Page 1 -->
+    <div class="border-t border-blue-900/10 pt-4 flex justify-between items-center text-3xs text-slate-400">
+      <span>PharmaBusiness - Reporte Oficial</span>
+      <span>Página 1 de 2</span>
+    </div>
+  </div>
+
+  <!-- PAGE 2: EVOLUCION Y RANKING DETALLADO -->
+  <div id="pdf-page-2" class="p-10 flex flex-col justify-between" style="min-height: 1120px; box-sizing: border-box; page-break-before: always;">
+    <div>
+      <!-- Header Page 2 -->
+      <div class="flex justify-between items-center border-b border-blue-900/10 pb-6 mb-8">
+        <div>
+          <span class="text-base font-black tracking-tight text-slate-800">Pharma<span class="text-blue-600">Business</span></span>
+          <p class="text-3xs text-slate-400 mt-0.5">Control Presupuestario y de Reposición</p>
+        </div>
+        <div class="text-right">
+          <p id="pdf-page-2-range" class="text-xs font-bold text-slate-600"></p>
+        </div>
+      </div>
+
+      <!-- Ranking Table Title -->
+      <div class="mb-5">
+        <h3 class="text-sm font-black text-slate-800 uppercase tracking-wider mb-2 border-l-4 border-blue-600 pl-3">Ranking Detallado de Gasto</h3>
+        <p class="text-2xs text-slate-500">Muestra el desglose y la contribución de gasto de cada proveedor y laboratorio ordenado de mayor a menor.</p>
+      </div>
+
+      <!-- Tables and Ranking -->
+      <div class="border border-blue-900/10 rounded-xl overflow-hidden mb-8">
+        <table class="w-full text-left text-xs border-collapse">
+          <thead>
+            <tr class="bg-slate-50 border-b border-blue-900/10 text-slate-500 font-bold">
+              <th class="py-3 px-4 w-16">Puesto</th>
+              <th class="py-3 px-4">Proveedor / Laboratorio</th>
+              <th class="py-3 px-4 text-right">Total Invertido</th>
+              <th class="py-3 px-4 text-right w-24">Porcentaje</th>
+            </tr>
+          </thead>
+          <tbody id="pdf-ranking-tbody" class="divide-y divide-blue-900/5">
+            <!-- JavaScript will inject ranking rows here -->
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Notas/Firmas -->
+      <div class="mt-16 grid grid-cols-2 gap-10">
+        <div class="border border-dashed border-slate-300 rounded-xl p-4 h-32 flex flex-col justify-between">
+          <span class="text-3xs font-bold text-slate-400 uppercase tracking-wider">Notas de Revisión</span>
+          <div class="border-b border-slate-200 w-full mb-1"></div>
+        </div>
+        <div class="flex flex-col justify-end items-center h-32">
+          <div class="border-t border-slate-400 w-44 text-center pt-2">
+            <p class="text-3xs font-bold text-slate-500 uppercase tracking-wider">Firma y Sello</p>
+            <p class="text-4xs text-slate-400 mt-0.5">Control de Gestión</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer Page 2 -->
+    <div class="border-t border-blue-900/10 pt-4 flex justify-between items-center text-3xs text-slate-400">
+      <span>PharmaBusiness - Reporte Oficial</span>
+      <span>Página 2 de 2</span>
     </div>
   </div>
 </div>
@@ -2676,7 +2851,146 @@ async function modalMarkAsUnpaid(id) {
     renderCalendar();
     renderVencModalListFiltered();
     updateCalStats();
-  } catch(e) { alert('Error: ' + e.message); }
+// ─── Exportación a PDF de Análisis ───────────────────────────────────────────
+async function exportAnalysisPDF() {
+  const btn = document.querySelector('[onclick="exportAnalysisPDF()"]');
+  const originalText = btn.innerHTML;
+  btn.innerHTML = `<svg class="w-4 h-4 animate-spin shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg> Generando...`;
+  btn.disabled = true;
+
+  try {
+    const desde = document.getElementById('analisis-desde').value;
+    const hasta = document.getElementById('analisis-hasta').value;
+    
+    // Formatear rango de fechas en cabecera
+    const formatDate = (dateStr) => {
+      if (!dateStr) return '';
+      const [y, m, d] = dateStr.split('-');
+      return `${d}/${m}/${y}`;
+    };
+    
+    const rangeLabel = (desde || hasta) 
+      ? `${formatDate(desde) || 'Inicio'} al ${formatDate(hasta) || 'Actual'}`
+      : 'Periodo Completo Histórico';
+      
+    document.getElementById('pdf-date-range').textContent = rangeLabel;
+    document.getElementById('pdf-page-2-range').textContent = `Periodo: ${rangeLabel}`;
+    
+    // Fecha de generación del informe
+    const now = new Date();
+    document.getElementById('pdf-gen-date').textContent = `Generado el ${now.toLocaleDateString('es-ES')} a las ${now.toLocaleTimeString('es-ES', {hour: '2-digit', minute:'2-digit'})}`;
+    
+    // Calcular facturas filtradas en el rango de fechas
+    let records = allFacturas;
+    if (desde) records = records.filter(r => (r.fields.Fecha || '') >= desde);
+    if (hasta) records = records.filter(r => (r.fields.Fecha || '') <= hasta);
+    
+    const facturas = records.filter(r => r.fields.Tipo !== 'Abono');
+    const abonos = records.filter(r => r.fields.Tipo === 'Abono');
+    
+    // Sumar importes por categoría
+    const byTipo = { Laboratorio: 0, FedeFarma: 0, Otro: 0 };
+    facturas.forEach(r => {
+      const t = r.fields.Tipo || 'Otro';
+      const key = byTipo[t] !== undefined ? t : 'Otro';
+      byTipo[key] += r.fields.Importe || 0;
+    });
+    
+    // Seguros + Nóminas del periodo seleccionado
+    let segFilt = allSeguros, nomFilt = allNominas;
+    if (desde) {
+      segFilt = segFilt.filter(s => (s.fecha || '') >= desde);
+      nomFilt = nomFilt.filter(n => (n.fecha || '') >= desde);
+    }
+    if (hasta) {
+      segFilt = segFilt.filter(s => (s.fecha || '') <= hasta);
+      nomFilt = nomFilt.filter(n => (n.fecha || '') <= hasta);
+    }
+    const totalTrab = segFilt.reduce((s, r) => s + Number(r.importe), 0) + nomFilt.reduce((s, r) => s + Number(r.importe), 0);
+    
+    // Sumar totales globales
+    const totalBrutoFacturas = facturas.reduce((s, r) => s + (r.fields.Importe || 0), 0);
+    const totalGeneralInversion = totalBrutoFacturas + totalTrab;
+    const avgFactura = facturas.length ? totalBrutoFacturas / facturas.length : 0;
+    
+    const totalAbonado = abonos.reduce((s, r) => s + (r.fields.Importe || 0), 0);
+    const balanceNeto = totalGeneralInversion - totalAbonado;
+    
+    // Agrupar proveedores por gasto (excluyendo abonos)
+    const sumsByLab = {};
+    facturas.forEach(r => {
+      const name = r.fields.Laboratorio || 'Sin nombre';
+      sumsByLab[name] = (sumsByLab[name] || 0) + (r.fields.Importe || 0);
+    });
+    const sortedLabs = Object.entries(sumsByLab)
+      .map(([name, amount]) => ({ name, amount }))
+      .sort((a, b) => b.amount - a.amount);
+      
+    // Poblar KPIs
+    const fmt = v => v.toLocaleString('es-ES', { minimumFractionDigits: 2 }) + ' €';
+    document.getElementById('pdf-kpi-total').textContent = fmt(totalGeneralInversion);
+    document.getElementById('pdf-kpi-count').textContent = facturas.length + (segFilt.length + nomFilt.length);
+    document.getElementById('pdf-kpi-top').textContent = sortedLabs[0]?.name || '—';
+    document.getElementById('pdf-kpi-top').title = sortedLabs[0]?.name || '';
+    document.getElementById('pdf-kpi-avg').textContent = fmt(avgFactura);
+    
+    // Poblar desglose de categorías
+    document.getElementById('pdf-cat-lab-total').textContent = fmt(byTipo.Laboratorio);
+    document.getElementById('pdf-cat-fede-total').textContent = fmt(byTipo.FedeFarma);
+    document.getElementById('pdf-cat-otro-total').textContent = fmt(byTipo.Otro);
+    document.getElementById('pdf-cat-trab-total').textContent = fmt(totalTrab);
+    
+    // Poblar abonos y balance neto
+    document.getElementById('pdf-abonos-total').textContent = fmt(totalAbonado);
+    document.getElementById('pdf-abonos-count').textContent = abonos.length;
+    document.getElementById('pdf-balance-neto').textContent = fmt(balanceNeto);
+    
+    // Poblar tabla de Ranking (Página 2)
+    const rankingTbody = document.getElementById('pdf-ranking-tbody');
+    if (!sortedLabs.length) {
+      rankingTbody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-slate-400">Sin compras registradas en este rango.</td></tr>`;
+    } else {
+      const totalGlobalLabs = sortedLabs.reduce((sum, r) => sum + r.amount, 0);
+      rankingTbody.innerHTML = sortedLabs.slice(0, 15).map((r, index) => {
+        const percentage = totalGlobalLabs > 0 ? (r.amount / totalGlobalLabs) * 100 : 0;
+        let badge = `<span class="font-bold text-slate-400">${index + 1}º</span>`;
+        if (index === 0) badge = `<span class="font-extrabold text-yellow-600 bg-yellow-50 px-2 py-0.5 rounded border border-yellow-200">1º</span>`;
+        else if (index === 1) badge = `<span class="font-extrabold text-slate-500 bg-slate-50 px-2 py-0.5 rounded border border-slate-200">2º</span>`;
+        else if (index === 2) badge = `<span class="font-extrabold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">3º</span>`;
+        
+        return `
+          <tr class="hover:bg-slate-50/50">
+            <td class="py-3 px-4">${badge}</td>
+            <td class="py-3 px-4 font-bold text-slate-800">${esc(r.name)}</td>
+            <td class="py-3 px-4 text-right font-extrabold text-slate-800">${fmt(r.amount)}</td>
+            <td class="py-3 px-4 text-right font-semibold text-blue-600">${percentage.toFixed(1)}%</td>
+          </tr>
+        `;
+      }).join('');
+    }
+    
+    // Disparar html2pdf
+    const element = document.getElementById('pdf-template-container');
+    element.classList.remove('hidden'); // temporalmente visible para html2pdf
+    
+    const options = {
+      margin: 0,
+      filename: `Reporte_Inversiones_${desde || 'Inicio'}_a_${hasta || 'Actual'}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+      jsPDF: { unit: 'px', format: [794, 1120], orientation: 'portrait' }
+    };
+    
+    await html2pdf().from(element).set(options).save();
+    element.classList.add('hidden'); // volver a ocultar
+    
+  } catch (error) {
+    console.error('Error al generar PDF:', error);
+    alert('Error al generar el reporte PDF: ' + error.message);
+  } finally {
+    btn.innerHTML = originalText;
+    btn.disabled = false;
+  }
 }
 
 // ─── Modal Ranking Laboratorios ───────────────────────────────────────────────
