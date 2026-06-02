@@ -2845,6 +2845,8 @@ async function modalMarkAsUnpaid(id) {
       if (modalRecordIdx === -1) currentVencModalRecords.push(updated);
     } else {
       if (modalRecordIdx !== -1) currentVencModalRecords.splice(modalRecordIdx, 1);
+    }
+    
     filterFacturas();
     renderCalendar();
     renderVencModalListFiltered();
