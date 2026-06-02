@@ -2288,18 +2288,18 @@ function renderAnalisisCharts(records) {
     document.getElementById('kpi-total').textContent = fmt(totalFiscal);
     document.getElementById('kpi-count').textContent = countFiscal;
     const conceptTotals = {};
-    fisFilt.forEach(f => { conceptTotals[f.concepto] = (conceptTotals[f.concepto]||0) + Number(f.importe); });
+    paidFisFilt.forEach(f => { conceptTotals[f.concepto] = (conceptTotals[f.concepto]||0) + Number(f.importe); });
     const topConcept = Object.entries(conceptTotals).sort((a,b)=>b[1]-a[1])[0]?.[0] || '—';
     document.getElementById('kpi-top').textContent = topConcept;
     document.getElementById('kpi-avg').textContent = fmt(countFiscal ? totalFiscal/countFiscal : 0);
     
     const breakdown = {};
-    fisFilt.forEach(f => { breakdown[f.concepto] = (breakdown[f.concepto]||0) + Number(f.importe); });
+    paidFisFilt.forEach(f => { breakdown[f.concepto] = (breakdown[f.concepto]||0) + Number(f.importe); });
     const bEntries = Object.entries(breakdown).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]);
     mkChart('chart-labs','bar',{labels:bEntries.map(([l])=>l),datasets:[{label:'€',data:bEntries.map(([,v])=>v),backgroundColor:'rgba(16,185,129,0.8)',borderRadius:6,borderSkipped:false}]},{plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>v.toLocaleString('es-ES')+'€',font:{size:11}}},x:{ticks:{font:{size:11}}}}});
     if (bEntries.length) mkChart('chart-donut','doughnut',{labels:bEntries.map(([l])=>l),datasets:[{data:bEntries.map(([,v])=>v),backgroundColor:genPalette2(bEntries.length),borderWidth:2,borderColor:'#fff',hoverOffset:6}]},{plugins:{legend:{position:'bottom',labels:{font:{size:11},padding:10}}},cutout:'65%'});
     const byMonthFis = {};
-    fisFilt.forEach(f => { if(f.fecha){const k=f.fecha.slice(0,7); byMonthFis[k]=(byMonthFis[k]||0)+Number(f.importe);} });
+    paidFisFilt.forEach(f => { if(f.fecha){const k=f.fecha.slice(0,7); byMonthFis[k]=(byMonthFis[k]||0)+Number(f.importe);} });
     const mFis = Object.entries(byMonthFis).sort(([a],[b])=>a.localeCompare(b));
     mkChart('chart-monthly','bar',{labels:mFis.map(([k])=>{const[y,m]=k.split('-');return new Date(y,m-1).toLocaleDateString('es-ES',{month:'short',year:'2-digit'});}),datasets:[{label:'€',data:mFis.map(([,v])=>v),backgroundColor:'rgba(16,185,129,0.7)',borderRadius:4}]},{plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>v.toLocaleString('es-ES')+'€',font:{size:11}}},x:{ticks:{font:{size:11}}}}});
     document.getElementById('abono-charts').classList.add('hidden');
