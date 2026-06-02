@@ -1848,8 +1848,8 @@ function applyAnalisisFilter() {
   const desde = document.getElementById('analisis-desde').value;
   const hasta = document.getElementById('analisis-hasta').value;
   let filtered = allFacturas;
-  if (desde) filtered = filtered.filter(r => (r.fields.Fecha||'') >= desde);
-  if (hasta) filtered = filtered.filter(r => (r.fields.Fecha||'') <= hasta);
+  if (desde) filtered = filtered.filter(r => (r.fields.FechaVencimiento || r.fields.Fecha || '') >= desde);
+  if (hasta) filtered = filtered.filter(r => (r.fields.FechaVencimiento || r.fields.Fecha || '') <= hasta);
   const info = document.getElementById('analisis-filter-info');
   if (desde || hasta) {
     const nF = filtered.filter(r=>r.fields.Tipo!=='Abono').length;
@@ -1970,8 +1970,8 @@ async function loadAnalisis(force) {
   const desde = document.getElementById('analisis-desde').value;
   const hasta = document.getElementById('analisis-hasta').value;
   let filtered = records;
-  if (desde) filtered = filtered.filter(r=>(r.fields.Fecha||'')>=desde);
-  if (hasta) filtered = filtered.filter(r=>(r.fields.Fecha||'')<=hasta);
+  if (desde) filtered = filtered.filter(r => (r.fields.FechaVencimiento || r.fields.Fecha || '') >= desde);
+  if (hasta) filtered = filtered.filter(r => (r.fields.FechaVencimiento || r.fields.Fecha || '') <= hasta);
   renderAnalisisCharts(filtered);
 }
 
@@ -2885,8 +2885,8 @@ async function exportAnalysisPDF() {
     
     // Calcular facturas filtradas en el rango de fechas
     let records = allFacturas;
-    if (desde) records = records.filter(r => (r.fields.Fecha || '') >= desde);
-    if (hasta) records = records.filter(r => (r.fields.Fecha || '') <= hasta);
+    if (desde) records = records.filter(r => (r.fields.FechaVencimiento || r.fields.Fecha || '') >= desde);
+    if (hasta) records = records.filter(r => (r.fields.FechaVencimiento || r.fields.Fecha || '') <= hasta);
     
     const facturas = records.filter(r => r.fields.Tipo !== 'Abono');
     const abonos = records.filter(r => r.fields.Tipo === 'Abono');
