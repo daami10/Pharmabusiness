@@ -1635,9 +1635,15 @@ function renderTable(records) {
     Abono: 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
   };
 
+  const s = document.getElementById('search-facturas')?.value.trim() || '';
+  const m = document.getElementById('filter-mes')?.value || '';
+  const minVal = document.getElementById('filter-importe-min')?.value || '';
+  const maxVal = document.getElementById('filter-importe-max')?.value || '';
+  const hasFilter = !!(s || m || minVal || maxVal || activeTipo || activeVencStatus);
+
   document.getElementById('facturas-tbody').innerHTML = sortedKeys.map((key, groupIdx) => {
     const groupRecords = groups[key];
-    const isOpen = false;
+    const isOpen = groupIdx === 0 || hasFilter;
     const [yr, mo] = key.split('-');
     const mesLabel = mo && mo !== '00' ? MESES[parseInt(mo,10)-1] + ' ' + yr : 'Sin fecha';
     const gFacturas = groupRecords.filter(r=>r.fields.Tipo!=='Abono');
