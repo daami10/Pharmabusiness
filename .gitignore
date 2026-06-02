@@ -1,0 +1,4 @@
+dist/
+node_modules/
+claves.txt
+settings.local.json
