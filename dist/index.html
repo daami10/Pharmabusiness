@@ -174,38 +174,6 @@
 
       <!-- Right: Profile Info -->
       <div class="flex items-center gap-4">
-        <!-- Fast Action Dropdown -->
-        <div class="relative inline-block text-left" id="fast-action-container">
-          <button onclick="toggleFastActionDropdown(event)" class="bg-gradient-to-r from-blue-500 to-[#00f2fe] text-slate-950 hover:opacity-90 font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow-lg shadow-blue-500/20 transition-all hover:scale-[1.02]">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
-            </svg>
-            Nuevo Registro
-          </button>
-          <div id="fast-action-dropdown" class="hidden absolute right-0 mt-2.5 w-52 rounded-xl bg-slate-900/90 border border-white/10 backdrop-blur-md shadow-2xl py-1.5 z-50 text-slate-300">
-            <button onclick="triggerFastAction('scan-factura')" class="w-full text-left px-4 py-2.5 text-xs hover:text-white hover:bg-white/5 transition-colors flex items-center gap-2">
-              <svg class="w-4 h-4 text-[#00f2fe]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><circle cx="12" cy="13" r="3"/></svg>
-              Escanear Factura con IA
-            </button>
-            <button onclick="triggerFastAction('add-factura')" class="w-full text-left px-4 py-2.5 text-xs hover:text-white hover:bg-white/5 transition-colors flex items-center gap-2">
-              <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-              Nueva Factura (Manual)
-            </button>
-            <button onclick="triggerFastAction('add-nomina')" class="w-full text-left px-4 py-2.5 text-xs hover:text-white hover:bg-white/5 transition-colors flex items-center gap-2">
-              <svg class="w-4 h-4 text-teal-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-              Registrar Nómina
-            </button>
-            <button onclick="triggerFastAction('add-seguro')" class="w-full text-left px-4 py-2.5 text-xs hover:text-white hover:bg-white/5 transition-colors flex items-center gap-2">
-              <svg class="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-              Registrar Seguro Social
-            </button>
-            <button onclick="triggerFastAction('add-fiscal')" class="w-full text-left px-4 py-2.5 text-xs hover:text-white hover:bg-white/5 transition-colors flex items-center gap-2">
-              <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-              Añadir Impuesto / Tasa
-            </button>
-          </div>
-        </div>
-
         <div class="flex items-center gap-3">
           <div class="text-right hidden sm:block">
             <p id="profile-name" class="text-xs font-black text-white">Farmacéutico</p>
@@ -226,9 +194,43 @@
 
 <!-- TAB: INICIO -->
 <section id="tab-inicio" class="max-w-7xl mx-auto px-6 py-8 fade-in">
-  <div class="mb-8">
-    <h1 class="text-3xl font-extrabold text-white tracking-tight">Inicio</h1>
-    <p class="text-sm text-slate-400 mt-1">Resumen general de tu farmacia para <span id="inicio-month-label" class="font-semibold text-slate-200">este mes</span></p>
+  <div class="flex items-center justify-between mb-8 flex-wrap gap-4">
+    <div>
+      <h1 class="text-3xl font-extrabold text-white tracking-tight">Inicio</h1>
+      <p class="text-sm text-slate-400 mt-1">Resumen general de tu farmacia para <span id="inicio-month-label" class="font-semibold text-slate-200">este mes</span></p>
+    </div>
+    
+    <!-- Nuevo Registro (Dropdown principal en Inicio, tamaño mediano/grande) -->
+    <div class="relative inline-block text-left" id="fast-action-container">
+      <button onclick="toggleFastActionDropdown(event)" class="bg-gradient-to-r from-blue-500 to-[#00f2fe] text-slate-950 hover:opacity-90 font-bold px-6 py-3 rounded-xl text-sm flex items-center gap-2 shadow-lg shadow-blue-500/20 transition-all hover:scale-[1.02]">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+        </svg>
+        Nuevo Registro
+      </button>
+      <div id="fast-action-dropdown" class="hidden absolute right-0 mt-2.5 w-56 rounded-xl bg-slate-900/95 border border-white/10 backdrop-blur-md shadow-2xl py-2 z-50 text-slate-300">
+        <button onclick="triggerFastAction('scan-factura')" class="w-full text-left px-4 py-2.5 text-xs hover:text-white hover:bg-white/5 transition-colors flex items-center gap-2">
+          <svg class="w-4 h-4 text-[#00f2fe]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><circle cx="12" cy="13" r="3"/></svg>
+          Escanear Factura con IA
+        </button>
+        <button onclick="triggerFastAction('add-factura')" class="w-full text-left px-4 py-2.5 text-xs hover:text-white hover:bg-white/5 transition-colors flex items-center gap-2">
+          <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          Nueva Factura (Manual)
+        </button>
+        <button onclick="triggerFastAction('add-nomina')" class="w-full text-left px-4 py-2.5 text-xs hover:text-white hover:bg-white/5 transition-colors flex items-center gap-2">
+          <svg class="w-4 h-4 text-teal-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          Registrar Nómina
+        </button>
+        <button onclick="triggerFastAction('add-seguro')" class="w-full text-left px-4 py-2.5 text-xs hover:text-white hover:bg-white/5 transition-colors flex items-center gap-2">
+          <svg class="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+          Registrar Seguro Social
+        </button>
+        <button onclick="triggerFastAction('add-fiscal')" class="w-full text-left px-4 py-2.5 text-xs hover:text-white hover:bg-white/5 transition-colors flex items-center gap-2">
+          <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+          Añadir Impuesto / Tasa
+        </button>
+      </div>
+    </div>
   </div>
 
   <!-- KPI SUMMARY CARDS -->
