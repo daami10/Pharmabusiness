@@ -747,8 +747,29 @@
     </div>
     <div class="px-6 py-5 space-y-4">
       <div>
-        <label class="block text-sm font-medium text-slate-300 mb-1.5">Mes</label>
-        <input id="seguro-fecha" type="month" class="w-full px-4 py-2.5 rounded-xl border border-white/5 bg-slate-950/40 text-slate-100 placeholder-slate-500 focus:border-[#00f2fe]/40 focus:ring-0 focus:outline-none text-sm transition-all">
+        <label class="block text-sm font-medium text-slate-300 mb-1.5">Mes y Año</label>
+        <div class="flex gap-3">
+          <select id="seguro-mes" class="flex-1 px-4 py-2.5 rounded-xl border border-white/5 bg-slate-950/40 text-slate-100 placeholder-slate-500 focus:border-[#00f2fe]/40 focus:ring-0 focus:outline-none text-sm transition-all cursor-pointer">
+            <option value="01" class="bg-[#0f172a]">Enero</option>
+            <option value="02" class="bg-[#0f172a]">Febrero</option>
+            <option value="03" class="bg-[#0f172a]">Marzo</option>
+            <option value="04" class="bg-[#0f172a]">Abril</option>
+            <option value="05" class="bg-[#0f172a]">Mayo</option>
+            <option value="06" class="bg-[#0f172a]">Junio</option>
+            <option value="07" class="bg-[#0f172a]">Julio</option>
+            <option value="08" class="bg-[#0f172a]">Agosto</option>
+            <option value="09" class="bg-[#0f172a]">Septiembre</option>
+            <option value="10" class="bg-[#0f172a]">Octubre</option>
+            <option value="11" class="bg-[#0f172a]">Noviembre</option>
+            <option value="12" class="bg-[#0f172a]">Diciembre</option>
+          </select>
+          <select id="seguro-anio" class="flex-1 px-4 py-2.5 rounded-xl border border-white/5 bg-slate-950/40 text-slate-100 placeholder-slate-500 focus:border-[#00f2fe]/40 focus:ring-0 focus:outline-none text-sm transition-all cursor-pointer">
+            <option value="2025" class="bg-[#0f172a]">2025</option>
+            <option value="2026" class="bg-[#0f172a]">2026</option>
+            <option value="2027" class="bg-[#0f172a]">2027</option>
+            <option value="2028" class="bg-[#0f172a]">2028</option>
+          </select>
+        </div>
       </div>
       <div>
         <label class="block text-sm font-medium text-slate-300 mb-1.5">Importe (€)</label>
@@ -802,8 +823,29 @@
         </select>
       </div>
       <div>
-        <label class="block text-sm font-medium text-slate-300 mb-1.5">Mes</label>
-        <input id="nomina-fecha" type="month" class="w-full px-4 py-2.5 rounded-xl border border-white/5 bg-slate-950/40 text-slate-100 placeholder-slate-500 focus:border-[#00f2fe]/40 focus:ring-0 focus:outline-none text-sm transition-all">
+        <label class="block text-sm font-medium text-slate-300 mb-1.5">Mes y Año</label>
+        <div class="flex gap-3">
+          <select id="nomina-mes" class="flex-1 px-4 py-2.5 rounded-xl border border-white/5 bg-slate-950/40 text-slate-100 placeholder-slate-500 focus:border-[#00f2fe]/40 focus:ring-0 focus:outline-none text-sm transition-all cursor-pointer">
+            <option value="01" class="bg-[#0f172a]">Enero</option>
+            <option value="02" class="bg-[#0f172a]">Febrero</option>
+            <option value="03" class="bg-[#0f172a]">Marzo</option>
+            <option value="04" class="bg-[#0f172a]">Abril</option>
+            <option value="05" class="bg-[#0f172a]">Mayo</option>
+            <option value="06" class="bg-[#0f172a]">Junio</option>
+            <option value="07" class="bg-[#0f172a]">Julio</option>
+            <option value="08" class="bg-[#0f172a]">Agosto</option>
+            <option value="09" class="bg-[#0f172a]">Septiembre</option>
+            <option value="10" class="bg-[#0f172a]">Octubre</option>
+            <option value="11" class="bg-[#0f172a]">Noviembre</option>
+            <option value="12" class="bg-[#0f172a]">Diciembre</option>
+          </select>
+          <select id="nomina-anio" class="flex-1 px-4 py-2.5 rounded-xl border border-white/5 bg-slate-950/40 text-slate-100 placeholder-slate-500 focus:border-[#00f2fe]/40 focus:ring-0 focus:outline-none text-sm transition-all cursor-pointer">
+            <option value="2025" class="bg-[#0f172a]">2025</option>
+            <option value="2026" class="bg-[#0f172a]">2026</option>
+            <option value="2027" class="bg-[#0f172a]">2027</option>
+            <option value="2028" class="bg-[#0f172a]">2028</option>
+          </select>
+        </div>
       </div>
       <div>
         <label class="block text-sm font-medium text-slate-300 mb-1.5">Importe (€)</label>
@@ -3049,7 +3091,8 @@ function renderNominas() {
 
 function openSeguroModal() {
   const now = new Date();
-  document.getElementById('seguro-fecha').value = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+  document.getElementById('seguro-mes').value = String(now.getMonth()+1).padStart(2,'0');
+  document.getElementById('seguro-anio').value = String(now.getFullYear());
   document.getElementById('seguro-importe').value = '';
   document.getElementById('seguro-notas').value = '';
   document.getElementById('seguro-modal').classList.remove('hidden');
@@ -3057,12 +3100,14 @@ function openSeguroModal() {
 function closeSeguroModal() { document.getElementById('seguro-modal').classList.add('hidden'); }
 
 async function saveSeguro() {
-  const fecha = document.getElementById('seguro-fecha').value;
+  const mes = document.getElementById('seguro-mes').value;
+  const anio = document.getElementById('seguro-anio').value;
   const importe = parseFloat(document.getElementById('seguro-importe').value) || 0;
   const notas = document.getElementById('seguro-notas').value.trim();
-  if (!fecha || !importe) { alert('Introduce el mes y el importe.'); return; }
+  if (!importe) { alert('Introduce el importe.'); return; }
+  const fecha = `${anio}-${mes}-01`;
   const { data: { user } } = await sb.auth.getUser();
-  const { data, error } = await sb.from('seguros_sociales').insert([{ user_id: user.id, fecha: fecha + '-01', importe, notas }]).select().single();
+  const { data, error } = await sb.from('seguros_sociales').insert([{ user_id: user.id, fecha, importe, notas }]).select().single();
   if (error) { alert('Error: ' + error.message); return; }
   allSeguros.unshift(data);
   renderSeguros();
@@ -3095,7 +3140,8 @@ async function saveTrabajador() {
 
 function openNominaModal() {
   const now = new Date();
-  document.getElementById('nomina-fecha').value = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+  document.getElementById('nomina-mes').value = String(now.getMonth()+1).padStart(2,'0');
+  document.getElementById('nomina-anio').value = String(now.getFullYear());
   document.getElementById('nomina-importe').value = '';
   document.getElementById('nomina-concepto').value = '';
   const sel = document.getElementById('nomina-trabajador');
@@ -3109,12 +3155,14 @@ async function saveNomina() {
   const sel = document.getElementById('nomina-trabajador');
   const trabajador_id = sel.value;
   const trabajador_nombre = sel.options[sel.selectedIndex]?.dataset?.nombre || '';
-  const fecha = document.getElementById('nomina-fecha').value;
+  const mes = document.getElementById('nomina-mes').value;
+  const anio = document.getElementById('nomina-anio').value;
   const importe = parseFloat(document.getElementById('nomina-importe').value) || 0;
   const concepto = document.getElementById('nomina-concepto').value.trim();
-  if (!trabajador_id || !fecha || !importe) { alert('Selecciona trabajador, mes e importe.'); return; }
+  if (!trabajador_id || !importe) { alert('Selecciona trabajador e importe.'); return; }
+  const fecha = `${anio}-${mes}-01`;
   const { data: { user } } = await sb.auth.getUser();
-  const { data, error } = await sb.from('nominas').insert([{ user_id: user.id, trabajador_id, trabajador_nombre, fecha: fecha + '-01', importe, concepto }]).select().single();
+  const { data, error } = await sb.from('nominas').insert([{ user_id: user.id, trabajador_id, trabajador_nombre, fecha, importe, concepto }]).select().single();
   if (error) { alert('Error: ' + error.message); return; }
   allNominas.unshift(data);
   renderNominas();
