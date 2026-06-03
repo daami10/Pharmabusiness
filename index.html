@@ -2991,7 +2991,9 @@ function renderSeguros() {
     const [yr, mo] = key.split('-');
     const mesLabel = mo && mo !== '00' ? MESES[parseInt(mo,10)-1] + ' ' + yr : 'Sin fecha';
     const gTotal = groupRecords.reduce((s, r) => s + Number(r.importe), 0);
-    const gCount = groupRecords.length + ' entrada' + (groupRecords.length !== 1 ? 's' : '');
+    
+    const isFutureGroup = isFuturePeriod(key + '-01');
+    const gCount = groupRecords.length + ' ' + (isFutureGroup ? 'previsto' + (groupRecords.length !== 1 ? 's' : '') : 'entrada' + (groupRecords.length !== 1 ? 's' : ''));
     const safeKey = key.replace('-','_');
     
     const headerRow = `<tr class="bg-white/5 cursor-pointer select-none hover:bg-white/10 transition-colors" onclick="toggleSegurosGroup('${safeKey}')">
@@ -3000,17 +3002,21 @@ function renderSeguros() {
           <div class="flex items-center gap-3">
             <svg id="chevron-seguros-${safeKey}" class="w-4 h-4 text-slate-400 transition-transform${isOpen?'':' -rotate-90'}" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
             <span class="font-bold text-slate-200 text-sm capitalize">${mesLabel}</span>
-            <span class="text-xs text-slate-500 font-bold bg-white/5 border border-white/5 px-2 py-0.5 rounded">${gCount}</span>
+            <span class="text-xs ${isFutureGroup ? 'text-orange-400/80 bg-orange-500/10 border border-orange-500/20' : 'text-slate-500 bg-white/5 border border-white/5'} font-bold px-2 py-0.5 rounded">${gCount}</span>
           </div>
-          <span class="font-extrabold text-sm text-[#00f2fe]">${gTotal.toLocaleString('es-ES',{minimumFractionDigits:2})} €</span>
+          <span class="font-extrabold text-sm ${isFutureGroup ? 'text-orange-400' : 'text-[#00f2fe]'}">${gTotal.toLocaleString('es-ES',{minimumFractionDigits:2})} €</span>
         </div>
       </td>
     </tr>`;
     
     const dataRows = groupRecords.map(s => {
       const imp = Number(s.importe).toLocaleString('es-ES', {minimumFractionDigits:2}) + ' €';
+      const badge = isFutureGroup 
+        ? '<span class="text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-orange-500/10 border border-orange-500/20 text-orange-400 animate-pulse">Previsto</span>' 
+        : '<span class="text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-white/5 border border-white/5 text-slate-400">Registrado</span>';
+      
       return `<tr class="seguros-row-${safeKey} hover:bg-white/5 transition-colors border-b border-white/5${isOpen?'':' hidden'}">
-        <td class="px-6 py-4 text-sm text-slate-500 capitalize">—</td>
+        <td class="px-6 py-4 text-sm text-slate-500 capitalize">${badge}</td>
         <td class="px-6 py-4 text-sm font-extrabold text-right text-white">${imp}</td>
         <td class="px-6 py-4 text-sm text-slate-300">${esc(s.notes || s.notas || '')}</td>
         <td class="px-6 py-4 text-right">
@@ -3053,7 +3059,9 @@ function renderNominas() {
     const [yr, mo] = key.split('-');
     const mesLabel = mo && mo !== '00' ? MESES[parseInt(mo,10)-1] + ' ' + yr : 'Sin fecha';
     const gTotal = groupRecords.reduce((s, r) => s + Number(r.importe), 0);
-    const gCount = groupRecords.length + ' nómina' + (groupRecords.length !== 1 ? 's' : '');
+    
+    const isFutureGroup = isFuturePeriod(key + '-01');
+    const gCount = groupRecords.length + ' ' + (isFutureGroup ? 'prevista' + (groupRecords.length !== 1 ? 's' : '') : 'nómina' + (groupRecords.length !== 1 ? 's' : ''));
     const safeKey = key.replace('-','_');
     
     const headerRow = `<tr class="bg-white/5 cursor-pointer select-none hover:bg-white/10 transition-colors" onclick="toggleNominasGroup('${safeKey}')">
@@ -3062,18 +3070,22 @@ function renderNominas() {
           <div class="flex items-center gap-3">
             <svg id="chevron-nominas-${safeKey}" class="w-4 h-4 text-slate-400 transition-transform${isOpen?'':' -rotate-90'}" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
             <span class="font-bold text-slate-200 text-sm capitalize">${mesLabel}</span>
-            <span class="text-xs text-slate-500 font-bold bg-white/5 border border-white/5 px-2 py-0.5 rounded">${gCount}</span>
+            <span class="text-xs ${isFutureGroup ? 'text-orange-400/80 bg-orange-500/10 border border-orange-500/20' : 'text-slate-500 bg-white/5 border border-white/5'} font-bold px-2 py-0.5 rounded">${gCount}</span>
           </div>
-          <span class="font-extrabold text-sm text-[#00f2fe]">${gTotal.toLocaleString('es-ES',{minimumFractionDigits:2})} €</span>
+          <span class="font-extrabold text-sm ${isFutureGroup ? 'text-orange-400' : 'text-[#00f2fe]'}">${gTotal.toLocaleString('es-ES',{minimumFractionDigits:2})} €</span>
         </div>
       </td>
     </tr>`;
     
     const dataRows = groupRecords.map(n => {
       const imp = Number(n.importe).toLocaleString('es-ES', {minimumFractionDigits:2}) + ' €';
+      const badge = isFutureGroup 
+        ? '<span class="text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-orange-500/10 border border-orange-500/20 text-orange-400 animate-pulse">Prevista</span>' 
+        : '<span class="text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-white/5 border border-white/5 text-slate-400">Registrada</span>';
+      
       return `<tr class="nominas-row-${safeKey} hover:bg-white/5 transition-colors border-b border-white/5${isOpen?'':' hidden'}">
         <td class="px-6 py-4 text-sm font-extrabold text-white">${esc(n.trabajador_nombre)||'—'}</td>
-        <td class="px-6 py-4 text-sm text-slate-500 capitalize">—</td>
+        <td class="px-6 py-4 text-sm text-slate-500 capitalize">${badge}</td>
         <td class="px-6 py-4 text-sm font-extrabold text-right text-white">${imp}</td>
         <td class="px-6 py-4 text-sm text-slate-300">${esc(n.concepto || n.concepto_nombre || '')}</td>
         <td class="px-6 py-4 text-right">
