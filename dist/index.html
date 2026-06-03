@@ -1991,8 +1991,13 @@ function renderInicio() {
     const labelEl = document.getElementById('inicio-month-label');
     if (labelEl) labelEl.textContent = monthLabel.charAt(0).toUpperCase() + monthLabel.slice(1);
     
-    // 1. Facturas del mes actual
-    const currentMonthFacturas = allFacturas.filter(f => f.fields.Fecha && f.fields.Fecha.slice(0, 7) === realKey && f.fields.Tipo !== 'Abono');
+    // 1. Facturas del mes actual (pagadas en este mes o que vencen este mes)
+    const currentMonthFacturas = allFacturas.filter(f => {
+      if (f.fields.Tipo === 'Abono') return false;
+      const isDueThisMonth = f.fields.FechaVencimiento && f.fields.FechaVencimiento.slice(0, 7) === realKey;
+      const isPaidThisMonth = f.fields.Pagada && f.fields.Fecha && f.fields.Fecha.slice(0, 7) === realKey;
+      return isDueThisMonth || isPaidThisMonth;
+    });
     const totalFacturas = currentMonthFacturas.reduce((sum, r) => sum + Number(r.fields.Importe || 0), 0);
     const countFacturas = currentMonthFacturas.length;
     
