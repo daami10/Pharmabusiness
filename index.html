@@ -2275,30 +2275,71 @@ dz.ondrop = e => {
 };
 
 async function scanInvoice() {
-  const gemini = getGemini(); const model = getModel();
-  if (!gemini) { showModalError('Configura tu Gemini API Key para usar el escaneo.'); return; }
   if (!currentPhotoBase64) return;
   const btn = document.getElementById('scan-btn');
   document.getElementById('scan-btn-text').textContent = 'Analizando...';
   btn.disabled = true;
   document.getElementById('scan-result').classList.add('hidden');
+  
   try {
-    const BASE_MODELS = ['gemini-2.0-flash', 'gemini-2.0-flash-lite', 'gemini-2.0-flash-001', 'gemini-2.5-flash', 'gemini-1.5-flash'];
-    const SCAN_MODELS = model ? [model, ...BASE_MODELS.filter(m => m !== model)] : BASE_MODELS;
-    let res, scanModel, firstError = '';
-    for (const m of SCAN_MODELS) {
-      res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${gemini}`, {
-        method: 'POST', headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ contents: [{ parts: [
-          { inline_data: { mime_type: currentPhotoMime, data: currentPhotoBase64 } },
-          { text: 'Esta es una factura farmacéutica. Extrae los siguientes datos y responde SOLO con un JSON válido (sin markdown, sin texto extra): {"laboratorio":"...","importe":0.00,"numFactura":"...","fecha":"YYYY-MM-DD"}. Si no encuentras algún campo, déjalo vacío o en 0.' }
-        ]}]})
+    const model = getModel();
+    let res = null;
+    let data = null;
+    
+    // Intentar primero usar la Serverless Function de Vercel (Seguro)
+    try {
+      res = await fetch(`/api/scan`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mimeType: currentPhotoMime,
+          base64Data: currentPhotoBase64,
+          model: model
+        })
       });
-      if (res.ok) { scanModel = m; break; }
-      try { const errData = await res.json(); if (!firstError) firstError = `[${m}] ${errData.error?.message || res.statusText}`; } catch(_) { if (!firstError) firstError = `[${m}] ${res.statusText}`; }
+      if (res.ok) {
+        data = await res.json();
+      }
+    } catch (apiErr) {
+      console.warn("Fallo al llamar al endpoint seguro /api/scan, reintentando con clave local...", apiErr);
     }
-    if (!res || !res.ok) throw new Error(`Ningún modelo Gemini disponible. Error: ${firstError}`);
-    const data = await res.json();
+    
+    // Fallback: Si el servidor no respondió 200, intentar llamada directa desde el cliente con la key local
+    if (!data) {
+      const gemini = getGemini();
+      if (!gemini || gemini === '__GEMINI_KEY__') {
+        throw new Error('No se pudo analizar con el servidor y no hay una API Key de Gemini configurada localmente.');
+      }
+      const BASE_MODELS = ['gemini-2.0-flash', 'gemini-2.0-flash-lite', 'gemini-2.0-flash-001', 'gemini-2.5-flash', 'gemini-1.5-flash'];
+      const SCAN_MODELS = model ? [model, ...BASE_MODELS.filter(m => m !== model)] : BASE_MODELS;
+      let firstError = '';
+      for (const m of SCAN_MODELS) {
+        res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${gemini}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{
+              parts: [
+                { inline_data: { mime_type: currentPhotoMime, data: currentPhotoBase64 } },
+                { text: 'Esta es una factura farmacéutica. Extrae los siguientes datos y responde SOLO con un JSON válido (sin markdown, sin texto extra): {"laboratorio":"...","importe":0.00,"numFactura":"...","fecha":"YYYY-MM-DD"}. Si no encuentras algún campo, déjalo vacío o en 0.' }
+              ]
+            }]
+          })
+        });
+        if (res.ok) {
+          data = await res.json();
+          break;
+        }
+        try {
+          const errData = await res.json();
+          if (!firstError) firstError = `[${m}] ${errData.error?.message || res.statusText}`;
+        } catch (_) {
+          if (!firstError) firstError = `[${m}] ${res.statusText}`;
+        }
+      }
+      if (!data) throw new Error(`Ningún modelo Gemini disponible. Error: ${firstError}`);
+    }
+    
     const blockReason = data.promptFeedback?.blockReason;
     if (blockReason) throw new Error(`Imagen bloqueada por filtro de seguridad de Gemini (${blockReason}). Intenta con otra imagen.`);
     const finishReason = data.candidates?.[0]?.finishReason;
@@ -2314,8 +2355,8 @@ async function scanInvoice() {
     const sr = document.getElementById('scan-result');
     sr.textContent = '✓ Datos extraídos automáticamente. Revisa y confirma antes de guardar.';
     sr.classList.remove('hidden');
-  } catch(e) {
-    showModalError('Error al analizar la imagen: '+e.message);
+  } catch (e) {
+    showModalError('Error al analizar la imagen: ' + e.message);
   }
   document.getElementById('scan-btn-text').textContent = 'Extraer datos con IA';
   btn.disabled = false;
