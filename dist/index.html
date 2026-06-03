@@ -200,8 +200,18 @@
       <p class="text-sm text-slate-400 mt-1">Resumen general de tu farmacia para <span id="inicio-month-label" class="font-semibold text-slate-200">este mes</span></p>
     </div>
     
-    <!-- Nuevo Registro (Dropdown principal en Inicio, tamaño mediano/grande) -->
-    <div class="relative inline-block text-left" id="fast-action-container">
+    <!-- Contenedor de Botones de Cabecera -->
+    <div class="flex items-center gap-3">
+      <!-- Previsión de Gasto (Mismo tamaño que Nuevo Registro) -->
+      <button onclick="openPrevisionModal()" class="flex items-center gap-2 px-6 py-3 rounded-xl border border-emerald-500/20 hover:border-emerald-400/40 text-sm font-bold text-emerald-400 hover:text-white bg-emerald-950/20 hover:bg-gradient-to-r hover:from-emerald-600 hover:to-emerald-500 transition-all duration-300 shadow-lg shadow-emerald-950/20 hover:scale-[1.02]">
+        <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+        </svg>
+        Previsión de Gasto
+      </button>
+
+      <!-- Nuevo Registro (Dropdown principal en Inicio, tamaño mediano/grande) -->
+      <div class="relative inline-block text-left" id="fast-action-container">
       <button onclick="toggleFastActionDropdown(event)" class="bg-gradient-to-r from-blue-500 to-[#00f2fe] text-slate-950 hover:opacity-90 font-bold px-6 py-3 rounded-xl text-sm flex items-center gap-2 shadow-lg shadow-blue-500/20 transition-all hover:scale-[1.02]">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
@@ -230,6 +240,7 @@
           Añadir Impuesto / Tasa
         </button>
       </div>
+    </div>
     </div>
   </div>
 
@@ -546,10 +557,6 @@
       <p class="text-sm text-slate-400 mt-1">Gasto acumulado por laboratorio y evolución temporal</p>
     </div>
     <div class="flex items-center gap-2.5">
-      <button onclick="openPrevisionModal()" class="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-emerald-500/20 hover:border-emerald-400/40 text-sm text-emerald-400 hover:text-white bg-emerald-950/20 hover:bg-gradient-to-r hover:from-emerald-600 hover:to-emerald-500 transition-all duration-300 shadow-md">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
-        Previsión de Gasto
-      </button>
       <button onclick="exportAnalysisPDF()" class="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-blue-500/20 hover:border-[#00f2fe]/40 text-sm text-[#00f2fe] hover:text-white bg-blue-950/20 hover:bg-gradient-to-r hover:from-blue-500 hover:to-[#00f2fe] transition-all duration-300 shadow-md">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
         Exportar PDF
