@@ -369,6 +369,10 @@
       <p class="text-sm text-slate-400 mt-1">Gasto acumulado por laboratorio y evolución temporal</p>
     </div>
     <div class="flex items-center gap-2.5">
+      <button onclick="openPrevisionModal()" class="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-emerald-500/20 hover:border-emerald-400/40 text-sm text-emerald-400 hover:text-white bg-emerald-950/20 hover:bg-gradient-to-r hover:from-emerald-600 hover:to-emerald-500 transition-all duration-300 shadow-md">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+        Previsión de Gasto
+      </button>
       <button onclick="exportAnalysisPDF()" class="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-blue-500/20 hover:border-[#00f2fe]/40 text-sm text-[#00f2fe] hover:text-white bg-blue-950/20 hover:bg-gradient-to-r hover:from-blue-500 hover:to-[#00f2fe] transition-all duration-300 shadow-md">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
         Exportar PDF
@@ -391,9 +395,9 @@
   </div>
 
   <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-    <div class="glass-card rounded-2xl p-5 shadow-2xl glass-card-hover"><p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Total Invertido</p><p id="kpi-total" class="text-2xl font-black text-white leading-none">—</p></div>
-    <div class="glass-card rounded-2xl p-5 shadow-2xl glass-card-hover"><p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Nº Facturas</p><p id="kpi-count" class="text-2xl font-black text-white leading-none">—</p></div>
-    <div id="kpi-top-card" onclick="showRankingModal()" class="glass-card rounded-2xl p-5 shadow-2xl glass-card-hover select-none transition-all duration-300"><p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Top Proveedor</p><p id="kpi-top" class="text-2xl font-black text-white leading-none truncate">—</p></div>
+    <div onclick="showAnalisisFacturasModal()" class="glass-card rounded-2xl p-5 shadow-2xl glass-card-hover select-none cursor-pointer transition-all duration-300 hover:scale-[1.02]"><p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Total Invertido</p><p id="kpi-total" class="text-2xl font-black text-white leading-none">—</p></div>
+    <div onclick="showAnalisisFacturasModal()" class="glass-card rounded-2xl p-5 shadow-2xl glass-card-hover select-none cursor-pointer transition-all duration-300 hover:scale-[1.02]"><p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Nº Facturas</p><p id="kpi-count" class="text-2xl font-black text-white leading-none">—</p></div>
+    <div id="kpi-top-card" onclick="showRankingModal()" class="glass-card rounded-2xl p-5 shadow-2xl glass-card-hover select-none cursor-pointer transition-all duration-300 hover:scale-[1.02]"><p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Top Proveedor</p><p id="kpi-top" class="text-2xl font-black text-white leading-none truncate">—</p></div>
     <div class="glass-card rounded-2xl p-5 shadow-2xl glass-card-hover"><p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Promedio / Factura</p><p id="kpi-avg" class="text-2xl font-black text-white leading-none">—</p></div>
   </div>
   <!-- KPIs por categoría -->
@@ -1229,6 +1233,57 @@
     <div class="mt-5 pt-4 border-t border-blue-950/50 flex justify-between items-center shrink-0">
       <span id="ranking-modal-total-label" class="text-xs text-slate-500 font-bold uppercase tracking-wider">Total Acumulado Laboratorios:</span>
       <span id="ranking-modal-total" class="text-lg font-black text-[#00f2fe] drop-shadow-[0_0_8px_rgba(0,242,254,0.3)]">0,00 €</span>
+    </div>
+  </div>
+</div>
+
+<!-- DYNAMIC ANALYSIS INVOICES DETAIL MODAL -->
+<div id="analisis-facturas-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
+  <div class="rounded-2xl p-8 w-full max-w-2xl fade-in flex flex-col max-h-[85vh] border border-[#00f2fe]/20" style="background: linear-gradient(135deg, #0b1528 0%, #060a12 100%); box-shadow: 0 0 25px rgba(0, 242, 254, 0.12), 0 12px 40px rgba(0, 0, 0, 0.65);">
+    <div class="flex items-center justify-between mb-4 shrink-0">
+      <div class="flex items-center gap-3">
+        <span class="w-3.5 h-3.5 rounded-full bg-[#00f2fe] shadow-[0_0_12px_rgba(0,242,254,0.8)] animate-pulse"></span>
+        <h3 id="analisis-facturas-modal-title" class="text-xl font-black text-slate-100 tracking-tight">Facturas Vencidas en el Periodo</h3>
+      </div>
+      <button onclick="closeAnalisisFacturasModal()" class="text-slate-400 hover:text-white hover:bg-white/5 p-1 rounded-lg transition-colors">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    
+    <!-- Search Bar in Modal -->
+    <div class="relative mb-5 shrink-0">
+      <svg class="w-4 h-4 text-[#00f2fe] absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      <input id="analisis-facturas-modal-search" type="text" placeholder="Buscar por laboratorio o proveedor..." oninput="renderAnalisisFacturasModalList()" autocomplete="off" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-blue-500/20 focus:border-[#00f2fe]/50 focus:ring-0 focus:outline-none text-sm bg-slate-950/60 text-slate-100 placeholder-slate-500 transition-all">
+    </div>
+
+    <!-- Scrollable content -->
+    <div id="analisis-facturas-modal-list" class="overflow-y-auto flex-1 pr-1 space-y-2.5" style="max-height: 52vh;">
+      <!-- JavaScript will inject invoice rows here -->
+    </div>
+
+    <div class="mt-5 pt-4 border-t border-blue-950/50 flex justify-between items-center shrink-0">
+      <span class="text-xs text-slate-500 font-bold uppercase tracking-wider">Total Suma Facturas:</span>
+      <span id="analisis-facturas-modal-total" class="text-lg font-black text-[#00f2fe] drop-shadow-[0_0_8px_rgba(0,242,254,0.3)]">0,00 €</span>
+    </div>
+  </div>
+</div>
+
+<!-- DYNAMIC EXPENSE FORECAST MODAL (PREVISIÓN DE GASTO) -->
+<div id="prevision-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
+  <div class="rounded-2xl p-8 w-full max-w-3xl fade-in flex flex-col max-h-[85vh] border border-[#00f2fe]/20" style="background: linear-gradient(135deg, #0b1528 0%, #060a12 100%); box-shadow: 0 0 25px rgba(0, 242, 254, 0.12), 0 12px 40px rgba(0, 0, 0, 0.65);">
+    <div class="flex items-center justify-between mb-6 shrink-0">
+      <div class="flex items-center gap-3">
+        <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+        <h3 class="text-xl font-black text-slate-100 tracking-tight">Previsión de Gastos (Meses Futuros)</h3>
+      </div>
+      <button onclick="closePrevisionModal()" class="text-slate-400 hover:text-white hover:bg-white/5 p-1.5 rounded-lg transition-colors">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <!-- Scrollable monthly groups list -->
+    <div id="prevision-modal-list" class="overflow-y-auto flex-1 pr-1 space-y-4" style="max-height: 60vh;">
+      <!-- JavaScript will inject monthly accordion groups here -->
     </div>
   </div>
 </div>
@@ -2272,6 +2327,7 @@ async function loadAnalisis(force) {
 }
 
 function renderAnalisisCharts(records) {
+  currentAnalisisFacturas = records;
   const abonos = records.filter(r => r.fields.Tipo === 'Abono');
   const facturas = records.filter(r => r.fields.Tipo !== 'Abono');
   const facturasChart = activeAnalisisTipo ? facturas.filter(r => (r.fields.Tipo || 'Otro') === activeAnalisisTipo) : facturas;
@@ -3712,6 +3768,192 @@ function renderRankingModalListFiltered() {
   
   const sumFiltered = filtered.reduce((s, r) => s + r.amount, 0);
   document.getElementById('ranking-modal-total').textContent = sumFiltered.toLocaleString('es-ES', {minimumFractionDigits: 2}) + ' €';
+}
+
+// ─── Previsión de Gasto (Meses Futuros) ──────────────────────────────────────
+let openPrevisionMonths = {};
+
+function openPrevisionModal() {
+  document.getElementById('prevision-modal').classList.remove('hidden');
+  renderPrevision();
+}
+
+function closePrevisionModal() {
+  document.getElementById('prevision-modal').classList.add('hidden');
+}
+
+// Cerrar al hacer clic fuera del contenido del modal
+document.getElementById('prevision-modal').onclick = e => {
+  if (e.target === document.getElementById('prevision-modal')) closePrevisionModal();
+};
+
+function togglePrevisionMonth(safeKey) {
+  const container = document.getElementById('prevision-content-' + safeKey);
+  const chevron = document.getElementById('chevron-prevision-' + safeKey);
+  if (!container) return;
+  const isHidden = container.classList.contains('hidden');
+  container.classList.toggle('hidden', !isHidden);
+  if (chevron) {
+    chevron.classList.toggle('-rotate-90', !isHidden);
+  }
+  openPrevisionMonths[safeKey] = isHidden;
+}
+
+function renderPrevision() {
+  const listContainer = document.getElementById('prevision-modal-list');
+  if (!listContainer) return;
+
+  const now = new Date();
+  const curYr = now.getFullYear();
+  const curMo = now.getMonth() + 1; // 1-indexed (ej: 6 para Junio)
+
+  // 1. Filtrar Facturas futuras impagadas (basado en FechaVencimiento o Fecha de emisión)
+  const futureInvoices = allFacturas.filter(f => {
+    if (f.fields.Tipo === 'Abono') return false;
+    if (f.fields.Pagada === true) return false;
+    const dateVal = f.fields.FechaVencimiento || f.fields.Fecha;
+    if (!dateVal) return false;
+    const [y, m] = dateVal.split('-');
+    const yr = parseInt(y, 10);
+    const mo = parseInt(m, 10);
+    return (yr > curYr) || (yr === curYr && mo > curMo);
+  });
+
+  // 2. Filtrar Impuestos futuros
+  const futureTaxes = allFiscalidad.filter(t => {
+    if (!t.fecha) return false;
+    const [y, m] = t.fecha.split('-');
+    const yr = parseInt(y, 10);
+    const mo = parseInt(m, 10);
+    return (yr > curYr) || (yr === curYr && mo > curMo);
+  });
+
+  // 3. Filtrar Nóminas futuras
+  const futurePayrolls = allNominas.filter(n => {
+    if (!n.fecha) return false;
+    const [y, m] = n.fecha.split('-');
+    const yr = parseInt(y, 10);
+    const mo = parseInt(m, 10);
+    return (yr > curYr) || (yr === curYr && mo > curMo);
+  });
+
+  // Agrupar
+  const groups = {};
+  const addRecord = (dateVal, type, r) => {
+    if (!dateVal) return;
+    const key = dateVal.slice(0, 7); // YYYY-MM
+    if (!groups[key]) groups[key] = { invoices: [], taxes: [], payrolls: [] };
+    groups[key][type].push(r);
+  };
+
+  futureInvoices.forEach(f => addRecord(f.fields.FechaVencimiento || f.fields.Fecha, 'invoices', f));
+  futureTaxes.forEach(t => addRecord(t.fecha, 'taxes', t));
+  futurePayrolls.forEach(n => addRecord(n.fecha, 'payrolls', n));
+
+  const sortedKeys = Object.keys(groups).sort((a, b) => a.localeCompare(b));
+  const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+  if (!sortedKeys.length) {
+    listContainer.innerHTML = `
+      <div class="py-16 text-center text-slate-400">
+        <svg class="w-12 h-12 text-slate-600 mx-auto mb-3" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        <p class="font-bold text-slate-400 text-sm">Sin previsiones registradas</p>
+        <p class="text-xs text-slate-500 mt-1">No hay facturas impagadas, impuestos ni nóminas programadas para los próximos meses.</p>
+      </div>
+    `;
+    return;
+  }
+
+  listContainer.innerHTML = sortedKeys.map((key, idx) => {
+    const data = groups[key];
+    const [yr, mo] = key.split('-');
+    const mesLabel = MESES[parseInt(mo, 10) - 1] + ' ' + yr;
+    const safeKey = key.replace('-', '_');
+
+    const totalInvoices = data.invoices.reduce((s, f) => s + (f.fields.Importe || 0), 0);
+    const totalTaxes = data.taxes.reduce((s, t) => s + Number(t.importe), 0);
+    const totalPayrolls = data.payrolls.reduce((s, n) => s + Number(n.importe), 0);
+    const totalMonth = totalInvoices + totalTaxes + totalPayrolls;
+
+    const isOpen = openPrevisionMonths[safeKey] !== undefined ? openPrevisionMonths[safeKey] : (idx === 0);
+
+    let itemsHTML = '';
+
+    if (data.invoices.length) {
+      itemsHTML += `<div class="mb-3">
+        <h4 class="text-2xs font-extrabold uppercase text-blue-400 mb-1.5 tracking-wider">Facturas Proveedores</h4>
+        <div class="space-y-1.5">
+          ${data.invoices.map(f => `
+            <div class="flex justify-between items-center bg-white/5 border border-white/5 px-3.5 py-2.5 rounded-xl text-xs">
+              <span class="font-semibold text-slate-300 truncate max-w-[260px]">${esc(f.fields.Laboratorio || 'Otros Proveedores')}</span>
+              <span class="font-bold text-white shrink-0">${(f.fields.Importe || 0).toLocaleString('es-ES', {minimumFractionDigits:2})} €</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>`;
+    }
+
+    if (data.taxes.length) {
+      itemsHTML += `<div class="mb-3">
+        <h4 class="text-2xs font-extrabold uppercase text-emerald-400 mb-1.5 tracking-wider">Impuestos y Fiscalidad</h4>
+        <div class="space-y-1.5">
+          ${data.taxes.map(t => `
+            <div class="flex justify-between items-center bg-white/5 border border-white/5 px-3.5 py-2.5 rounded-xl text-xs">
+              <div>
+                <span class="font-semibold text-slate-300 truncate max-w-[260px]">${esc(t.concepto)}</span>
+                ${t.notas ? `<p class="text-[10px] text-slate-500 truncate max-w-[240px] mt-0.5">${esc(t.notas)}</p>` : ''}
+              </div>
+              <span class="font-bold text-white shrink-0">${Number(t.importe).toLocaleString('es-ES', {minimumFractionDigits:2})} €</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>`;
+    }
+
+    if (data.payrolls.length) {
+      itemsHTML += `<div class="mb-3">
+        <h4 class="text-2xs font-extrabold uppercase text-orange-400 mb-1.5 tracking-wider">Costes Laborales (Nóminas)</h4>
+        <div class="space-y-1.5">
+          ${data.payrolls.map(n => `
+            <div class="flex justify-between items-center bg-white/5 border border-white/5 px-3.5 py-2.5 rounded-xl text-xs">
+              <div>
+                <span class="font-semibold text-slate-300 truncate max-w-[260px]">${esc(n.trabajador_nombre || 'Trabajador')}</span>
+                ${n.concepto ? `<p class="text-[10px] text-slate-500 truncate max-w-[240px] mt-0.5">${esc(n.concepto)}</p>` : ''}
+              </div>
+              <span class="font-bold text-white shrink-0">${Number(n.importe).toLocaleString('es-ES', {minimumFractionDigits:2})} €</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>`;
+    }
+
+    return `
+      <!-- Monthly Card -->
+      <div class="bg-slate-900/40 border border-white/5 rounded-2xl overflow-hidden shadow-xl transition-all duration-200">
+        <!-- Header Acordeón -->
+        <div class="px-5 py-4 cursor-pointer hover:bg-white/5 flex items-center justify-between select-none transition-colors" onclick="togglePrevisionMonth('${safeKey}')">
+          <div class="flex items-center gap-3">
+            <svg id="chevron-prevision-${safeKey}" class="w-4 h-4 text-slate-400 transition-transform${isOpen ? '' : ' -rotate-90'}" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+            <span class="font-extrabold text-sm text-slate-100 capitalize">${mesLabel}</span>
+          </div>
+          <div class="flex items-center gap-4">
+            <!-- Desglose micro -->
+            <div class="hidden sm:flex items-center gap-2.5 text-[10px] font-bold text-slate-500">
+              ${totalInvoices > 0 ? `<span class="bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded text-blue-400">Fac: ${totalInvoices.toLocaleString('es-ES',{maximumFractionDigits:0})}€</span>` : ''}
+              ${totalTaxes > 0 ? `<span class="bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded text-emerald-400">Imp: ${totalTaxes.toLocaleString('es-ES',{maximumFractionDigits:0})}€</span>` : ''}
+              ${totalPayrolls > 0 ? `<span class="bg-orange-500/10 border border-orange-500/20 px-2 py-0.5 rounded text-orange-400">Nom: ${totalPayrolls.toLocaleString('es-ES',{maximumFractionDigits:0})}€</span>` : ''}
+            </div>
+            <span class="font-black text-sm text-[#00f2fe]">${totalMonth.toLocaleString('es-ES', {minimumFractionDigits:2})} €</span>
+          </div>
+        </div>
+
+        <!-- Cuerpo del Acordeón -->
+        <div id="prevision-content-${safeKey}" class="px-5 pb-5 pt-1 border-t border-white/5 bg-slate-950/20 ${isOpen ? '' : 'hidden'}">
+          ${itemsHTML}
+        </div>
+      </div>
+    `;
+  }).join('');
 }
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
