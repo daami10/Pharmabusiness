@@ -41,7 +41,7 @@ export default async function handler(req, res) {
           contents: [{
             parts: [
               { inline_data: { mime_type: mimeType, data: base64Data } },
-              { text: 'Esta es una factura farmacéutica. Extrae los siguientes datos y responde SOLO con un JSON válido (sin markdown, sin texto extra): {"laboratorio":"...","importe":0.00,"numFactura":"...","fecha":"YYYY-MM-DD"}. Si no encuentras algún campo, déjalo vacío o en 0.' }
+              { text: 'Esta es una factura farmacéutica. Extrae los siguientes datos y responde SOLO con un JSON válido (sin markdown, sin texto extra): {"laboratorio":"...","importe":0.00,"numFactura":"...","fecha":"YYYY-MM-DD","vencimiento":"YYYY-MM-DD"}. Si no encuentras algún campo, déjalo vacío o en 0.' }
             ]
           }]
         })

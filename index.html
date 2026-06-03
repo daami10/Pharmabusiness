@@ -2691,7 +2691,7 @@ async function scanInvoice() {
             contents: [{
               parts: [
                 { inline_data: { mime_type: currentPhotoMime, data: currentPhotoBase64 } },
-                { text: 'Esta es una factura farmacéutica. Extrae los siguientes datos y responde SOLO con un JSON válido (sin markdown, sin texto extra): {"laboratorio":"...","importe":0.00,"numFactura":"...","fecha":"YYYY-MM-DD"}. Si no encuentras algún campo, déjalo vacío o en 0.' }
+                { text: 'Esta es una factura farmacéutica. Extrae los siguientes datos y responde SOLO con un JSON válido (sin markdown, sin texto extra): {"laboratorio":"...","importe":0.00,"numFactura":"...","fecha":"YYYY-MM-DD","vencimiento":"YYYY-MM-DD"}. Si no encuentras algún campo, déjalo vacío o en 0.' }
               ]
             }]
           })
@@ -2722,6 +2722,7 @@ async function scanInvoice() {
     if (extracted.numFactura) document.getElementById('f-num').value = extracted.numFactura;
     if (extracted.fecha && /^\d{4}-\d{2}-\d{2}$/.test(extracted.fecha)) document.getElementById('f-fecha').value = extracted.fecha;
     if (extracted.importe && extracted.importe > 0) document.getElementById('f-importe').value = extracted.importe;
+    if (extracted.vencimiento && /^\d{4}-\d{2}-\d{2}$/.test(extracted.vencimiento)) document.getElementById('f-vencimiento').value = extracted.vencimiento;
     const sr = document.getElementById('scan-result');
     sr.textContent = '✓ Datos extraídos automáticamente. Revisa y confirma antes de guardar.';
     sr.classList.remove('hidden');
