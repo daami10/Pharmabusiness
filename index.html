@@ -594,12 +594,13 @@
 <div id="fiscal-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
   <div class="glass-card rounded-2xl shadow-2xl w-full max-w-md border border-white/10">
     <div class="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-slate-950/20">
-      <h3 class="text-base font-bold text-slate-100">Nuevo Gasto Fiscal</h3>
+      <h3 class="text-base font-bold text-slate-100" id="fiscal-modal-title">Nuevo Gasto Fiscal</h3>
       <button onclick="closeFiscalModal()" class="p-2 rounded-lg hover:bg-white/5 text-slate-400 hover:text-white transition-colors">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
       </button>
     </div>
     <div class="px-6 py-5 space-y-4">
+      <input type="hidden" id="fiscal-record-id">
       <div>
         <label class="block text-sm font-medium text-slate-300 mb-1.5">Concepto</label>
         <select id="fiscal-concepto" class="w-full px-4 py-2.5 rounded-xl border border-white/5 bg-slate-950/40 text-slate-100 placeholder-slate-500 focus:border-[#00f2fe]/40 focus:ring-0 focus:outline-none text-sm transition-all cursor-pointer">
@@ -648,7 +649,7 @@
     </div>
     <div class="px-6 pb-5 flex gap-3">
       <button onclick="closeFiscalModal()" class="flex-1 px-4 py-2.5 rounded-xl border border-white/5 text-sm font-semibold text-slate-400 hover:bg-white/5 hover:text-white transition-colors bg-transparent">Cancelar</button>
-      <button onclick="saveFiscal()" class="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 text-white text-sm font-semibold transition-all shadow-md hover:scale-[1.01]">Guardar</button>
+      <button id="fiscal-submit-btn" onclick="saveFiscal()" class="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 text-white text-sm font-semibold transition-all shadow-md hover:scale-[1.01]">Guardar</button>
     </div>
   </div>
 </div>
@@ -740,12 +741,13 @@
 <div id="seguro-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
   <div class="glass-card rounded-2xl shadow-2xl w-full max-w-md border border-white/10">
     <div class="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-slate-950/20">
-      <h3 class="text-base font-bold text-slate-100">Nuevo Seguro Social / Impuesto</h3>
+      <h3 class="text-base font-bold text-slate-100" id="seguro-modal-title">Nuevo Seguro Social / Impuesto</h3>
       <button onclick="closeSeguroModal()" class="p-2 rounded-lg hover:bg-white/5 text-slate-400 hover:text-white transition-colors">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
       </button>
     </div>
     <div class="px-6 py-5 space-y-4">
+      <input type="hidden" id="seguro-record-id">
       <div>
         <label class="block text-sm font-medium text-slate-300 mb-1.5">Mes y Año</label>
         <div class="flex gap-3">
@@ -782,7 +784,7 @@
     </div>
     <div class="px-6 pb-5 flex gap-3">
       <button onclick="closeSeguroModal()" class="flex-1 px-4 py-2.5 rounded-xl border border-white/5 text-sm font-semibold text-slate-400 hover:bg-white/5 hover:text-white transition-colors bg-transparent">Cancelar</button>
-      <button onclick="saveSeguro()" class="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 text-white text-sm font-semibold transition-all shadow-md hover:scale-[1.01]">Guardar</button>
+      <button id="seguro-submit-btn" onclick="saveSeguro()" class="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 text-white text-sm font-semibold transition-all shadow-md hover:scale-[1.01]">Guardar</button>
     </div>
   </div>
 </div>
@@ -810,12 +812,13 @@
 <div id="nomina-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
   <div class="glass-card rounded-2xl shadow-2xl w-full max-w-md border border-white/10">
     <div class="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-slate-950/20">
-      <h3 class="text-base font-bold text-slate-100">Nueva Nómina</h3>
+      <h3 class="text-base font-bold text-slate-100" id="nomina-modal-title">Nueva Nómina</h3>
       <button onclick="closeNominaModal()" class="p-2 rounded-lg hover:bg-white/5 text-slate-400 hover:text-white transition-colors">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
       </button>
     </div>
     <div class="px-6 py-5 space-y-4">
+      <input type="hidden" id="nomina-record-id">
       <div>
         <label class="block text-sm font-medium text-slate-300 mb-1.5">Trabajador</label>
         <select id="nomina-trabajador" class="w-full px-4 py-2.5 rounded-xl border border-white/5 bg-slate-900 text-slate-100 focus:border-[#00f2fe]/40 focus:ring-0 focus:outline-none text-sm transition-all cursor-pointer">
@@ -858,7 +861,7 @@
     </div>
     <div class="px-6 pb-5 flex gap-3">
       <button onclick="closeNominaModal()" class="flex-1 px-4 py-2.5 rounded-xl border border-white/5 text-sm font-semibold text-slate-400 hover:bg-white/5 hover:text-white transition-colors bg-transparent">Cancelar</button>
-      <button onclick="saveNomina()" class="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 text-white text-sm font-semibold transition-all shadow-md hover:scale-[1.01]">Guardar</button>
+      <button id="nomina-submit-btn" onclick="saveNomina()" class="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 text-white text-sm font-semibold transition-all shadow-md hover:scale-[1.01]">Guardar</button>
     </div>
   </div>
 </div>
@@ -3020,7 +3023,10 @@ function renderSeguros() {
         <td class="px-6 py-4 text-sm font-extrabold text-right text-white">${imp}</td>
         <td class="px-6 py-4 text-sm text-slate-300">${esc(s.notes || s.notas || '')}</td>
         <td class="px-6 py-4 text-right">
-          <button onclick="deleteSeguro('${s.id}')" class="text-slate-400 hover:text-red-400 p-1.5 rounded-xl hover:bg-white/5 transition-all"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+          <div class="flex items-center justify-end gap-1.5">
+            <button onclick="openEditSeguroModal('${s.id}')" class="text-slate-400 hover:text-white p-1.5 rounded-xl hover:bg-white/5 transition-all"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
+            <button onclick="deleteSeguro('${s.id}')" class="text-slate-400 hover:text-red-400 p-1.5 rounded-xl hover:bg-white/5 transition-all"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+          </div>
         </td>
       </tr>`;
     }).join('');
@@ -3089,7 +3095,10 @@ function renderNominas() {
         <td class="px-6 py-4 text-sm font-extrabold text-right text-white">${imp}</td>
         <td class="px-6 py-4 text-sm text-slate-300">${esc(n.concepto || n.concepto_nombre || '')}</td>
         <td class="px-6 py-4 text-right">
-          <button onclick="deleteNomina('${n.id}')" class="text-slate-400 hover:text-red-400 p-1.5 rounded-xl hover:bg-white/5 transition-all"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+          <div class="flex items-center justify-end gap-1.5">
+            <button onclick="openEditNominaModal('${n.id}')" class="text-slate-400 hover:text-white p-1.5 rounded-xl hover:bg-white/5 transition-all"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
+            <button onclick="deleteNomina('${n.id}')" class="text-slate-400 hover:text-red-400 p-1.5 rounded-xl hover:bg-white/5 transition-all"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+          </div>
         </td>
       </tr>`;
     }).join('');
@@ -3103,15 +3112,34 @@ function renderNominas() {
 
 function openSeguroModal() {
   const now = new Date();
+  document.getElementById('seguro-record-id').value = '';
+  document.getElementById('seguro-modal-title').textContent = 'Nuevo Seguro Social / Impuesto';
+  document.getElementById('seguro-submit-btn').textContent = 'Guardar';
   document.getElementById('seguro-mes').value = String(now.getMonth()+1).padStart(2,'0');
   document.getElementById('seguro-anio').value = String(now.getFullYear());
   document.getElementById('seguro-importe').value = '';
   document.getElementById('seguro-notas').value = '';
   document.getElementById('seguro-modal').classList.remove('hidden');
 }
+function openEditSeguroModal(id) {
+  const s = allSeguros.find(r => r.id === id);
+  if (!s) return;
+  document.getElementById('seguro-record-id').value = id;
+  document.getElementById('seguro-modal-title').textContent = 'Editar Seguro Social';
+  document.getElementById('seguro-submit-btn').textContent = 'Guardar cambios';
+  if (s.fecha) {
+    const [y, m] = s.fecha.split('-');
+    document.getElementById('seguro-mes').value = m;
+    document.getElementById('seguro-anio').value = y;
+  }
+  document.getElementById('seguro-importe').value = s.importe || '';
+  document.getElementById('seguro-notas').value = s.notes || s.notas || '';
+  document.getElementById('seguro-modal').classList.remove('hidden');
+}
 function closeSeguroModal() { document.getElementById('seguro-modal').classList.add('hidden'); }
 
 async function saveSeguro() {
+  const editingId = document.getElementById('seguro-record-id').value;
   const mes = document.getElementById('seguro-mes').value;
   const anio = document.getElementById('seguro-anio').value;
   const importe = parseFloat(document.getElementById('seguro-importe').value) || 0;
@@ -3119,9 +3147,19 @@ async function saveSeguro() {
   if (!importe) { alert('Introduce el importe.'); return; }
   const fecha = `${anio}-${mes}-01`;
   const { data: { user } } = await sb.auth.getUser();
-  const { data, error } = await sb.from('seguros_sociales').insert([{ user_id: user.id, fecha, importe, notas }]).select().single();
-  if (error) { alert('Error: ' + error.message); return; }
-  allSeguros.unshift(data);
+  
+  if (editingId) {
+    const { data, error } = await sb.from('seguros_sociales').update({ fecha, importe, notas }).eq('id', editingId).select().single();
+    if (error) { alert('Error: ' + error.message); return; }
+    const idx = allSeguros.findIndex(r => r.id === editingId);
+    if (idx !== -1) allSeguros[idx] = data;
+  } else {
+    const { data, error } = await sb.from('seguros_sociales').insert([{ user_id: user.id, fecha, importe, notas }]).select().single();
+    if (error) { alert('Error: ' + error.message); return; }
+    allSeguros.unshift(data);
+  }
+  
+  allSeguros.sort((a,b) => (b.fecha || '').localeCompare(a.fecha || ''));
   renderSeguros();
   closeSeguroModal();
 }
@@ -3152,6 +3190,9 @@ async function saveTrabajador() {
 
 function openNominaModal() {
   const now = new Date();
+  document.getElementById('nomina-record-id').value = '';
+  document.getElementById('nomina-modal-title').textContent = 'Nueva Nómina';
+  document.getElementById('nomina-submit-btn').textContent = 'Guardar';
   document.getElementById('nomina-mes').value = String(now.getMonth()+1).padStart(2,'0');
   document.getElementById('nomina-anio').value = String(now.getFullYear());
   document.getElementById('nomina-importe').value = '';
@@ -3161,9 +3202,29 @@ function openNominaModal() {
     allTrabajadores.map(t => `<option value="${t.id}" data-nombre="${esc(t.nombre)}">${esc(t.nombre)}</option>`).join('');
   document.getElementById('nomina-modal').classList.remove('hidden');
 }
+function openEditNominaModal(id) {
+  const n = allNominas.find(r => r.id === id);
+  if (!n) return;
+  document.getElementById('nomina-record-id').value = id;
+  document.getElementById('nomina-modal-title').textContent = 'Editar Nómina';
+  document.getElementById('nomina-submit-btn').textContent = 'Guardar cambios';
+  const sel = document.getElementById('nomina-trabajador');
+  sel.innerHTML = '<option value="">Seleccionar trabajador...</option>' +
+    allTrabajadores.map(t => `<option value="${t.id}" data-nombre="${esc(t.nombre)}">${esc(t.nombre)}</option>`).join('');
+  sel.value = n.trabajador_id || '';
+  if (n.fecha) {
+    const [y, m] = n.fecha.split('-');
+    document.getElementById('nomina-mes').value = m;
+    document.getElementById('nomina-anio').value = y;
+  }
+  document.getElementById('nomina-importe').value = n.importe || '';
+  document.getElementById('nomina-concepto').value = n.concepto || n.concepto_nombre || '';
+  document.getElementById('nomina-modal').classList.remove('hidden');
+}
 function closeNominaModal() { document.getElementById('nomina-modal').classList.add('hidden'); }
 
 async function saveNomina() {
+  const editingId = document.getElementById('nomina-record-id').value;
   const sel = document.getElementById('nomina-trabajador');
   const trabajador_id = sel.value;
   const trabajador_nombre = sel.options[sel.selectedIndex]?.dataset?.nombre || '';
@@ -3174,9 +3235,19 @@ async function saveNomina() {
   if (!trabajador_id || !importe) { alert('Selecciona trabajador e importe.'); return; }
   const fecha = `${anio}-${mes}-01`;
   const { data: { user } } = await sb.auth.getUser();
-  const { data, error } = await sb.from('nominas').insert([{ user_id: user.id, trabajador_id, trabajador_nombre, fecha, importe, concepto }]).select().single();
-  if (error) { alert('Error: ' + error.message); return; }
-  allNominas.unshift(data);
+  
+  if (editingId) {
+    const { data, error } = await sb.from('nominas').update({ trabajador_id, trabajador_nombre, fecha, importe, concepto }).eq('id', editingId).select().single();
+    if (error) { alert('Error: ' + error.message); return; }
+    const idx = allNominas.findIndex(r => r.id === editingId);
+    if (idx !== -1) allNominas[idx] = data;
+  } else {
+    const { data, error } = await sb.from('nominas').insert([{ user_id: user.id, trabajador_id, trabajador_nombre, fecha, importe, concepto }]).select().single();
+    if (error) { alert('Error: ' + error.message); return; }
+    allNominas.unshift(data);
+  }
+  
+  allNominas.sort((a,b) => (b.fecha || '').localeCompare(a.fecha || ''));
   renderNominas();
   closeNominaModal();
 }
@@ -3350,7 +3421,10 @@ function renderFiscalidad() {
         <td class="px-6 py-4 text-sm font-extrabold text-right text-white">${imp}</td>
         <td class="px-6 py-4 text-sm text-slate-400">${esc(f.notas || '')}</td>
         <td class="px-6 py-4 text-right">
-          <button onclick="deleteFiscal('${f.id}')" class="text-slate-400 hover:text-red-400 p-1.5 rounded-xl hover:bg-white/5 transition-all"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+          <div class="flex items-center justify-end gap-1.5">
+            <button onclick="openEditFiscalModal('${f.id}')" class="text-slate-400 hover:text-white p-1.5 rounded-xl hover:bg-white/5 transition-all"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
+            <button onclick="deleteFiscal('${f.id}')" class="text-slate-400 hover:text-red-400 p-1.5 rounded-xl hover:bg-white/5 transition-all"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+          </div>
         </td>
       </tr>`;
     }).join('');
@@ -3361,18 +3435,37 @@ function renderFiscalidad() {
 
 function openFiscalModal() {
   const now = new Date();
+  document.getElementById('fiscal-record-id').value = '';
+  document.getElementById('fiscal-modal-title').textContent = 'Nuevo Gasto Fiscal';
+  document.getElementById('fiscal-submit-btn').textContent = 'Guardar';
   document.getElementById('fiscal-mes').value = String(now.getMonth()+1).padStart(2,'0');
   document.getElementById('fiscal-anio').value = String(now.getFullYear());
   document.getElementById('fiscal-importe').value = '';
   document.getElementById('fiscal-notas').value = '';
   document.getElementById('fiscal-modal').classList.remove('hidden');
 }
-
+function openEditFiscalModal(id) {
+  const f = allFiscalidad.find(r => r.id === id);
+  if (!f) return;
+  document.getElementById('fiscal-record-id').value = id;
+  document.getElementById('fiscal-modal-title').textContent = 'Editar Gasto Fiscal';
+  document.getElementById('fiscal-submit-btn').textContent = 'Guardar cambios';
+  document.getElementById('fiscal-concepto').value = f.concepto || 'Otros';
+  if (f.fecha) {
+    const [y, m] = f.fecha.split('-');
+    document.getElementById('fiscal-mes').value = m;
+    document.getElementById('fiscal-anio').value = y;
+  }
+  document.getElementById('fiscal-importe').value = f.importe || '';
+  document.getElementById('fiscal-notas').value = f.notas || '';
+  document.getElementById('fiscal-modal').classList.remove('hidden');
+}
 function closeFiscalModal() {
   document.getElementById('fiscal-modal').classList.add('hidden');
 }
 
 async function saveFiscal() {
+  const editingId = document.getElementById('fiscal-record-id').value;
   const concepto = document.getElementById('fiscal-concepto').value;
   const mes = document.getElementById('fiscal-mes').value;
   const anio = document.getElementById('fiscal-anio').value;
@@ -3383,11 +3476,19 @@ async function saveFiscal() {
 
   const fecha = `${anio}-${mes}-01`;
   const { data: { user } } = await sb.auth.getUser();
-  const { data, error } = await sb.from('fiscalidad').insert([{ user_id: user.id, concepto, fecha, importe, notas }]).select().single();
   
-  if (error) { alert('Error: ' + error.message); return; }
+  if (editingId) {
+    const { data, error } = await sb.from('fiscalidad').update({ concepto, fecha, importe, notas }).eq('id', editingId).select().single();
+    if (error) { alert('Error: ' + error.message); return; }
+    const idx = allFiscalidad.findIndex(r => r.id === editingId);
+    if (idx !== -1) allFiscalidad[idx] = data;
+  } else {
+    const { data, error } = await sb.from('fiscalidad').insert([{ user_id: user.id, concepto, fecha, importe, notas }]).select().single();
+    if (error) { alert('Error: ' + error.message); return; }
+    allFiscalidad.unshift(data);
+  }
 
-  allFiscalidad.unshift(data);
+  allFiscalidad.sort((a,b) => (b.fecha || '').localeCompare(a.fecha || ''));
   renderFiscalidad();
   
   if (activeTab === 'analisis') loadAnalisis(true);
