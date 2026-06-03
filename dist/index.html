@@ -669,7 +669,7 @@
     <!-- SEGUROS SOCIALES -->
     <div class="glass-card rounded-2xl border border-white/5 overflow-hidden shadow-2xl">
       <div class="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-slate-950/20">
-        <h2 class="text-base font-bold text-slate-200">Seguros Sociales / Impuestos</h2>
+        <h2 class="text-base font-bold text-slate-200">Seguros Sociales</h2>
         <button onclick="openSeguroModal()" class="flex items-center gap-1.5 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 text-white px-4 py-2 rounded-xl font-bold text-xs transition-all duration-300 shadow-md hover:scale-[1.02]">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
           Añadir
@@ -741,7 +741,7 @@
 <div id="seguro-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
   <div class="glass-card rounded-2xl shadow-2xl w-full max-w-md border border-white/10">
     <div class="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-slate-950/20">
-      <h3 class="text-base font-bold text-slate-100" id="seguro-modal-title">Nuevo Seguro Social / Impuesto</h3>
+      <h3 class="text-base font-bold text-slate-100" id="seguro-modal-title">Nuevo Seguro Social</h3>
       <button onclick="closeSeguroModal()" class="p-2 rounded-lg hover:bg-white/5 text-slate-400 hover:text-white transition-colors">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
       </button>
@@ -3113,7 +3113,7 @@ function renderNominas() {
 function openSeguroModal() {
   const now = new Date();
   document.getElementById('seguro-record-id').value = '';
-  document.getElementById('seguro-modal-title').textContent = 'Nuevo Seguro Social / Impuesto';
+  document.getElementById('seguro-modal-title').textContent = 'Nuevo Seguro Social';
   document.getElementById('seguro-submit-btn').textContent = 'Guardar';
   document.getElementById('seguro-mes').value = String(now.getMonth()+1).padStart(2,'0');
   document.getElementById('seguro-anio').value = String(now.getFullYear());
