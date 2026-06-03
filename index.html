@@ -3837,18 +3837,28 @@ function renderPrevision() {
     return (yr > curYr) || (yr === curYr && mo > curMo);
   });
 
+  // 4. Filtrar Seguros Sociales futuros
+  const futureSeguros = allSeguros.filter(s => {
+    if (!s.fecha) return false;
+    const [y, m] = s.fecha.split('-');
+    const yr = parseInt(y, 10);
+    const mo = parseInt(m, 10);
+    return (yr > curYr) || (yr === curYr && mo > curMo);
+  });
+
   // Agrupar
   const groups = {};
   const addRecord = (dateVal, type, r) => {
     if (!dateVal) return;
     const key = dateVal.slice(0, 7); // YYYY-MM
-    if (!groups[key]) groups[key] = { invoices: [], taxes: [], payrolls: [] };
+    if (!groups[key]) groups[key] = { invoices: [], taxes: [], payrolls: [], seguros: [] };
     groups[key][type].push(r);
   };
 
   futureInvoices.forEach(f => addRecord(f.fields.FechaVencimiento || f.fields.Fecha, 'invoices', f));
   futureTaxes.forEach(t => addRecord(t.fecha, 'taxes', t));
   futurePayrolls.forEach(n => addRecord(n.fecha, 'payrolls', n));
+  futureSeguros.forEach(s => addRecord(s.fecha, 'seguros', s));
 
   const sortedKeys = Object.keys(groups).sort((a, b) => a.localeCompare(b));
   const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
@@ -3858,7 +3868,7 @@ function renderPrevision() {
       <div class="py-16 text-center text-slate-400">
         <svg class="w-12 h-12 text-slate-600 mx-auto mb-3" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
         <p class="font-bold text-slate-400 text-sm">Sin previsiones registradas</p>
-        <p class="text-xs text-slate-500 mt-1">No hay facturas impagadas, impuestos ni nóminas programadas para los próximos meses.</p>
+        <p class="text-xs text-slate-500 mt-1">No hay facturas impagadas, impuestos, nóminas ni seguros sociales programados para los próximos meses.</p>
       </div>
     `;
     return;
@@ -3873,7 +3883,8 @@ function renderPrevision() {
     const totalInvoices = data.invoices.reduce((s, f) => s + (f.fields.Importe || 0), 0);
     const totalTaxes = data.taxes.reduce((s, t) => s + Number(t.importe), 0);
     const totalPayrolls = data.payrolls.reduce((s, n) => s + Number(n.importe), 0);
-    const totalMonth = totalInvoices + totalTaxes + totalPayrolls;
+    const totalSeguros = data.seguros ? data.seguros.reduce((s, sg) => s + Number(sg.importe), 0) : 0;
+    const totalMonth = totalInvoices + totalTaxes + totalPayrolls + totalSeguros;
 
     const isOpen = openPrevisionMonths[safeKey] !== undefined ? openPrevisionMonths[safeKey] : (idx === 0);
 
@@ -3927,6 +3938,23 @@ function renderPrevision() {
       </div>`;
     }
 
+    if (data.seguros && data.seguros.length) {
+      itemsHTML += `<div class="mb-3">
+        <h4 class="text-2xs font-extrabold uppercase text-indigo-400 mb-1.5 tracking-wider">Seguros Sociales Personal</h4>
+        <div class="space-y-1.5">
+          ${data.seguros.map(s => `
+            <div class="flex justify-between items-center bg-white/5 border border-white/5 px-3.5 py-2.5 rounded-xl text-xs">
+              <div>
+                <span class="font-semibold text-slate-300">Seguridad Social Patronal</span>
+                ${(s.notes || s.notas) ? `<p class="text-[10px] text-slate-500 truncate max-w-[240px] mt-0.5">${esc(s.notes || s.notas)}</p>` : ''}
+              </div>
+              <span class="font-bold text-white shrink-0">${Number(s.importe).toLocaleString('es-ES', {minimumFractionDigits:2})} €</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>`;
+    }
+
     return `
       <!-- Monthly Card -->
       <div class="bg-slate-900/40 border border-white/5 rounded-2xl overflow-hidden shadow-xl transition-all duration-200">
@@ -3942,6 +3970,7 @@ function renderPrevision() {
               ${totalInvoices > 0 ? `<span class="bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded text-blue-400">Fac: ${totalInvoices.toLocaleString('es-ES',{maximumFractionDigits:0})}€</span>` : ''}
               ${totalTaxes > 0 ? `<span class="bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded text-emerald-400">Imp: ${totalTaxes.toLocaleString('es-ES',{maximumFractionDigits:0})}€</span>` : ''}
               ${totalPayrolls > 0 ? `<span class="bg-orange-500/10 border border-orange-500/20 px-2 py-0.5 rounded text-orange-400">Nom: ${totalPayrolls.toLocaleString('es-ES',{maximumFractionDigits:0})}€</span>` : ''}
+              ${totalSeguros > 0 ? `<span class="bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded text-indigo-400">Seg.Soc: ${totalSeguros.toLocaleString('es-ES',{maximumFractionDigits:0})}€</span>` : ''}
             </div>
             <span class="font-black text-sm text-[#00f2fe]">${totalMonth.toLocaleString('es-ES', {minimumFractionDigits:2})} €</span>
           </div>
