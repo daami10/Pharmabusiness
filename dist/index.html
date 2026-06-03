@@ -146,6 +146,10 @@
         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
         Configuración
       </button>
+      <button onclick="openPrivacyModal()" class="w-full flex items-center gap-3.5 px-4 py-3 text-sm font-semibold rounded-xl text-slate-400 border border-transparent hover:text-white hover:bg-white/5 transition-all duration-200">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        Política de Privacidad
+      </button>
       <button onclick="signOut()" class="w-full flex items-center gap-3.5 px-4 py-3 text-sm font-semibold rounded-xl text-slate-500 hover:text-red-400 border border-transparent hover:bg-red-500/10 transition-all duration-200">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
         Salir
@@ -1199,6 +1203,79 @@
   </div>
 </div>
 
+<!-- PRIVACY POLICY MODAL -->
+<div id="privacy-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center p-4" style="z-index:9999">
+  <div class="glass-card rounded-2xl p-8 shadow-2xl w-full max-w-2xl border border-white/10 fade-in max-h-[85vh] flex flex-col">
+    <div class="flex items-center justify-between mb-4 shrink-0">
+      <div class="flex items-center gap-2.5">
+        <svg class="w-5 h-5 text-[#00f2fe]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+        </svg>
+        <h3 class="text-xl font-bold text-slate-100">Política de Privacidad</h3>
+      </div>
+      <button onclick="closePrivacyModal()" class="text-slate-400 hover:text-white hover:bg-white/5 p-1 rounded-lg transition-colors">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+    
+    <div class="overflow-y-auto pr-2 space-y-4 text-sm text-slate-300 leading-relaxed custom-scrollbar">
+      <p class="text-xs text-slate-400"><strong>Última actualización:</strong> 3 de junio de 2026</p>
+      
+      <p>La presente Política de Privacidad describe cómo <strong>GFarma</strong> (en adelante, "la Aplicación" o "el Servicio"), gestionada por el Propietario/Desarrollador (en adelante, "el Proveedor"), recopila, utiliza y protege la información y los datos de carácter personal y financiero de los usuarios (en adelante, "el Cliente" o "los Usuarios").</p>
+      <p>Al utilizar GFarma, usted acepta las prácticas descritas en esta política.</p>
+      
+      <hr class="border-white/5 my-4">
+      
+      <h4 class="font-bold text-slate-100 text-base">1. Información que Recopilamos</h4>
+      <p>Para el correcto funcionamiento de GFarma, la aplicación procesa y almacena los siguientes datos que el propio usuario introduce voluntariamente:</p>
+      <ul class="list-disc pl-5 space-y-1.5 text-slate-300">
+        <li><strong>Datos de Registro y Cuenta:</strong> Correo electrónico y contraseña (gestionados y encriptados de forma segura a través del sistema de autenticación de Supabase).</li>
+        <li><strong>Datos Financieros e Inversiones:</strong> Información de facturas de proveedores (laboratorios, importes, números de factura, fechas de emisión y vencimiento, estado de pago).</li>
+        <li><strong>Datos Laborales y Fiscales:</strong> Nóminas del personal de la farmacia, importes de seguros sociales, impuestos municipales y estatales declarados en el módulo de Fiscalidad.</li>
+        <li><strong>Documentación Adjunta (Imágenes):</strong> Fotografías o PDFs de facturas subidas por el usuario para su extracción de datos por Inteligencia Artificial (a través de la API de Gemini).</li>
+      </ul>
+      
+      <h4 class="font-bold text-slate-100 text-base mt-4">2. Finalidad del Tratamiento de los Datos</h4>
+      <p>Los datos proporcionados se utilizan exclusivamente para:</p>
+      <ol class="list-decimal pl-5 space-y-1.5 text-slate-300">
+        <li>Permitir al Cliente llevar un control de compras, vencimientos y previsiones de gasto.</li>
+        <li>Generar reportes financieros en formatos PDF o CSV descargables por el propio usuario.</li>
+        <li>Facilitar la automatización de la lectura de facturas físicas mediante herramientas de reconocimiento óptico por IA (Gemini).</li>
+        <li>Proveer soporte técnico y mantenimiento de la aplicación.</li>
+      </ol>
+      
+      <h4 class="font-bold text-slate-100 text-base mt-4">3. Seguridad de los Datos y Almacenamiento</h4>
+      <ul class="list-disc pl-5 space-y-1.5 text-slate-300">
+        <li><strong>Infraestructura:</strong> Los datos se almacenan en los servidores de <strong>Supabase</strong>, que cuenta con medidas de seguridad físicas y lógicas de nivel empresarial.</li>
+        <li><strong>Aislamiento de Datos (RLS):</strong> La base de datos tiene activada la tecnología <strong>Row Level Security (RLS)</strong>. Esto significa que los datos están blindados a nivel de base de datos para que ningún usuario de la aplicación pueda consultar, modificar o eliminar datos de otros usuarios bajo ninguna circunstancia.</li>
+        <li><strong>Privacidad del Administrador:</strong> Aunque el Proveedor actúa como administrador de la infraestructura de la base de datos (con capacidad técnica teórica de mantenimiento en Supabase), se compromete formalmente por contrato de confidencialidad a <strong>no acceder, revisar, compartir ni modificar</strong> los datos comerciales ni personales del Cliente, salvo autorización expresa para resolución de incidencias técnicas.</li>
+      </ul>
+      
+      <h4 class="font-bold text-slate-100 text-base mt-4">4. Transferencias a Terceros</h4>
+      <ul class="list-disc pl-5 space-y-1.5 text-slate-300">
+        <li><strong>Herramientas de IA (Gemini):</strong> Cuando el usuario utiliza la función de escaneo de facturas, la imagen se envía temporalmente de forma encriptada a la API de <strong>Google Gemini</strong> para la extracción de texto. Estos datos no son almacenados por el proveedor de IA para entrenar modelos públicos y se procesan de forma transitoria.</li>
+        <li><strong>No comercialización:</strong> GFarma <strong>nunca</strong> venderá, alquilará, compartirá ni comerciará con los datos del Cliente con terceras empresas ni agencias de publicidad.</li>
+      </ul>
+      
+      <h4 class="font-bold text-slate-100 text-base mt-4">5. Derechos del Usuario (Derechos ARCO)</h4>
+      <p>De acuerdo con el Reglamento General de Protección de Datos (RGPD), el Cliente tiene derecho a:</p>
+      <ul class="list-disc pl-5 space-y-1.5 text-slate-300">
+        <li><strong>Acceso:</strong> Consultar qué datos tenemos sobre él.</li>
+        <li><strong>Rectificación:</strong> Corregir cualquier dato erróneo.</li>
+        <li><strong>Supresión (Derecho al olvido):</strong> Solicitar la eliminación total de su cuenta y todos sus datos de la base de datos.</li>
+        <li><strong>Portabilidad:</strong> Exportar sus datos en formato estructurado (CSV/PDF) en cualquier momento.</li>
+      </ul>
+      <p>Para ejercer cualquiera de estos derechos, el usuario puede ponerse en contacto con el Proveedor a través del canal de soporte oficial habilitado.</p>
+    </div>
+    
+    <div class="mt-6 pt-4 border-t border-white/5 flex justify-end shrink-0">
+      <button onclick="closePrivacyModal()" class="px-5 py-2.5 bg-white/10 hover:bg-white/15 text-white font-semibold rounded-xl text-sm transition-all">Cerrar</button>
+    </div>
+  </div>
+</div>
+
 <!-- NO-CONFIG BANNER -->
 <div id="no-config-banner" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-5 py-3 rounded-xl shadow-2xl border border-white/5 backdrop-blur-md flex items-center gap-3 z-30 text-sm">
   <svg class="w-4 h-4 text-yellow-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
@@ -1742,6 +1819,16 @@ function openAdmin() {
 function closeAdmin() {
   const panel = document.getElementById('admin-panel');
   if (panel) { panel.classList.add('hidden'); panel.style.display = ''; }
+}
+function openPrivacyModal() {
+  try {
+    const p = document.getElementById('privacy-modal');
+    if (p) { p.classList.remove('hidden'); p.style.display = 'flex'; }
+  } catch(err) { console.error('openPrivacyModal error:', err); }
+}
+function closePrivacyModal() {
+  const p = document.getElementById('privacy-modal');
+  if (p) { p.classList.add('hidden'); p.style.display = ''; }
 }
 function closeOnboarding() {
   const om = document.getElementById('onboarding-modal');
@@ -4194,6 +4281,8 @@ document.addEventListener('DOMContentLoaded', () => {
   if (closeBtn) closeBtn.onclick = closeAdmin;
   const panel = document.getElementById('admin-panel');
   if (panel) panel.onclick = e => { if (e.target === panel) closeAdmin(); };
+  const privPanel = document.getElementById('privacy-modal');
+  if (privPanel) privPanel.onclick = e => { if (e.target === privPanel) closePrivacyModal(); };
   const saveBtn = document.getElementById('admin-save');
   if (saveBtn) saveBtn.onclick = () => {
     const g   = document.getElementById('admin-gemini');
