@@ -2044,7 +2044,7 @@ function renderInicio() {
     const trabDescEl = document.getElementById('inicio-stat-trabajadores-desc');
     if (trabAmtEl) trabAmtEl.textContent = totalTrabajadores.toLocaleString('es-ES', { minimumFractionDigits: 2 }) + ' €';
     if (trabDescEl) {
-      trabDescEl.textContent = `${currentMonthNominas.length} nómina${currentMonthNominas.length === 1 ? '' : 's'} y &nbsp;${currentMonthSeguros.length} seguro${currentMonthSeguros.length === 1 ? '' : 's'} social${currentMonthSeguros.length === 1 ? '' : 'es'}`;
+      trabDescEl.textContent = `${currentMonthNominas.length} nómina${currentMonthNominas.length === 1 ? '' : 's'} y ${currentMonthSeguros.length} seguro${currentMonthSeguros.length === 1 ? '' : 's'} social${currentMonthSeguros.length === 1 ? '' : 'es'}`;
     }
   } catch (err) {
     console.error('renderInicio error:', err);
