@@ -1,8 +1,14 @@
+# Build artifacts
 dist/
 node_modules/
+
+# Secretos / credenciales — NUNCA subir
 claves.txt
+.env
+.env.*
 settings.local.json
 
-claves.txt
+# Scripts de utilidad con datos/credenciales locales
 import.js
 import.sql
+scratch/
