@@ -4969,7 +4969,11 @@ document.addEventListener('DOMContentLoaded', () => {
       
       // Mostrar onboarding de mayoristas si es la primera vez que inicia sesión en este navegador
       if (localStorage.getItem('pb_wholesalers') === null) {
-        selectedOnbWholesalers = ['FedeFarma'];
+        if (session.user.email === 'demo@gfarma.com') {
+          selectedOnbWholesalers = ['FedeFarma', 'Cofares'];
+        } else {
+          selectedOnbWholesalers = ['FedeFarma'];
+        }
         updateOnbUI();
         document.getElementById('wholesaler-onboarding-modal').classList.remove('hidden');
       }

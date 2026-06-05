@@ -258,6 +258,7 @@ async function main() {
     const facturas = [];
     const today = new Date(Date.UTC(2026, 5, 5)); // 5 de Junio de 2026 (fecha actual del sistema en UTC)
 
+    let wholesalerCount = 0;
     for (let i = 1; i <= 160; i++) {
       // Elegir mes aleatorio del rango total (Junio 2025 a Diciembre 2026)
       const randomMonthIndex = Math.floor(Math.random() * months.length);
@@ -280,8 +281,15 @@ async function main() {
       } else {
         const rand = Math.random();
         if (rand < 0.25) {
-          proveedor = 'FedeFarma';
-          tipo = 'FedeFarma';
+          wholesalerCount++;
+          const mod = wholesalerCount % 20;
+          if (mod === 0 || mod === 7 || mod === 14) {
+            proveedor = 'Cofares';
+            tipo = 'Cofares';
+          } else {
+            proveedor = 'FedeFarma';
+            tipo = 'FedeFarma';
+          }
           importe = parseFloat((4000 + Math.random() * 16000).toFixed(2));
         } else if (rand < 0.80) {
           const lab = laboratorios[Math.floor(Math.random() * laboratorios.length)];
