@@ -4966,6 +4966,15 @@ document.addEventListener('DOMContentLoaded', () => {
       const emailEl = document.getElementById('header-user-email');
       if (emailEl) { emailEl.textContent = session.user.email; emailEl.classList.remove('hidden'); }
       renderBudgetList();
+
+      // Asegurar que el usuario de testeo siempre tenga configurados FedeFarma y Cofares
+      if (session.user.email === 'demo@gfarma.com') {
+        const currentWholes = getWholesalers();
+        if (!currentWholes.includes('Cofares')) {
+          localStorage.setItem('pb_wholesalers', JSON.stringify(['FedeFarma', 'Cofares']));
+          initDynamicWholesalers();
+        }
+      }
       
       // Mostrar onboarding de mayoristas si es la primera vez que inicia sesión en este navegador
       if (localStorage.getItem('pb_wholesalers') === null) {
