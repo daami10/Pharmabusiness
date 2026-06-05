@@ -513,7 +513,7 @@
     <span class="text-xs text-slate-400 font-bold uppercase tracking-wider shrink-0 mr-1">Categoría:</span>
     <button id="tipo-btn-" onclick="setTipoFilter('')" class="tipo-btn px-4 py-1.5 rounded-xl text-xs font-bold transition-all bg-gradient-to-r from-blue-500 to-indigo-600 border border-blue-400/20 text-white shadow-lg shadow-blue-500/10 hover:scale-[1.02]">Todos</button>
     <button id="tipo-btn-Laboratorio" onclick="setTipoFilter('Laboratorio')" class="tipo-btn px-4 py-1.5 rounded-xl text-xs font-bold transition-all bg-white/5 border border-white/5 text-slate-300 hover:bg-white/10 hover:scale-[1.02]">Laboratorios</button>
-    <button id="tipo-btn-FedeFarma" onclick="setTipoFilter('FedeFarma')" class="tipo-btn px-4 py-1.5 rounded-xl text-xs font-bold transition-all bg-white/5 border border-white/5 text-slate-300 hover:bg-white/10 hover:scale-[1.02]">FedeFarma</button>
+    <button id="tipo-btn-FedeFarma" onclick="setTipoFilter('FedeFarma')" class="tipo-btn px-4 py-1.5 rounded-xl text-xs font-bold transition-all bg-white/5 border border-white/5 text-slate-300 hover:bg-white/10 hover:scale-[1.02]">Mayorista</button>
     <button id="tipo-btn-Otro" onclick="setTipoFilter('Otro')" class="tipo-btn px-4 py-1.5 rounded-xl text-xs font-bold transition-all bg-white/5 border border-white/5 text-slate-300 hover:bg-white/10 hover:scale-[1.02]">Otros</button>
     <button id="tipo-btn-Abono" onclick="setTipoFilter('Abono')" class="tipo-btn px-4 py-1.5 rounded-xl text-xs font-bold transition-all bg-white/5 border border-white/5 text-slate-300 hover:bg-white/10 hover:scale-[1.02]">Abonos</button>
   </div>
@@ -594,7 +594,7 @@
     <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Ver gráficas de:</span>
     <button id="analisis-btn-total" onclick="setAnalisisTipo('')" class="analisis-tipo-btn px-4 py-1.5 rounded-xl text-xs font-bold transition-all bg-gradient-to-r from-blue-500 to-indigo-600 border border-blue-400/20 text-white shadow-lg">Total</button>
     <button id="analisis-btn-Laboratorio" onclick="setAnalisisTipo('Laboratorio')" class="analisis-tipo-btn px-4 py-1.5 rounded-xl text-xs font-bold transition-all bg-white/5 border border-white/5 text-slate-300 hover:bg-white/10">Laboratorios</button>
-    <button id="analisis-btn-FedeFarma" onclick="setAnalisisTipo('FedeFarma')" class="analisis-tipo-btn px-4 py-1.5 rounded-xl text-xs font-bold transition-all bg-white/5 border border-white/5 text-slate-300 hover:bg-white/10">FedeFarma</button>
+    <button id="analisis-btn-FedeFarma" onclick="setAnalisisTipo('FedeFarma')" class="analisis-tipo-btn px-4 py-1.5 rounded-xl text-xs font-bold transition-all bg-white/5 border border-white/5 text-slate-300 hover:bg-white/10">Mayorista</button>
     <button id="analisis-btn-Otro" onclick="setAnalisisTipo('Otro')" class="analisis-tipo-btn px-4 py-1.5 rounded-xl text-xs font-bold transition-all bg-white/5 border border-white/5 text-slate-300 hover:bg-white/10">Otros</button>
     <button id="analisis-btn-Fiscalidad" onclick="setAnalisisTipo('Fiscalidad')" class="analisis-tipo-btn px-4 py-1.5 rounded-xl text-xs font-bold transition-all bg-white/5 border border-white/5 text-slate-300 hover:bg-white/10">Fiscalidad</button>
     <button id="analisis-btn-Trabajadores" onclick="setAnalisisTipo('Trabajadores')" class="analisis-tipo-btn px-4 py-1.5 rounded-xl text-xs font-bold transition-all bg-white/5 border border-white/5 text-slate-300 hover:bg-white/10">Trabajadores</button>
@@ -611,7 +611,7 @@
     <div id="analisis-card-FedeFarma" onclick="setAnalisisTipo('FedeFarma')" class="bg-gradient-to-br from-purple-500/10 to-purple-950/5 border border-purple-500/20 rounded-2xl p-5 shadow-2xl cursor-pointer hover:border-purple-500/40 hover:bg-purple-500/15 transition-all select-none glass-card">
       <div class="flex items-center gap-2 mb-2">
         <span class="w-2 h-2 rounded-full bg-purple-500 shadow-[0_0_6px_rgba(168,85,247,0.5)]"></span>
-        <p class="text-xs font-bold text-purple-400 uppercase tracking-wider">FedeFarma</p>
+        <p class="text-xs font-bold text-purple-400 uppercase tracking-wider">Mayorista</p>
       </div>
       <p id="kpi-fede-total" class="text-2xl font-black text-purple-400 leading-none">—</p>
       <p id="kpi-fede-count" class="text-2xs text-slate-500 font-bold uppercase tracking-wider mt-1.5">— facturas</p>
@@ -1367,6 +1367,11 @@
         <input id="admin-model" type="text" placeholder="gemini-2.0-flash" class="w-full px-4 py-3 rounded-xl border border-white/5 bg-slate-950/40 text-slate-100 placeholder-slate-500 focus:border-[#00f2fe]/40 focus:ring-0 focus:outline-none text-sm font-mono transition-all">
         <p class="text-xs text-slate-500 mt-1">Deja en blanco para auto-detección. Ej: <code class="bg-slate-950 text-slate-300 px-1 rounded">gemini-2.0-flash</code></p>
       </div>
+      <div>
+        <label class="block text-sm font-semibold text-slate-300 mb-1.5">Mayoristas (separados por comas)</label>
+        <input id="admin-wholesalers" type="text" placeholder="FedeFarma, Cofares, Hefame..." class="w-full px-4 py-3 rounded-xl border border-white/5 bg-slate-950/40 text-slate-100 placeholder-slate-500 focus:border-[#00f2fe]/40 focus:ring-0 focus:outline-none text-sm transition-all">
+        <p class="text-xs text-slate-500 mt-1">Escribe los distribuidores mayoristas con los que trabajas.</p>
+      </div>
       <button id="admin-save" class="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 text-white py-3 rounded-xl font-bold text-sm transition-all shadow-lg shadow-blue-500/20 hover:scale-[1.01]">Guardar configuración</button>
       <div class="border-t border-white/5 pt-4 mt-2">
         <button type="button" onclick="document.getElementById('budget-section').classList.toggle('hidden')" class="flex items-center gap-2 text-sm font-semibold text-slate-300 hover:text-[#00f2fe] transition-colors w-full">
@@ -1792,6 +1797,65 @@ const K = { g: 'pb_gemini', m: 'pb_model' };
 const getGemini = () => localStorage.getItem(K.g) || GEMINI_KEY_DEFAULT;
 const getModel  = () => localStorage.getItem(K.m) || '';
 
+const getWholesalers = () => {
+  const stored = localStorage.getItem('pb_wholesalers');
+  if (stored) {
+    try {
+      return JSON.parse(stored);
+    } catch(e) {
+      return stored.split(',').map(s => s.trim()).filter(Boolean);
+    }
+  }
+  return ['FedeFarma'];
+};
+const isWholesaler = (tipo) => getWholesalers().includes(tipo);
+
+function initDynamicWholesalers() {
+  const wholesalers = getWholesalers();
+  const label = wholesalers.length > 1 ? 'Mayoristas' : 'Mayorista';
+  const labelPlural = wholesalers.length > 1 ? 'Mayoristas' : 'Mayorista';
+
+  // 1. Dropdown options in Nueva Factura form
+  const tipoSelect = document.getElementById('f-tipo');
+  if (tipoSelect) {
+    let html = `<option value="" class="bg-[#0f172a] text-slate-400">Seleccionar categoría...</option>
+                <option value="Laboratorio" class="bg-[#0f172a]">Laboratorio</option>`;
+    wholesalers.forEach(w => {
+      html += `<option value="${w}" class="bg-[#0f172a]">${w}</option>`;
+    });
+    html += `<option value="Otro" class="bg-[#0f172a]">Otro</option>`;
+    tipoSelect.innerHTML = html;
+  }
+
+  // 2. Facturas Filter Buttons (tipo-btn-FedeFarma)
+  const btnFilt = document.getElementById('tipo-btn-FedeFarma');
+  if (btnFilt) {
+    btnFilt.textContent = labelPlural;
+  }
+
+  // 3. Análisis tab filter buttons (analisis-btn-FedeFarma)
+  const btnAnalisis = document.getElementById('analisis-btn-FedeFarma');
+  if (btnAnalisis) {
+    btnAnalisis.textContent = labelPlural;
+  }
+
+  // 4. Análisis category card (analisis-card-FedeFarma)
+  const cardFedeLabel = document.querySelector('#analisis-card-FedeFarma p.text-purple-400, #analisis-card-FedeFarma p.text-xs');
+  if (cardFedeLabel) {
+    cardFedeLabel.textContent = label;
+  }
+
+  // 5. PDF layout category labels
+  const pdfFedeLabel = document.getElementById('pdf-cat-fede-total');
+  if (pdfFedeLabel && pdfFedeLabel.previousElementSibling) {
+    pdfFedeLabel.previousElementSibling.textContent = label;
+  }
+  const pdfFedeTitleEl = document.querySelector('.font-bold.text-slate-600.flex.items-center.gap-2 span');
+  if (pdfFedeTitleEl && pdfFedeTitleEl.textContent.includes('FedeFarma')) {
+    pdfFedeTitleEl.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-indigo-600 shrink-0"></span>${label}`;
+  }
+}
+
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 let authMode = 'login';
 
@@ -2061,8 +2125,10 @@ function openAdmin() {
   try {
     const g   = document.getElementById('admin-gemini');
     const mod = document.getElementById('admin-model');
+    const wholes = document.getElementById('admin-wholesalers');
     if (g)   g.value   = getGemini();
     if (mod) mod.value = getModel();
+    if (wholes) wholes.value = getWholesalers().join(', ');
     const panel = document.getElementById('admin-panel');
     if (panel) { panel.classList.remove('hidden'); panel.style.display = 'flex'; }
   } catch(err) { console.error('openAdmin error:', err); }
@@ -2152,19 +2218,29 @@ function setTipoFilter(tipo) {
 
 function updateTipoCounts() {
   const counts = {'': allFacturas.length, 'Laboratorio': 0, 'FedeFarma': 0, 'Otro': 0, 'Abono': 0};
-  allFacturas.forEach(r => { const t = r.fields.Tipo || ''; if (t in counts) counts[t]++; });
+  allFacturas.forEach(r => {
+    const t = r.fields.Tipo || '';
+    if (isWholesaler(t)) {
+      counts['FedeFarma']++;
+    } else if (t in counts) {
+      counts[t]++;
+    }
+  });
   document.getElementById('tipo-btn-').textContent            = `Todos (${counts['']})`;
   document.getElementById('tipo-btn-Laboratorio').textContent = `Laboratorios (${counts['Laboratorio']})`;
-  document.getElementById('tipo-btn-FedeFarma').textContent   = `FedeFarma (${counts['FedeFarma']})`;
+  const wholesalers = getWholesalers();
+  const wlLabel = wholesalers.length > 1 ? 'Mayoristas' : 'Mayorista';
+  document.getElementById('tipo-btn-FedeFarma').textContent   = `${wlLabel} (${counts['FedeFarma']})`;
   document.getElementById('tipo-btn-Otro').textContent        = `Otros (${counts['Otro']})`;
   document.getElementById('tipo-btn-Abono').textContent       = `Abonos (${counts['Abono']})`;
 }
 
 function onTipoChange() {
   const tipo = document.getElementById('f-tipo').value;
-  if (tipo === 'FedeFarma') {
-    document.getElementById('f-laboratorio').value = 'FedeFarma';
-  } else if (document.getElementById('f-laboratorio').value === 'FedeFarma') {
+  const wholesalers = getWholesalers();
+  if (wholesalers.includes(tipo)) {
+    document.getElementById('f-laboratorio').value = tipo;
+  } else if (wholesalers.includes(document.getElementById('f-laboratorio').value)) {
     document.getElementById('f-laboratorio').value = '';
   }
 }
@@ -2236,7 +2312,7 @@ function filterFacturas() {
   renderTable(allFacturas.filter(r => {
     const ok1 = !s || (r.fields.Laboratorio||'').toLowerCase().includes(s) || (r.fields.NumFactura||'').toLowerCase().includes(s);
     const ok2 = !m || (r.fields.Fecha||'').slice(5,7) === m;
-    const ok3 = !activeTipo || (r.fields.Tipo||'') === activeTipo;
+    const ok3 = !activeTipo || (activeTipo === 'FedeFarma' ? isWholesaler(r.fields.Tipo) : (r.fields.Tipo||'') === activeTipo);
     const ok4 = !activeVencStatus || getEffectiveVencStatus(r) === activeVencStatus;
     const imp = r.fields.Importe || 0;
     const ok5 = min === null || imp >= min;
@@ -2341,7 +2417,7 @@ function renderTable(records) {
         <td class="px-6 py-4.5">
           <div class="flex flex-col gap-1">
             <span class="text-sm font-bold text-white">${esc(f.Laboratorio)||'—'}</span>
-            ${f.Tipo ? `<span class="inline-block w-fit text-2xs font-bold px-2 py-0.5 rounded-full ${tipoBadgeColors[f.Tipo]||'bg-slate-500/10 border border-slate-500/20 text-slate-300'}">${esc(f.Tipo)}</span>` : ''}
+            ${f.Tipo ? `<span class="inline-block w-fit text-2xs font-bold px-2 py-0.5 rounded-full ${isWholesaler(f.Tipo) ? tipoBadgeColors['FedeFarma'] : (tipoBadgeColors[f.Tipo]||'bg-slate-500/10 border border-slate-500/20 text-slate-300')}">${esc(f.Tipo)}</span>` : ''}
           </div>
         </td>
         <td class="px-6 py-4.5 text-sm text-slate-400 font-mono">${isAbono ? '—' : (esc(f.NumFactura)||'—')}</td>
@@ -2792,7 +2868,10 @@ function renderAnalisisCharts(records) {
   currentAnalisisFacturas = records;
   const abonos = records.filter(r => r.fields.Tipo === 'Abono');
   const facturas = records.filter(r => r.fields.Tipo !== 'Abono');
-  const facturasChart = activeAnalisisTipo ? facturas.filter(r => (r.fields.Tipo || 'Otro') === activeAnalisisTipo) : facturas;
+  const facturasChart = activeAnalisisTipo ? facturas.filter(r => {
+    const t = r.fields.Tipo || 'Otro';
+    return activeAnalisisTipo === 'FedeFarma' ? isWholesaler(t) : t === activeAnalisisTipo;
+  }) : facturas;
   const abonoChartsEl = document.getElementById('abono-charts');
 
   const hasFacturas = (facturas.length > 0 || abonos.length > 0);
@@ -2811,7 +2890,7 @@ function renderAnalisisCharts(records) {
   const byTipo = {Laboratorio:{total:0,count:0}, FedeFarma:{total:0,count:0}, Otro:{total:0,count:0}};
   facturas.forEach(r => {
     const t = r.fields.Tipo || 'Otro';
-    const key = byTipo[t] ? t : 'Otro';
+    const key = isWholesaler(t) ? 'FedeFarma' : (byTipo[t] ? t : 'Otro');
     byTipo[key].total += r.fields.Importe||0;
     byTipo[key].count++;
   });
@@ -2927,7 +3006,7 @@ function renderAnalisisCharts(records) {
   const allLabs = sorted;
   const genPalette = n => { const base=['#2563EB','#059669','#7C3AED','#EA580C','#0891B2','#DC2626','#CA8A04','#0F766E','#9333EA','#BE185D']; return Array.from({length:n},(_,i)=>i<base.length?base[i]:`hsl(${(i*137.5)%360},65%,50%)`); };
   const tipoBarColor = {Laboratorio:'rgba(37,99,235,0.8)', FedeFarma:'rgba(124,58,237,0.8)', Otro:'rgba(107,114,128,0.8)'};
-  const defaultBarColor = tipoBarColor[activeAnalisisTipo] || 'rgba(37,99,235,0.8)';
+  const defaultBarColor = isWholesaler(activeAnalisisTipo) || activeAnalisisTipo === 'FedeFarma' ? 'rgba(124,58,237,0.8)' : (tipoBarColor[activeAnalisisTipo] || 'rgba(37,99,235,0.8)');
   const barColors = allLabs.map(([lab,val]) => budgets[lab] && val > budgets[lab] ? 'rgba(220,38,38,0.8)' : defaultBarColor);
   mkChart('chart-labs','bar',{labels:allLabs.map(([l])=>l),datasets:[{label:'€',data:allLabs.map(([,v])=>v),backgroundColor:barColors,borderRadius:6,borderSkipped:false}]},{plugins:{legend:{display:false},tooltip:{callbacks:{afterLabel:ctx=>{const lab=allLabs[ctx.dataIndex][0];return budgets[lab]?'Presupuesto: '+budgets[lab].toLocaleString('es-ES')+'€':'';}}},},scales:{y:{ticks:{callback:v=>v.toLocaleString('es-ES')+'€',font:{size:11}}},x:{ticks:{font:{size:11}}}}});
   if (allLabs.length) mkChart('chart-donut','doughnut',{labels:allLabs.map(([l])=>l),datasets:[{data:allLabs.map(([,v])=>v),backgroundColor:genPalette(allLabs.length),borderWidth:2,borderColor:'#fff',hoverOffset:6}]},{plugins:{legend:{position:'bottom',labels:{font:{size:11},padding:10}}},cutout:'65%'});
@@ -4024,7 +4103,7 @@ function renderVencModalListFiltered() {
       <td class="py-4">
         <div class="flex flex-col gap-0.5">
           <span class="text-sm font-bold text-white">${esc(f.Laboratorio) || '—'}</span>
-          ${f.Tipo ? `<span class="inline-block w-fit text-2xs font-bold px-1.5 py-0.5 rounded-full ${tipoBadgeColors[f.Tipo] || 'bg-slate-500/10 border border-slate-500/20 text-slate-300'}">${esc(f.Tipo)}</span>` : ''}
+          ${f.Tipo ? `<span class="inline-block w-fit text-2xs font-bold px-1.5 py-0.5 rounded-full ${isWholesaler(f.Tipo) ? tipoBadgeColors['FedeFarma'] : (tipoBadgeColors[f.Tipo] || 'bg-slate-500/10 border border-slate-500/20 text-slate-300')}">${esc(f.Tipo)}</span>` : ''}
         </div>
       </td>
       <td class="py-4 text-sm text-slate-400 font-mono">${esc(f.NumFactura) || '—'}</td>
@@ -4120,7 +4199,7 @@ async function exportAnalysisPDF() {
     const byTipo = { Laboratorio: 0, FedeFarma: 0, Otro: 0 };
     facturas.forEach(r => {
       const t = r.fields.Tipo || 'Otro';
-      const key = byTipo[t] !== undefined ? t : 'Otro';
+      const key = isWholesaler(t) ? 'FedeFarma' : (byTipo[t] !== undefined ? t : 'Otro');
       byTipo[key] += r.fields.Importe || 0;
     });
     
@@ -4568,6 +4647,7 @@ function renderPrevision() {
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
+  initDynamicWholesalers();
   // Close fast action dropdown when clicking outside
   document.addEventListener('click', e => {
     const dropdown = document.getElementById('fast-action-dropdown');
@@ -4615,8 +4695,20 @@ document.addEventListener('DOMContentLoaded', () => {
   if (saveBtn) saveBtn.onclick = () => {
     const g   = document.getElementById('admin-gemini');
     const mod = document.getElementById('admin-model');
+    const wholes = document.getElementById('admin-wholesalers');
     localStorage.setItem(K.g, g   ? g.value.trim()   : '');
     localStorage.setItem(K.m, mod ? mod.value.trim() : '');
+    if (wholes) {
+      const wList = wholes.value.split(',').map(s => s.trim()).filter(Boolean);
+      if (wList.length > 0) {
+        localStorage.setItem('pb_wholesalers', JSON.stringify(wList));
+      }
+    }
+    initDynamicWholesalers();
+    filterFacturas();
+    if (!document.getElementById('tab-analisis').classList.contains('hidden')) {
+      loadAnalisis(false);
+    }
     closeAdmin();
   };
 
