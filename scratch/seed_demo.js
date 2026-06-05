@@ -73,7 +73,6 @@ async function getOrCreateDemoUser() {
 
 async function clearExistingData(userId) {
   console.log('Limpiando datos existentes en tablas para el usuario:', userId);
-  // Eliminamos nóminas y seguros sociales antes que trabajadores debido a claves foráneas
   await apiRequest('DELETE', `/rest/v1/nominas?user_id=eq.${userId}`);
   await apiRequest('DELETE', `/rest/v1/seguros_sociales?user_id=eq.${userId}`);
   await apiRequest('DELETE', `/rest/v1/trabajadores?user_id=eq.${userId}`);
@@ -105,14 +104,15 @@ async function main() {
       trabMap[t.nombre] = t.id;
     });
 
-    // 2. GENERAR RANGOS DE MESES (Últimos 12 meses + actual: Junio 2025 a Junio 2026)
+    // 2. GENERAR RANGOS DE MESES (Últimos 12 meses + Año en curso completo: Junio 2025 a Diciembre 2026)
+    // Usamos fechas UTC absolutas para evitar corrimientos por zona horaria.
     const months = [];
-    const startDate = new Date(2025, 5, 1); // 1 de Junio de 2025
-    const endDate = new Date(2026, 5, 1);   // 1 de Junio de 2026 (mes actual en el sistema)
+    const startDate = new Date(Date.UTC(2025, 5, 1)); // 1 de Junio de 2025 UTC
+    const endDate = new Date(Date.UTC(2026, 11, 1));  // 1 de Diciembre de 2026 UTC
     let cur = new Date(startDate);
     while (cur <= endDate) {
       months.push(new Date(cur));
-      cur.setMonth(cur.getMonth() + 1);
+      cur.setUTCMonth(cur.getUTCMonth() + 1);
     }
 
     // 3. SEEDING DE NÓMINAS, SEGUROS SOCIALES Y FISCALIDAD
@@ -124,6 +124,7 @@ async function main() {
     months.forEach(date => {
       const monthStr = date.toISOString().slice(0, 7);
       const fecha = `${monthStr}-01`;
+      const mesNum = date.getUTCMonth(); // 0-indexed en UTC
 
       // Nóminas mensuales para la plantilla
       nominas.push({
@@ -151,16 +152,15 @@ async function main() {
         concepto: 'Nómina ordinaria'
       });
 
-      // Paga extra en Diciembre (Navidad) y Junio (Verano)
-      const mesNum = date.getMonth(); // 0-indexed
-      if (mesNum === 11) { // Diciembre
+      // Paga extra en Junio (Verano) y Diciembre (Navidad)
+      if (mesNum === 5 || mesNum === 11) {
         nominas.push({
           user_id: userId,
           trabajador_id: trabMap['Laura García'],
           trabajador_nombre: 'Laura García',
           fecha: fecha,
           importe: 2150.00,
-          concepto: 'Paga extra Navidad'
+          concepto: mesNum === 5 ? 'Paga extra Verano' : 'Paga extra Navidad'
         });
         nominas.push({
           user_id: userId,
@@ -168,7 +168,7 @@ async function main() {
           trabajador_nombre: 'Carlos Martínez',
           fecha: fecha,
           importe: 1550.00,
-          concepto: 'Paga extra Navidad'
+          concepto: mesNum === 5 ? 'Paga extra Verano' : 'Paga extra Navidad'
         });
         nominas.push({
           user_id: userId,
@@ -176,7 +176,7 @@ async function main() {
           trabajador_nombre: 'María Rodríguez',
           fecha: fecha,
           importe: 1250.00,
-          concepto: 'Paga extra Navidad'
+          concepto: mesNum === 5 ? 'Paga extra Verano' : 'Paga extra Navidad'
         });
       }
 
@@ -207,7 +207,7 @@ async function main() {
         importe: 620.00,
         notas: 'Retenciones trabajadores y profesionales'
       });
-      // Pago Pago fraccionado Impuesto de Sociedades (Octubre, Diciembre, Abril) (Modelo 202)
+      // Pago fraccionado Impuesto de Sociedades (Octubre, Diciembre, Abril) (Modelo 202)
       if (mesNum === 9 || mesNum === 11 || mesNum === 3) {
         fiscalidad.push({
           user_id: userId,
@@ -227,8 +227,8 @@ async function main() {
     console.log(`Seguros sociales insertados: ${segurosSociales.length}`);
     console.log(`Impuestos/Fiscalidad insertados: ${fiscalidad.length}`);
 
-    // 4. GENERAR 100 FACTURAS (Y ABONOS)
-    console.log('Generando 100 facturas...');
+    // 4. GENERAR 160 FACTURAS (Y ABONOS)
+    console.log('Generando 160 facturas...');
 
     const laboratorios = [
       { nombre: 'Cinfa', tipo: 'Laboratorio' },
@@ -256,34 +256,30 @@ async function main() {
     ];
 
     const facturas = [];
-    const today = new Date(2026, 5, 5); // 5 de Junio de 2026 (fecha actual del sistema)
+    const today = new Date(Date.UTC(2026, 5, 5)); // 5 de Junio de 2026 (fecha actual del sistema en UTC)
 
-    for (let i = 1; i <= 100; i++) {
-      // Elegir mes aleatorio del último año
+    for (let i = 1; i <= 160; i++) {
+      // Elegir mes aleatorio del rango total (Junio 2025 a Diciembre 2026)
       const randomMonthIndex = Math.floor(Math.random() * months.length);
       const invoiceMonth = new Date(months[randomMonthIndex]);
       
       // Asignar un día aleatorio entre 1 y 28
       const randomDay = Math.floor(Math.random() * 28) + 1;
-      const invoiceDate = new Date(invoiceMonth.getFullYear(), invoiceMonth.getMonth(), randomDay);
+      const invoiceDate = new Date(Date.UTC(invoiceMonth.getUTCFullYear(), invoiceMonth.getUTCMonth(), randomDay));
       const fechaStr = invoiceDate.toISOString().slice(0, 10);
 
-      // Decidir si es un Abono (5% de probabilidad)
+      // Decidir si es un Abono (7% de probabilidad)
       const isAbono = Math.random() < 0.07;
 
       let proveedor, tipo, importe;
 
       if (isAbono) {
-        // Los abonos suelen ser de laboratorios
         proveedor = laboratorios[Math.floor(Math.random() * laboratorios.length)].nombre;
         tipo = 'Abono';
         importe = parseFloat((30 + Math.random() * 550).toFixed(2));
       } else {
-        // Distribuidores principales (FedeFarma) - 20%
-        // Laboratorios - 60%
-        // Otros - 20%
         const rand = Math.random();
-        if (rand < 0.20) {
+        if (rand < 0.25) {
           proveedor = 'FedeFarma';
           tipo = 'FedeFarma';
           importe = parseFloat((4000 + Math.random() * 16000).toFixed(2));
@@ -305,29 +301,26 @@ async function main() {
       let vencimientoStr = null;
 
       if (tipo === 'Abono') {
-        pagada = false; // Los abonos no se marcan como "pagados" en la UI de la misma forma, se resta el importe
+        pagada = false;
         vencimientoStr = null;
       } else {
-        // Para facturas en el pasado (más de 30 días de antigüedad con respecto a today)
-        // Se define un 85% de probabilidad de que estén PAGADAS, y un 15% de que estén por pagar (para generar la visualización de "VENCIDAS" en rojo).
         const diffTime = today - invoiceDate;
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-        if (diffDays > 30) {
-          // Factura antigua
-          pagada = Math.random() < 0.85; // 85% pagadas, 15% vencidas
-          // Fecha de vencimiento es fecha de emisión + 30 días
-          const vencDate = new Date(invoiceDate);
-          vencDate.setDate(vencDate.getDate() + 30);
+        if (invoiceDate > today) {
+          // Factura futura: SIEMPRE pendiente (pagada: false) para que aparezca en previsión
+          pagada = false;
+          const vencDate = new Date(invoiceDate.getTime() + 30 * 24 * 60 * 60 * 1000);
+          vencimientoStr = vencDate.toISOString().slice(0, 10);
+        } else if (diffDays > 30) {
+          // Factura antigua: hacemos que más facturas queden pendientes para verlas
+          pagada = Math.random() < 0.45; // 45% pagadas, 55% pendientes/vencidas (aumentamos pendientes)
+          const vencDate = new Date(invoiceDate.getTime() + 30 * 24 * 60 * 60 * 1000);
           vencimientoStr = vencDate.toISOString().slice(0, 10);
         } else {
-          // Factura reciente (últimos 30 días o futuras)
-          // La mayoría (80%) por pagar (pagada: false) para que aparezcan en el calendario o previsión
-          pagada = Math.random() < 0.20; 
-          
-          // Fecha de vencimiento es fecha de emisión + 30 días
-          const vencDate = new Date(invoiceDate);
-          vencDate.setDate(vencDate.getDate() + 30);
+          // Factura reciente (últimos 30 días)
+          pagada = Math.random() < 0.10; // Solo 10% pagadas, 90% pendientes/próximas
+          const vencDate = new Date(invoiceDate.getTime() + 30 * 24 * 60 * 60 * 1000);
           vencimientoStr = vencDate.toISOString().slice(0, 10);
         }
       }
@@ -348,12 +341,13 @@ async function main() {
       });
     }
 
-    // Insertar en lotes de 50 para evitar sobrecargar la petición
-    const batch1 = facturas.slice(0, 50);
-    const batch2 = facturas.slice(50, 100);
-
-    await apiRequest('POST', '/rest/v1/facturas', batch1);
-    await apiRequest('POST', '/rest/v1/facturas', batch2);
+    // Insertar en lotes de 40
+    const batchSize = 40;
+    for (let j = 0; j < facturas.length; j += batchSize) {
+      const batch = facturas.slice(j, j + batchSize);
+      await apiRequest('POST', '/rest/v1/facturas', batch);
+      console.log(`Lote de facturas insertado: ${j} a ${Math.min(j + batchSize, facturas.length)}`);
+    }
 
     console.log(`Total facturas insertadas correctamente: ${facturas.length}`);
     console.log(`  PAGADAS: ${facturas.filter(f => f.pagada).length}`);

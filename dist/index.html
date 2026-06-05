@@ -1355,17 +1355,32 @@
           <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
         </svg>
       </div>
-      <h3 class="text-xl font-bold text-slate-100">Configuración de Mayorista</h3>
+      <h3 class="text-xl font-bold text-slate-100">Configuración de Mayoristas</h3>
       <p class="text-xs text-slate-400 mt-1 uppercase tracking-wider font-bold">Paso inicial</p>
     </div>
-    <div class="space-y-4">
-      <p class="text-sm text-slate-300 leading-relaxed">
-        Para comenzar, indica con qué distribuidor mayorista trabaja tu farmacia (puedes introducir varios separados por comas):
+    <div class="space-y-5">
+      <p class="text-xs text-slate-300 leading-relaxed">
+        Selecciona los distribuidores mayoristas con los que trabaja tu farmacia:
       </p>
+      
+      <!-- Predefined Wholesalers Grid -->
+      <div class="grid grid-cols-2 gap-2" id="onb-predefined-grid"></div>
+
+      <!-- Add Custom Wholesaler Input -->
       <div>
-        <label class="block text-sm font-semibold text-slate-300 mb-1.5">Mayoristas</label>
-        <input id="onb-wholesalers" type="text" value="FedeFarma" placeholder="Ej: FedeFarma, Cofares, Hefame..." class="w-full px-4 py-3 rounded-xl border border-white/5 bg-slate-950/40 text-slate-100 placeholder-slate-500 focus:border-[#00f2fe]/40 focus:ring-0 focus:outline-none text-sm transition-all">
+        <label class="block text-2xs font-semibold text-slate-400 mb-1.5 uppercase tracking-wider">¿Trabajas con otro? Añádelo aquí</label>
+        <div class="flex gap-2">
+          <input id="onb-custom-wholesaler" type="text" placeholder="Ej: Apoteka, Cecofar..." class="flex-1 px-3.5 py-2.5 rounded-xl border border-white/5 bg-slate-950/40 text-slate-100 placeholder-slate-600 focus:border-[#00f2fe]/40 focus:ring-0 focus:outline-none text-xs transition-all">
+          <button type="button" onclick="addOnbCustom()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 rounded-xl font-bold text-sm transition-colors">+</button>
+        </div>
       </div>
+
+      <!-- Active Selected List -->
+      <div>
+        <label class="block text-2xs font-semibold text-slate-400 mb-1.5 uppercase tracking-wider font-bold">Mayoristas Seleccionados</label>
+        <div id="onb-selected-tags" class="flex flex-wrap gap-1.5 min-h-[40px] p-3 rounded-xl border border-white/5 bg-slate-950/20"></div>
+      </div>
+
       <button id="onb-wholesalers-save" class="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 text-white py-3 rounded-xl font-bold text-sm transition-all shadow-lg shadow-blue-500/20 hover:scale-[1.01]">Guardar y Comenzar</button>
     </div>
   </div>
@@ -1393,9 +1408,25 @@
         <p class="text-xs text-slate-500 mt-1">Deja en blanco para auto-detección. Ej: <code class="bg-slate-950 text-slate-300 px-1 rounded">gemini-2.0-flash</code></p>
       </div>
       <div>
-        <label class="block text-sm font-semibold text-slate-300 mb-1.5">Mayoristas (separados por comas)</label>
-        <input id="admin-wholesalers" type="text" placeholder="FedeFarma, Cofares, Hefame..." class="w-full px-4 py-3 rounded-xl border border-white/5 bg-slate-950/40 text-slate-100 placeholder-slate-500 focus:border-[#00f2fe]/40 focus:ring-0 focus:outline-none text-sm transition-all">
-        <p class="text-xs text-slate-500 mt-1">Escribe los distribuidores mayoristas con los que trabajas.</p>
+        <label class="block text-sm font-semibold text-slate-300 mb-1.5">Mayoristas con los que trabajas</label>
+        
+        <!-- Predefined Wholesalers Grid -->
+        <div class="grid grid-cols-2 gap-2 mb-3" id="admin-predefined-grid"></div>
+
+        <!-- Add Custom Wholesaler Input -->
+        <div class="mb-3">
+          <label class="block text-2xs font-semibold text-slate-400 mb-1 uppercase tracking-wider">¿Trabajas con otro? Añádelo aquí</label>
+          <div class="flex gap-2">
+            <input id="admin-custom-wholesaler" type="text" placeholder="Ej: Apoteka, Cecofar..." class="flex-1 px-3.5 py-2.5 rounded-xl border border-white/5 bg-slate-950/40 text-slate-100 placeholder-slate-600 focus:border-[#00f2fe]/40 focus:ring-0 focus:outline-none text-xs transition-all">
+            <button type="button" onclick="addAdminCustom()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 rounded-xl font-bold text-sm transition-colors">+</button>
+          </div>
+        </div>
+
+        <!-- Active Selected List -->
+        <div>
+          <label class="block text-2xs font-semibold text-slate-400 mb-1.5 uppercase tracking-wider">Mayoristas Seleccionados</label>
+          <div id="admin-selected-tags" class="flex flex-wrap gap-1.5 min-h-[40px] p-3 rounded-xl border border-white/5 bg-slate-950/20"></div>
+        </div>
       </div>
       <button id="admin-save" class="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 text-white py-3 rounded-xl font-bold text-sm transition-all shadow-lg shadow-blue-500/20 hover:scale-[1.01]">Guardar configuración</button>
       <div class="border-t border-white/5 pt-4 mt-2">
@@ -1881,6 +1912,152 @@ function initDynamicWholesalers() {
   }
 }
 
+// --- Wholesalers Interactive UI State & Helpers ---
+const PREDEFINED_WHOLESALERS = ['FedeFarma', 'Cofares', 'Bidafarma', 'Hefame', 'Alliance Healthcare'];
+let selectedOnbWholesalers = [];
+let selectedAdminWholesalers = [];
+
+function updateOnbUI() {
+  const grid = document.getElementById('onb-predefined-grid');
+  if (grid) {
+    grid.innerHTML = PREDEFINED_WHOLESALERS.map(w => {
+      const isSelected = selectedOnbWholesalers.includes(w);
+      return `
+        <button type="button" onclick="toggleOnbWholesaler('${esc(w)}')" class="flex items-center justify-between px-4 py-2.5 rounded-xl border text-2xs font-bold transition-all ${
+          isSelected 
+            ? 'bg-indigo-600/20 border-[#00f2fe] text-white shadow-[0_0_12px_rgba(0,242,254,0.15)]' 
+            : 'bg-slate-950/40 border-white/5 text-slate-400 hover:border-white/10 hover:text-slate-200'
+        }">
+          <span>${esc(w)}</span>
+          ${isSelected 
+            ? '<svg class="w-4.5 h-4.5 text-[#00f2fe]" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>' 
+            : '<span class="w-4 h-4 rounded-full border border-white/15"></span>'
+          }
+        </button>
+      `;
+    }).join('');
+  }
+
+  const tagsContainer = document.getElementById('onb-selected-tags');
+  if (tagsContainer) {
+    if (selectedOnbWholesalers.length === 0) {
+      tagsContainer.innerHTML = '<span class="text-2xs text-slate-500 select-none">Ninguno seleccionado. Elige de la lista o añade uno personalizado.</span>';
+    } else {
+      tagsContainer.innerHTML = selectedOnbWholesalers.map(w => `
+        <span class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-2xs font-bold bg-indigo-500/10 border border-indigo-500/30 text-indigo-300">
+          <span>${esc(w)}</span>
+          <button type="button" onclick="removeOnbWholesaler('${esc(w)}')" class="text-indigo-400 hover:text-indigo-200 focus:outline-none transition-colors">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </span>
+      `).join('');
+    }
+  }
+}
+
+function toggleOnbWholesaler(w) {
+  const idx = selectedOnbWholesalers.indexOf(w);
+  if (idx !== -1) {
+    selectedOnbWholesalers.splice(idx, 1);
+  } else {
+    selectedOnbWholesalers.push(w);
+  }
+  updateOnbUI();
+}
+
+function removeOnbWholesaler(w) {
+  const idx = selectedOnbWholesalers.indexOf(w);
+  if (idx !== -1) {
+    selectedOnbWholesalers.splice(idx, 1);
+    updateOnbUI();
+  }
+}
+
+function addOnbCustom() {
+  const input = document.getElementById('onb-custom-wholesaler');
+  if (!input) return;
+  const val = input.value.trim();
+  if (val && !selectedOnbWholesalers.includes(val)) {
+    selectedOnbWholesalers.push(val);
+    input.value = '';
+    updateOnbUI();
+  }
+}
+
+function updateAdminUI() {
+  const grid = document.getElementById('admin-predefined-grid');
+  if (grid) {
+    grid.innerHTML = PREDEFINED_WHOLESALERS.map(w => {
+      const isSelected = selectedAdminWholesalers.includes(w);
+      return `
+        <button type="button" onclick="toggleAdminWholesaler('${esc(w)}')" class="flex items-center justify-between px-4 py-2.5 rounded-xl border text-2xs font-bold transition-all ${
+          isSelected 
+            ? 'bg-indigo-600/20 border-[#00f2fe] text-white shadow-[0_0_12px_rgba(0,242,254,0.15)]' 
+            : 'bg-slate-950/40 border-white/5 text-slate-400 hover:border-white/10 hover:text-slate-200'
+        }">
+          <span>${esc(w)}</span>
+          ${isSelected 
+            ? '<svg class="w-4.5 h-4.5 text-[#00f2fe]" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>' 
+            : '<span class="w-4 h-4 rounded-full border border-white/15"></span>'
+          }
+        </button>
+      `;
+    }).join('');
+  }
+
+  const tagsContainer = document.getElementById('admin-selected-tags');
+  if (tagsContainer) {
+    if (selectedAdminWholesalers.length === 0) {
+      tagsContainer.innerHTML = '<span class="text-2xs text-slate-500 select-none">Ninguno seleccionado. Elige o añade uno personalizado.</span>';
+    } else {
+      tagsContainer.innerHTML = selectedAdminWholesalers.map(w => `
+        <span class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-2xs font-bold bg-indigo-500/10 border border-indigo-500/30 text-indigo-300">
+          <span>${esc(w)}</span>
+          <button type="button" onclick="removeAdminWholesaler('${esc(w)}')" class="text-indigo-400 hover:text-indigo-200 focus:outline-none transition-colors">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </span>
+      `).join('');
+    }
+  }
+}
+
+function toggleAdminWholesaler(w) {
+  const idx = selectedAdminWholesalers.indexOf(w);
+  if (idx !== -1) {
+    selectedAdminWholesalers.splice(idx, 1);
+  } else {
+    selectedAdminWholesalers.push(w);
+  }
+  updateAdminUI();
+}
+
+function removeAdminWholesaler(w) {
+  const idx = selectedAdminWholesalers.indexOf(w);
+  if (idx !== -1) {
+    selectedAdminWholesalers.splice(idx, 1);
+    updateAdminUI();
+  }
+}
+
+function addAdminCustom() {
+  const input = document.getElementById('admin-custom-wholesaler');
+  if (!input) return;
+  const val = input.value.trim();
+  if (val && !selectedAdminWholesalers.includes(val)) {
+    selectedAdminWholesalers.push(val);
+    input.value = '';
+    updateAdminUI();
+  }
+}
+
+window.toggleOnbWholesaler = toggleOnbWholesaler;
+window.removeOnbWholesaler = removeOnbWholesaler;
+window.addOnbCustom = addOnbCustom;
+window.toggleAdminWholesaler = toggleAdminWholesaler;
+window.removeAdminWholesaler = removeAdminWholesaler;
+window.addAdminCustom = addAdminCustom;
+
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 let authMode = 'login';
 
@@ -2150,10 +2327,13 @@ function openAdmin() {
   try {
     const g   = document.getElementById('admin-gemini');
     const mod = document.getElementById('admin-model');
-    const wholes = document.getElementById('admin-wholesalers');
     if (g)   g.value   = getGemini();
     if (mod) mod.value = getModel();
-    if (wholes) wholes.value = getWholesalers().join(', ');
+    
+    // Inicializar lista de mayoristas para admin
+    selectedAdminWholesalers = [...getWholesalers()];
+    updateAdminUI();
+    
     const panel = document.getElementById('admin-panel');
     if (panel) { panel.classList.remove('hidden'); panel.style.display = 'flex'; }
   } catch(err) { console.error('openAdmin error:', err); }
@@ -4720,43 +4900,59 @@ document.addEventListener('DOMContentLoaded', () => {
   if (saveBtn) saveBtn.onclick = () => {
     const g   = document.getElementById('admin-gemini');
     const mod = document.getElementById('admin-model');
-    const wholes = document.getElementById('admin-wholesalers');
     localStorage.setItem(K.g, g   ? g.value.trim()   : '');
     localStorage.setItem(K.m, mod ? mod.value.trim() : '');
-    if (wholes) {
-      const wList = wholes.value.split(',').map(s => s.trim()).filter(Boolean);
-      if (wList.length > 0) {
-        localStorage.setItem('pb_wholesalers', JSON.stringify(wList));
+    
+    if (selectedAdminWholesalers.length > 0) {
+      localStorage.setItem('pb_wholesalers', JSON.stringify(selectedAdminWholesalers));
+      initDynamicWholesalers();
+      filterFacturas();
+      if (!document.getElementById('tab-analisis').classList.contains('hidden')) {
+        loadAnalisis(false);
       }
+      closeAdmin();
+    } else {
+      alert('Por favor, selecciona al menos un mayorista.');
     }
-    initDynamicWholesalers();
-    filterFacturas();
-    if (!document.getElementById('tab-analisis').classList.contains('hidden')) {
-      loadAnalisis(false);
-    }
-    closeAdmin();
   };
 
   // Guardar configuración inicial de mayoristas
   const onbSaveBtn = document.getElementById('onb-wholesalers-save');
   if (onbSaveBtn) {
     onbSaveBtn.onclick = () => {
-      const inp = document.getElementById('onb-wholesalers');
-      if (inp) {
-        const wList = inp.value.split(',').map(s => s.trim()).filter(Boolean);
-        if (wList.length > 0) {
-          localStorage.setItem('pb_wholesalers', JSON.stringify(wList));
-          initDynamicWholesalers();
-          filterFacturas();
-          if (!document.getElementById('tab-analisis').classList.contains('hidden')) {
-            loadAnalisis(false);
-          }
-          document.getElementById('wholesaler-onboarding-modal').classList.add('hidden');
-        } else {
-          alert('Por favor, indica al menos un mayorista.');
+      if (selectedOnbWholesalers.length > 0) {
+        localStorage.setItem('pb_wholesalers', JSON.stringify(selectedOnbWholesalers));
+        initDynamicWholesalers();
+        filterFacturas();
+        if (!document.getElementById('tab-analisis').classList.contains('hidden')) {
+          loadAnalisis(false);
         }
+        document.getElementById('wholesaler-onboarding-modal').classList.add('hidden');
+      } else {
+        alert('Por favor, selecciona al menos un mayorista.');
       }
     };
+  }
+
+  // Keydown listeners for custom inputs to add on Enter
+  const onbCustomInput = document.getElementById('onb-custom-wholesaler');
+  if (onbCustomInput) {
+    onbCustomInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        addOnbCustom();
+      }
+    });
+  }
+
+  const adminCustomInput = document.getElementById('admin-custom-wholesaler');
+  if (adminCustomInput) {
+    adminCustomInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        addAdminCustom();
+      }
+    });
   }
 
   // Enter key on login form
@@ -4773,9 +4969,11 @@ document.addEventListener('DOMContentLoaded', () => {
       
       // Mostrar onboarding de mayoristas si es la primera vez que inicia sesión en este navegador
       if (localStorage.getItem('pb_wholesalers') === null) {
+        selectedOnbWholesalers = ['FedeFarma'];
+        updateOnbUI();
         document.getElementById('wholesaler-onboarding-modal').classList.remove('hidden');
       }
-
+      
       const sf = document.getElementById('search-facturas');
       if (sf) { sf.value = ''; }
       loadFacturas();
