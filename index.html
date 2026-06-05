@@ -3212,15 +3212,119 @@ function renderAnalisisCharts(records) {
   const genPalette = n => { const base=['#2563EB','#059669','#7C3AED','#EA580C','#0891B2','#DC2626','#CA8A04','#0F766E','#9333EA','#BE185D']; return Array.from({length:n},(_,i)=>i<base.length?base[i]:`hsl(${(i*137.5)%360},65%,50%)`); };
   const tipoBarColor = {Laboratorio:'rgba(37,99,235,0.8)', FedeFarma:'rgba(124,58,237,0.8)', Otro:'rgba(107,114,128,0.8)'};
   const defaultBarColor = isWholesaler(activeAnalisisTipo) || activeAnalisisTipo === 'FedeFarma' ? 'rgba(124,58,237,0.8)' : (tipoBarColor[activeAnalisisTipo] || 'rgba(37,99,235,0.8)');
-  const barColors = allLabs.map(([lab,val]) => budgets[lab] && val > budgets[lab] ? 'rgba(220,38,38,0.8)' : defaultBarColor);
-  mkChart('chart-labs','bar',{labels:allLabs.map(([l])=>l),datasets:[{label:'€',data:allLabs.map(([,v])=>v),backgroundColor:barColors,borderRadius:6,borderSkipped:false}]},{plugins:{legend:{display:false},tooltip:{callbacks:{afterLabel:ctx=>{const lab=allLabs[ctx.dataIndex][0];return budgets[lab]?'Presupuesto: '+budgets[lab].toLocaleString('es-ES')+'€':'';}}},},scales:{y:{ticks:{callback:v=>v.toLocaleString('es-ES')+'€',font:{size:11}}},x:{ticks:{font:{size:11}}}}});
-  if (allLabs.length) mkChart('chart-donut','doughnut',{labels:allLabs.map(([l])=>l),datasets:[{data:allLabs.map(([,v])=>v),backgroundColor:genPalette(allLabs.length),borderWidth:2,borderColor:'#fff',hoverOffset:6}]},{plugins:{legend:{position:'bottom',labels:{font:{size:11},padding:10}}},cutout:'65%'});
+  const wholesalers = getWholesalers();
 
-  const byMonth = {};
-  facturasChart.forEach(r=>{ const f=r.fields.Fecha; if(f){const k=f.slice(0,7); byMonth[k]=(byMonth[k]||0)+(r.fields.Importe||0);} });
-  const months = Object.entries(byMonth).sort(([a],[b])=>a.localeCompare(b));
-  const mLabels = months.map(([k])=>{ const [y,m]=k.split('-'); return new Date(y,m-1).toLocaleDateString('es-ES',{month:'short',year:'2-digit'}); });
-  mkChart('chart-monthly','bar',{labels:mLabels,datasets:[{label:'€',data:months.map(([,v])=>v),backgroundColor:defaultBarColor.replace('0.8','0.7'),borderRadius:4}]},{plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>v.toLocaleString('es-ES')+'€',font:{size:11}}},x:{ticks:{font:{size:11}}}}});
+  const barColors = allLabs.map(([lab,val], idx) => {
+    if (budgets[lab] && val > budgets[lab]) return 'rgba(220,38,38,0.8)';
+    if (activeAnalisisTipo === 'FedeFarma') {
+      const baseColors = [
+        'rgba(37, 99, 235, 0.8)',   // blue
+        'rgba(5, 150, 105, 0.8)',   // green/emerald
+        'rgba(124, 58, 237, 0.8)',  // purple
+        'rgba(234, 88, 12, 0.8)',   // orange
+        'rgba(8, 145, 178, 0.8)'    // cyan
+      ];
+      const wIdx = wholesalers.indexOf(lab);
+      return wIdx !== -1 ? baseColors[wIdx % baseColors.length] : defaultBarColor;
+    }
+    return defaultBarColor;
+  });
+
+  mkChart('chart-labs','bar',{labels:allLabs.map(([l])=>l),datasets:[{label:'€',data:allLabs.map(([,v])=>v),backgroundColor:barColors,borderRadius:6,borderSkipped:false}]},{plugins:{legend:{display:false},tooltip:{callbacks:{afterLabel:ctx=>{const lab=allLabs[ctx.dataIndex][0];return budgets[lab]?'Presupuesto: '+budgets[lab].toLocaleString('es-ES')+'€':'';}}},},scales:{y:{ticks:{callback:v=>v.toLocaleString('es-ES')+'€',font:{size:11}}},x:{ticks:{font:{size:11}}}}});
+  
+  if (allLabs.length) {
+    const donutColors = allLabs.map(([lab]) => {
+      if (activeAnalisisTipo === 'FedeFarma') {
+        const baseColors = ['#2563EB', '#059669', '#7C3AED', '#EA580C', '#0891B2'];
+        const wIdx = wholesalers.indexOf(lab);
+        return wIdx !== -1 ? baseColors[wIdx % baseColors.length] : '#7C3AED';
+      }
+      return null;
+    });
+    const finalPalette = activeAnalisisTipo === 'FedeFarma' ? donutColors : genPalette(allLabs.length);
+    mkChart('chart-donut','doughnut',{labels:allLabs.map(([l])=>l),datasets:[{data:allLabs.map(([,v])=>v),backgroundColor:finalPalette,borderWidth:2,borderColor:'#fff',hoverOffset:6}]},{plugins:{legend:{position:'bottom',labels:{font:{size:11},padding:10}}},cutout:'65%'});
+  }
+
+  if (activeAnalisisTipo === 'FedeFarma') {
+    // Stacked monthly chart for wholesalers
+    const uniqueMonthsSet = new Set();
+    facturasChart.forEach(r => { if (r.fields.Fecha) uniqueMonthsSet.add(r.fields.Fecha.slice(0, 7)); });
+    const sortedMonths = Array.from(uniqueMonthsSet).sort((a, b) => a.localeCompare(b));
+    const mLabels = sortedMonths.map(k => {
+      const [y, m] = k.split('-');
+      return new Date(y, m - 1).toLocaleDateString('es-ES', { month: 'short', year: '2-digit' });
+    });
+
+    const values = {};
+    sortedMonths.forEach(m => {
+      values[m] = {};
+      wholesalers.forEach(w => values[m][w] = 0);
+    });
+
+    facturasChart.forEach(r => {
+      const f = r.fields.Fecha;
+      if (f) {
+        const k = f.slice(0, 7);
+        const t = r.fields.Tipo || 'Otro';
+        if (wholesalers.includes(t)) {
+          values[k][t] += r.fields.Importe || 0;
+        }
+      }
+    });
+
+    const baseColors = [
+      'rgba(37, 99, 235, 0.7)',   // blue
+      'rgba(5, 150, 105, 0.7)',   // green/emerald
+      'rgba(124, 58, 237, 0.7)',  // purple
+      'rgba(234, 88, 12, 0.7)',   // orange
+      'rgba(8, 145, 178, 0.7)'    // cyan
+    ];
+
+    const datasets = wholesalers.map((w, idx) => ({
+      label: w,
+      data: sortedMonths.map(m => values[m][w]),
+      backgroundColor: baseColors[idx % baseColors.length],
+      borderRadius: 4
+    }));
+
+    mkChart('chart-monthly', 'bar', { labels: mLabels, datasets: datasets }, {
+      plugins: { legend: { display: true, position: 'top', labels: { font: { size: 10 }, color: '#94a3b8' } } },
+      scales: {
+        y: { stacked: true, ticks: { callback: v => v.toLocaleString('es-ES') + '€', font: { size: 11 } } },
+        x: { stacked: true, ticks: { font: { size: 11 } } }
+      }
+    });
+  } else {
+    // Normal single-dataset chart
+    const byMonth = {};
+    facturasChart.forEach(r => {
+      const f = r.fields.Fecha;
+      if (f) {
+        const k = f.slice(0, 7);
+        byMonth[k] = (byMonth[k] || 0) + (r.fields.Importe || 0);
+      }
+    });
+    const months = Object.entries(byMonth).sort(([a], [b]) => a.localeCompare(b));
+    const mLabels = months.map(([k]) => {
+      const [y, m] = k.split('-');
+      return new Date(y, m - 1).toLocaleDateString('es-ES', { month: 'short', year: '2-digit' });
+    });
+    mkChart('chart-monthly', 'bar', {
+      labels: mLabels,
+      datasets: [{
+        label: '€',
+        data: months.map(([, v]) => v),
+        backgroundColor: defaultBarColor.replace('0.8', '0.7'),
+        borderRadius: 4
+      }]
+    }, {
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { ticks: { callback: v => v.toLocaleString('es-ES') + '€', font: { size: 11 } } },
+        x: { ticks: { font: { size: 11 } } }
+      }
+    });
+  }
 
   // ─ Gráficas de abonos ─
   if (!abonos.length) { abonoChartsEl.classList.add('hidden'); return; }
