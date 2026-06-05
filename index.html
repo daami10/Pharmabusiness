@@ -3401,7 +3401,7 @@ function renderAnalisisCharts(records) {
   document.getElementById('kpi-abono-count').textContent = abonos.length;
   const kpiNeto = document.getElementById('kpi-balance-neto');
   kpiNeto.textContent = fmt(balanceNeto);
-  kpiNeto.className = 'text-2xl font-black ' + (balanceNeto >= 0 ? 'text-gray-900' : 'text-green-700');
+  kpiNeto.className = 'text-2xl font-black ' + (balanceNeto >= 0 ? 'text-white' : 'text-emerald-400');
 
   const byLabAbono = {};
   abonos.forEach(r=>{ const l=r.fields.Laboratorio||'Sin nombre'; byLabAbono[l]=(byLabAbono[l]||0)+(r.fields.Importe||0); });
