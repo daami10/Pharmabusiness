@@ -85,6 +85,11 @@
     ::-webkit-scrollbar-thumb:hover {
       background: rgba(255, 255, 255, 0.2);
     }
+    /* Estilo para los selectores de fecha nativos */
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(1) brightness(1.5);
+      cursor: pointer;
+    }
   </style>
 </head>
 <body class="bg-slate-950 text-[#f1f5f9] antialiased min-h-screen relative overflow-x-hidden">
@@ -3179,9 +3184,9 @@ function renderCalendar() {
       if (recs.length > 1) dots += `<div class="text-center" style="font-size:9px;line-height:1;color:#6b7280">${recs.length}</div>`;
     }
 
-    const ringClass   = isToday ? 'ring-2 ring-blue-500 ring-offset-1' : '';
-    const cursorClass = recs.length ? 'cursor-pointer hover:bg-blue-50' : '';
-    const numClass    = isToday ? 'font-black text-blue-600' : 'text-gray-700';
+    const ringClass   = isToday ? 'ring-2 ring-[#00f2fe]' : '';
+    const cursorClass = recs.length ? 'cursor-pointer hover:bg-white/10' : '';
+    const numClass    = isToday ? 'font-black text-[#00f2fe]' : 'text-slate-300';
 
     html += `<div onclick="calScrollToDay('${dateStr}')" class="aspect-square flex flex-col items-center justify-start pt-1 rounded-lg ${ringClass} ${cursorClass} transition-colors select-none">
       <span class="text-xs ${numClass}">${d}</span>
