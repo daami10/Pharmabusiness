@@ -175,6 +175,12 @@
         <button onclick="toggleSidebar()" class="lg:hidden p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-colors">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
         </button>
+        
+        <!-- Year Selector -->
+        <div class="flex items-center bg-slate-950/40 border border-white/5 rounded-xl p-0.5 shadow-inner select-none ml-2 shrink-0">
+          <button onclick="setYearFilter('2025')" id="year-btn-2025" class="px-3.5 py-1.5 rounded-lg text-xs font-black transition-all text-slate-400 hover:text-slate-200">2025</button>
+          <button onclick="setYearFilter('2026')" id="year-btn-2026" class="px-3.5 py-1.5 rounded-lg text-xs font-black transition-all bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow shadow-indigo-500/20">2026</button>
+        </div>
       </div>
 
       <!-- Right: Profile Info -->
@@ -1849,6 +1855,50 @@ const GEMINI_KEY_DEFAULT = 'AIzaSyC3QilDhZemS2obK8Wv4uvjQCYo9cmA_aA';
 const { createClient } = window.supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+let activeYear = '2026';
+
+function setYearFilter(year) {
+  activeYear = String(year);
+  if (typeof calYear !== 'undefined') {
+    calYear = parseInt(year, 10);
+  }
+  
+  const btn2025 = document.getElementById('year-btn-2025');
+  const btn2026 = document.getElementById('year-btn-2026');
+  
+  const activeClass = ['bg-gradient-to-r', 'from-blue-500', 'to-indigo-600', 'text-white', 'shadow', 'shadow-indigo-500/20'];
+  const inactiveClass = ['text-slate-400', 'hover:text-slate-200'];
+  
+  if (btn2025 && btn2026) {
+    if (year === '2025') {
+      btn2025.classList.remove(...inactiveClass);
+      btn2025.classList.add(...activeClass);
+      btn2026.classList.remove(...activeClass);
+      btn2026.classList.add(...inactiveClass);
+    } else {
+      btn2026.classList.remove(...inactiveClass);
+      btn2026.classList.add(...activeClass);
+      btn2025.classList.remove(...activeClass);
+      btn2025.classList.add(...inactiveClass);
+    }
+  }
+
+  // Refresh UI components dynamically
+  if (typeof renderInicio === 'function') renderInicio();
+  if (typeof filterFacturas === 'function') filterFacturas();
+  if (typeof renderAbonos === 'function') renderAbonos();
+  if (typeof renderCalendar === 'function') renderCalendar();
+  if (typeof renderNominas === 'function') renderNominas();
+  if (typeof renderSeguros === 'function') renderSeguros();
+  if (typeof renderFiscalidad === 'function') renderFiscalidad();
+  
+  // Refresh analysis if active
+  const isAnalisisActive = document.getElementById('tab-btn-analisis')?.classList.contains('tab-active');
+  if (isAnalisisActive && typeof loadAnalisis === 'function') {
+    loadAnalisis(true);
+  }
+}
+window.setYearFilter = setYearFilter;
 const K = { g: 'pb_gemini', m: 'pb_model' };
 const getGemini = () => localStorage.getItem(K.g) || GEMINI_KEY_DEFAULT;
 const getModel  = () => localStorage.getItem(K.m) || '';
@@ -2259,7 +2309,7 @@ function switchTab(tab) {
 function renderInicio() {
   try {
     const now = new Date();
-    const currentYear = now.getFullYear();
+    const currentYear = activeYear;
     const currentMonth = String(now.getMonth() + 1).padStart(2, '0');
     const realKey = currentYear + '-' + currentMonth;
     
@@ -2515,6 +2565,8 @@ function filterFacturas() {
   const min = minVal !== '' ? parseFloat(minVal) : null;
   const max = maxVal !== '' ? parseFloat(maxVal) : null;
   renderTable(allFacturas.filter(r => {
+    const dateVal = r.fields.Fecha || r.fields.FechaVencimiento;
+    const okYear = dateVal && dateVal.slice(0,4) === activeYear;
     const ok1 = !s || (r.fields.Laboratorio||'').toLowerCase().includes(s) || (r.fields.NumFactura||'').toLowerCase().includes(s);
     const ok2 = !m || (r.fields.Fecha||'').slice(5,7) === m;
     const ok3 = !activeTipo || (activeTipo === 'FedeFarma' ? isWholesaler(r.fields.Tipo) : (r.fields.Tipo||'') === activeTipo);
@@ -2522,7 +2574,7 @@ function filterFacturas() {
     const imp = r.fields.Importe || 0;
     const ok5 = min === null || imp >= min;
     const ok6 = max === null || imp <= max;
-    return ok1 && ok2 && ok3 && ok4 && ok5 && ok6;
+    return okYear && ok1 && ok2 && ok3 && ok4 && ok5 && ok6;
   }));
 }
 
@@ -3066,6 +3118,12 @@ async function loadAnalisis(force) {
   let filtered = records;
   if (desde) filtered = filtered.filter(r => (r.fields.FechaVencimiento || r.fields.Fecha || '') >= desde);
   if (hastaLimit) filtered = filtered.filter(r => (r.fields.FechaVencimiento || r.fields.Fecha || '') <= hastaLimit);
+  if (!desde && !hastaLimit) {
+    filtered = filtered.filter(r => {
+      const dt = r.fields.FechaVencimiento || r.fields.Fecha || '';
+      return dt.slice(0, 4) === activeYear;
+    });
+  }
   renderAnalisisCharts(filtered);
 }
 
@@ -3120,6 +3178,10 @@ function renderAnalisisCharts(records) {
   let segFilt = allSeguros, nomFilt = allNominas;
   if (desde) { segFilt = segFilt.filter(s=>(s.fecha||'')>=desde); nomFilt = nomFilt.filter(n=>(n.fecha||'')>=desde); }
   if (hastaLimit) { segFilt = segFilt.filter(s=>(s.fecha||'')<=hastaLimit); nomFilt = nomFilt.filter(n=>(n.fecha||'')<=hastaLimit); }
+  if (!desde && !hastaLimit) {
+    segFilt = segFilt.filter(s => (s.fecha || '').slice(0, 4) === activeYear);
+    nomFilt = nomFilt.filter(n => (n.fecha || '').slice(0, 4) === activeYear);
+  }
   const totalTrab = segFilt.reduce((s,r)=>s+Number(r.importe),0) + nomFilt.reduce((s,r)=>s+Number(r.importe),0);
   const countTrab = segFilt.length + nomFilt.length;
   document.getElementById('kpi-trab-total').textContent = fmt(totalTrab);
@@ -3129,6 +3191,9 @@ function renderAnalisisCharts(records) {
   let fisFilt = allFiscalidad;
   if (desde) { fisFilt = fisFilt.filter(f=>(f.fecha||'')>=desde); }
   if (hastaLimit) { fisFilt = fisFilt.filter(f=>(f.fecha||'')<=hastaLimit); }
+  if (!desde && !hastaLimit) {
+    fisFilt = fisFilt.filter(f => (f.fecha || '').slice(0, 4) === activeYear);
+  }
   
   // Si hay filtros de fecha activos, permitimos simular e incluir previsiones futuras.
   // Si no hay filtros de fecha, ocultamos las previsiones futuras del acumulado.
@@ -3398,7 +3463,7 @@ function mkChart(id,type,data,options) {
 
 // ─── Abonos ───────────────────────────────────────────────────────────────────
 function renderAbonos() {
-  allAbonos = allFacturas.filter(r => r.fields.Tipo === 'Abono');
+  allAbonos = allFacturas.filter(r => r.fields.Tipo === 'Abono' && r.fields.Fecha && r.fields.Fecha.slice(0, 4) === activeYear);
   const tbody = document.getElementById('abonos-tbody');
   const empty = document.getElementById('abonos-empty');
   const table = document.getElementById('abonos-table');
@@ -3785,6 +3850,7 @@ function renderSeguros() {
   
   const groups = {};
   allSeguros.forEach(s => {
+    if (s.fecha && s.fecha.slice(0, 4) !== activeYear) return;
     const key = s.fecha ? s.fecha.slice(0, 7) : '0000-00';
     if (!groups[key]) groups[key] = [];
     groups[key].push(s);
@@ -3840,7 +3906,7 @@ function renderSeguros() {
     return headerRow + dataRows;
   }).join('');
   
-  const total = allSeguros.reduce((s, r) => s + Number(r.importe), 0);
+  const total = allSeguros.filter(s => s.fecha && s.fecha.slice(0, 4) === activeYear).reduce((s, r) => s + Number(r.importe), 0);
   document.getElementById('seguros-total').textContent = total.toLocaleString('es-ES', {minimumFractionDigits:2}) + ' €';
 }
 
@@ -3857,6 +3923,7 @@ function renderNominas() {
   
   const groups = {};
   allNominas.forEach(n => {
+    if (n.fecha && n.fecha.slice(0, 4) !== activeYear) return;
     const key = n.fecha ? n.fecha.slice(0, 7) : '0000-00';
     if (!groups[key]) groups[key] = [];
     groups[key].push(n);
@@ -3913,7 +3980,7 @@ function renderNominas() {
     return headerRow + dataRows;
   }).join('');
   
-  const total = allNominas.reduce((s, r) => s + Number(r.importe), 0);
+  const total = allNominas.filter(n => n.fecha && n.fecha.slice(0, 4) === activeYear).reduce((s, r) => s + Number(r.importe), 0);
   document.getElementById('nominas-total').textContent = total.toLocaleString('es-ES', {minimumFractionDigits:2}) + ' €';
 }
 
@@ -4137,7 +4204,9 @@ function toggleFiscalGroup(safeKey) {
 function renderFiscalidad() {
   document.getElementById('fiscal-loading').classList.add('hidden');
   renderInicio();
-  if (!allFiscalidad.length) {
+  const filteredFiscalidad = allFiscalidad.filter(f => f.fecha && f.fecha.slice(0, 4) === activeYear);
+
+  if (!filteredFiscalidad.length) {
     document.getElementById('fiscal-empty').innerHTML = `
       <svg class="w-12 h-12 text-slate-600 mx-auto mb-3" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
       <p class="text-slate-400 font-bold">Sin impuestos registrados</p>
@@ -4160,7 +4229,7 @@ function renderFiscalidad() {
   let totalAutonomo = 0;
   let totalRentaSoc = 0;
 
-  allFiscalidad.forEach(f => {
+  filteredFiscalidad.forEach(f => {
     if (isFuturePeriod(f.fecha)) return;
     const imp = Number(f.importe);
     totalImpuestos += imp;
@@ -4179,7 +4248,7 @@ function renderFiscalidad() {
   document.getElementById('kpi-fiscal-renta').textContent = totalRentaSoc.toLocaleString('es-ES', {minimumFractionDigits:2}) + ' €';
 
   const groups = {};
-  allFiscalidad.forEach(f => {
+  filteredFiscalidad.forEach(f => {
     const key = f.fecha ? f.fecha.slice(0, 7) : '0000-00';
     if (!groups[key]) groups[key] = [];
     groups[key].push(f);
