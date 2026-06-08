@@ -9,7 +9,7 @@ import { useFacturas } from '@/lib/queries/facturas'
 import { useFiscalidad } from '@/lib/queries/fiscalidad'
 import { useNominas, useSeguros } from '@/lib/queries/trabajadores'
 import { useYearStore } from '@/stores/yearStore'
-import { getWholesalers } from '@/lib/config/wholesalers'
+import { useWholesalersStore } from '@/stores/wholesalersStore'
 import { formatMoney } from '@/lib/utils/money'
 import { analyzeFacturas, filterByDateRange } from './lib/analisis-view'
 import type { AnalisisCategory } from './lib/analisis-view'
@@ -38,7 +38,7 @@ export function AnalisisPage() {
   const nominas = useNominas()
   const seguros = useSeguros()
 
-  const wholesalers = useMemo(() => getWholesalers(), [])
+  const wholesalers = useWholesalersStore((s) => s.wholesalers)
   const [category, setCategory] = useState<AnalisisCategory>('')
   const [desde, setDesde] = useState('')
   const [hasta, setHasta] = useState('')

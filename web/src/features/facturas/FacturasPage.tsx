@@ -5,7 +5,8 @@ import { Calendar } from './Calendar'
 import { downloadFacturasCSV } from './lib/csv'
 import { useFacturas, useDeleteFactura } from '@/lib/queries/facturas'
 import { useYearStore } from '@/stores/yearStore'
-import { getWholesalers, isWholesaler } from '@/lib/config/wholesalers'
+import { isWholesaler } from '@/lib/config/wholesalers'
+import { useWholesalersStore } from '@/stores/wholesalersStore'
 import { formatMoney } from '@/lib/utils/money'
 import { formatDate } from '@/lib/utils/dates'
 import { StatusBadge } from '@/components/ui/StatusBadge'
@@ -36,7 +37,7 @@ export function FacturasPage() {
   const deleteFactura = useDeleteFactura()
   const year = useYearStore((s) => s.year)
 
-  const wholesalers = useMemo(() => getWholesalers(), [])
+  const wholesalers = useWholesalersStore((s) => s.wholesalers)
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState<FacturaCategory>('')
   // Estado de expansión: solo guardamos las desviaciones del usuario respecto al
