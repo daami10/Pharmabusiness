@@ -1,0 +1,21 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import 'tailwindcss';
+
+/* Tokens de marca GFarma (heredados del diseño actual) */
+@theme {
+  --color-brand: #2563eb;
+  --color-darkbg: #090d16;
+  --color-accent-blue: #00f2fe;
+  --color-accent-emerald: #10b981;
+  --font-sans: 'Outfit', 'Inter', sans-serif;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font-sans);
+  background: radial-gradient(circle at top left, #0f203d 0%, #050a12 90%);
+  color: #f1f5f9;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
