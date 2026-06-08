@@ -841,6 +841,10 @@
         <label class="block text-sm font-medium text-slate-300 mb-1.5">Notas (opcional)</label>
         <input id="fiscal-notas" type="text" placeholder="Observaciones..." class="w-full px-4 py-2.5 rounded-xl border border-white/5 bg-slate-950/40 text-slate-100 placeholder-slate-500 focus:border-[#00f2fe]/40 focus:ring-0 focus:outline-none text-sm transition-all">
       </div>
+      <div class="flex items-center gap-2 mt-2 select-none" id="fiscal-repetir-container">
+        <input type="checkbox" id="fiscal-repetir" class="w-4 h-4 rounded border-white/10 bg-slate-950/40 text-blue-500 focus:ring-0 focus:ring-offset-0 cursor-pointer">
+        <label for="fiscal-repetir" class="text-xs text-slate-300 cursor-pointer">Repetir mensualmente hasta fin de año contable</label>
+      </div>
     </div>
     <div class="px-6 pb-5 flex gap-3">
       <button onclick="closeFiscalModal()" class="flex-1 px-4 py-2.5 rounded-xl border border-white/5 text-sm font-semibold text-slate-400 hover:bg-white/5 hover:text-white transition-colors bg-transparent">Cancelar</button>
@@ -976,6 +980,10 @@
         <label class="block text-sm font-medium text-slate-300 mb-1.5">Notas (opcional)</label>
         <input id="seguro-notas" type="text" placeholder="Observaciones..." class="w-full px-4 py-2.5 rounded-xl border border-white/5 bg-slate-950/40 text-slate-100 placeholder-slate-500 focus:border-[#00f2fe]/40 focus:ring-0 focus:outline-none text-sm transition-all">
       </div>
+      <div class="flex items-center gap-2 mt-2 select-none" id="seguro-repetir-container">
+        <input type="checkbox" id="seguro-repetir" class="w-4 h-4 rounded border-white/10 bg-slate-950/40 text-blue-500 focus:ring-0 focus:ring-offset-0 cursor-pointer">
+        <label for="seguro-repetir" class="text-xs text-slate-300 cursor-pointer">Repetir mensualmente hasta fin de año contable</label>
+      </div>
     </div>
     <div class="px-6 pb-5 flex gap-3">
       <button onclick="closeSeguroModal()" class="flex-1 px-4 py-2.5 rounded-xl border border-white/5 text-sm font-semibold text-slate-400 hover:bg-white/5 hover:text-white transition-colors bg-transparent">Cancelar</button>
@@ -1052,6 +1060,10 @@
       <div>
         <label class="block text-sm font-medium text-slate-300 mb-1.5">Concepto (opcional)</label>
         <input id="nomina-concepto" type="text" placeholder="Ej: Paga doble" class="w-full px-4 py-2.5 rounded-xl border border-white/5 bg-slate-950/40 text-slate-100 placeholder-slate-500 focus:border-[#00f2fe]/40 focus:ring-0 focus:outline-none text-sm transition-all">
+      </div>
+      <div class="flex items-center gap-2 mt-2 select-none" id="nomina-repetir-container">
+        <input type="checkbox" id="nomina-repetir" class="w-4 h-4 rounded border-white/10 bg-slate-950/40 text-blue-500 focus:ring-0 focus:ring-offset-0 cursor-pointer">
+        <label for="nomina-repetir" class="text-xs text-slate-300 cursor-pointer">Repetir mensualmente hasta fin de año contable</label>
       </div>
     </div>
     <div class="px-6 pb-5 flex gap-3">
@@ -4007,6 +4019,8 @@ function openSeguroModal() {
   document.getElementById('seguro-anio').value = String(now.getFullYear());
   document.getElementById('seguro-importe').value = '';
   document.getElementById('seguro-notas').value = '';
+  document.getElementById('seguro-repetir').checked = false;
+  document.getElementById('seguro-repetir-container').classList.remove('hidden');
   document.getElementById('seguro-modal').classList.remove('hidden');
 }
 function openEditSeguroModal(id) {
@@ -4022,6 +4036,7 @@ function openEditSeguroModal(id) {
   }
   document.getElementById('seguro-importe').value = s.importe || '';
   document.getElementById('seguro-notas').value = s.notes || s.notas || '';
+  document.getElementById('seguro-repetir-container').classList.add('hidden');
   document.getElementById('seguro-modal').classList.remove('hidden');
 }
 function closeSeguroModal() { document.getElementById('seguro-modal').classList.add('hidden'); }
@@ -4042,9 +4057,23 @@ async function saveSeguro() {
     const idx = allSeguros.findIndex(r => r.id === editingId);
     if (idx !== -1) allSeguros[idx] = data;
   } else {
-    const { data, error } = await sb.from('seguros_sociales').insert([{ user_id: user.id, fecha, importe, notas }]).select().single();
-    if (error) { alert('Error: ' + error.message); return; }
-    allSeguros.unshift(data);
+    const repetir = document.getElementById('seguro-repetir')?.checked;
+    if (repetir) {
+      const months = getRemainingMonths(mes);
+      const records = months.map(m => ({
+        user_id: user.id,
+        fecha: `${anio}-${m}-01`,
+        importe,
+        notas
+      }));
+      const { data, error } = await sb.from('seguros_sociales').insert(records).select();
+      if (error) { alert('Error: ' + error.message); return; }
+      allSeguros.push(...data);
+    } else {
+      const { data, error } = await sb.from('seguros_sociales').insert([{ user_id: user.id, fecha, importe, notas }]).select().single();
+      if (error) { alert('Error: ' + error.message); return; }
+      allSeguros.unshift(data);
+    }
   }
   
   allSeguros.sort((a,b) => (b.fecha || '').localeCompare(a.fecha || ''));
@@ -4096,6 +4125,8 @@ function openNominaModal() {
   const sel = document.getElementById('nomina-trabajador');
   sel.innerHTML = '<option value="">Seleccionar trabajador...</option>' +
     allTrabajadores.map(t => `<option value="${t.id}" data-nombre="${esc(t.nombre)}">${esc(t.nombre)}</option>`).join('');
+  document.getElementById('nomina-repetir').checked = false;
+  document.getElementById('nomina-repetir-container').classList.remove('hidden');
   document.getElementById('nomina-modal').classList.remove('hidden');
 }
 function openEditNominaModal(id) {
@@ -4115,6 +4146,7 @@ function openEditNominaModal(id) {
   }
   document.getElementById('nomina-importe').value = n.importe || '';
   document.getElementById('nomina-concepto').value = n.concepto || n.concepto_nombre || '';
+  document.getElementById('nomina-repetir-container').classList.add('hidden');
   document.getElementById('nomina-modal').classList.remove('hidden');
 }
 function closeNominaModal() { document.getElementById('nomina-modal').classList.add('hidden'); }
@@ -4138,9 +4170,25 @@ async function saveNomina() {
     const idx = allNominas.findIndex(r => r.id === editingId);
     if (idx !== -1) allNominas[idx] = data;
   } else {
-    const { data, error } = await sb.from('nominas').insert([{ user_id: user.id, trabajador_id, trabajador_nombre, fecha, importe, concepto }]).select().single();
-    if (error) { alert('Error: ' + error.message); return; }
-    allNominas.unshift(data);
+    const repetir = document.getElementById('nomina-repetir')?.checked;
+    if (repetir) {
+      const months = getRemainingMonths(mes);
+      const records = months.map(m => ({
+        user_id: user.id,
+        trabajador_id,
+        trabajador_nombre,
+        fecha: `${anio}-${m}-01`,
+        importe,
+        concepto
+      }));
+      const { data, error } = await sb.from('nominas').insert(records).select();
+      if (error) { alert('Error: ' + error.message); return; }
+      allNominas.push(...data);
+    } else {
+      const { data, error } = await sb.from('nominas').insert([{ user_id: user.id, trabajador_id, trabajador_nombre, fecha, importe, concepto }]).select().single();
+      if (error) { alert('Error: ' + error.message); return; }
+      allNominas.unshift(data);
+    }
   }
   
   allNominas.sort((a,b) => (b.fecha || '').localeCompare(a.fecha || ''));
@@ -4162,6 +4210,15 @@ async function deleteNomina(id) {
   if (prevModal && !prevModal.classList.contains('hidden')) {
     renderPrevision();
   }
+}
+
+function getRemainingMonths(startMonthStr) {
+  const startMonth = parseInt(startMonthStr, 10);
+  const months = [];
+  for (let m = startMonth; m <= 12; m++) {
+    months.push(String(m).padStart(2, '0'));
+  }
+  return months;
 }
 
 // ─── Fiscalidad ───────────────────────────────────────────────────────────────
@@ -4349,6 +4406,8 @@ function openFiscalModal() {
   document.getElementById('fiscal-anio').value = String(now.getFullYear());
   document.getElementById('fiscal-importe').value = '';
   document.getElementById('fiscal-notas').value = '';
+  document.getElementById('fiscal-repetir').checked = false;
+  document.getElementById('fiscal-repetir-container').classList.remove('hidden');
   document.getElementById('fiscal-modal').classList.remove('hidden');
 }
 function openEditFiscalModal(id) {
@@ -4365,6 +4424,7 @@ function openEditFiscalModal(id) {
   }
   document.getElementById('fiscal-importe').value = f.importe || '';
   document.getElementById('fiscal-notas').value = f.notas || '';
+  document.getElementById('fiscal-repetir-container').classList.add('hidden');
   document.getElementById('fiscal-modal').classList.remove('hidden');
 }
 function closeFiscalModal() {
@@ -4390,9 +4450,24 @@ async function saveFiscal() {
     const idx = allFiscalidad.findIndex(r => r.id === editingId);
     if (idx !== -1) allFiscalidad[idx] = data;
   } else {
-    const { data, error } = await sb.from('fiscalidad').insert([{ user_id: user.id, concepto, fecha, importe, notas }]).select().single();
-    if (error) { alert('Error: ' + error.message); return; }
-    allFiscalidad.unshift(data);
+    const repetir = document.getElementById('fiscal-repetir')?.checked;
+    if (repetir) {
+      const months = getRemainingMonths(mes);
+      const records = months.map(m => ({
+        user_id: user.id,
+        concepto,
+        fecha: `${anio}-${m}-01`,
+        importe,
+        notas
+      }));
+      const { data, error } = await sb.from('fiscalidad').insert(records).select();
+      if (error) { alert('Error: ' + error.message); return; }
+      allFiscalidad.push(...data);
+    } else {
+      const { data, error } = await sb.from('fiscalidad').insert([{ user_id: user.id, concepto, fecha, importe, notas }]).select().single();
+      if (error) { alert('Error: ' + error.message); return; }
+      allFiscalidad.unshift(data);
+    }
   }
 
   allFiscalidad.sort((a,b) => (b.fecha || '').localeCompare(a.fecha || ''));
