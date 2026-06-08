@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
-import { ChevronDown, Search, Trash2 } from 'lucide-react'
+import { ChevronDown, Pencil, Plus, Search, Trash2 } from 'lucide-react'
+import { FacturaModal } from './FacturaModal'
 import { useFacturas, useDeleteFactura } from '@/lib/queries/facturas'
 import { useYearStore } from '@/stores/yearStore'
 import { getWholesalers, isWholesaler } from '@/lib/config/wholesalers'
@@ -39,6 +40,8 @@ export function FacturasPage() {
   // Estado de expansión: solo guardamos las desviaciones del usuario respecto al
   // valor por defecto (primer grupo abierto, resto cerrados).
   const [overrides, setOverrides] = useState<Record<string, boolean>>({})
+  const [modalOpen, setModalOpen] = useState(false)
+  const [editing, setEditing] = useState<Factura | null>(null)
 
   const facturas = useMemo(() => data ?? [], [data])
 
@@ -88,6 +91,16 @@ export function FacturasPage() {
     deleteFactura.mutate(f.id)
   }
 
+  function openCreate() {
+    setEditing(null)
+    setModalOpen(true)
+  }
+
+  function openEdit(f: Factura) {
+    setEditing(f)
+    setModalOpen(true)
+  }
+
   const total = netTotal(visible)
   const nFacturas = visible.filter((f) => f.tipo !== 'Abono').length
   const nAbonos = visible.filter((f) => f.tipo === 'Abono').length
@@ -103,10 +116,22 @@ export function FacturasPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-8">
-      <h1 className="text-3xl font-extrabold tracking-tight text-white">Facturas</h1>
-      <p className="mt-1 text-sm text-slate-400">
-        Gastos de proveedores y abonos de {year}.
-      </p>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-extrabold tracking-tight text-white">Facturas</h1>
+          <p className="mt-1 text-sm text-slate-400">
+            Gastos de proveedores y abonos de {year}.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={openCreate}
+          className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-accent-blue px-5 py-2.5 text-sm font-bold text-slate-950 shadow-lg transition-all hover:opacity-90"
+        >
+          <Plus className="h-4 w-4" strokeWidth={2.5} />
+          Nueva factura
+        </button>
+      </div>
 
       {/* Filtros */}
       <div className="mt-6 space-y-3">
@@ -169,6 +194,7 @@ export function FacturasPage() {
                   onToggle={() => toggle(g.key, idx)}
                   items={g.items}
                   wholesalers={wholesalers}
+                  onEdit={openEdit}
                   onDelete={onDelete}
                 />
               ))}
@@ -187,6 +213,12 @@ export function FacturasPage() {
           <span className="text-lg font-black text-white">{formatMoney(total)}</span>
         </div>
       )}
+
+      <FacturaModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        factura={editing}
+      />
     </div>
   )
 }
@@ -200,6 +232,7 @@ function FragmentGroup({
   onToggle,
   items,
   wholesalers,
+  onEdit,
   onDelete,
 }: {
   groupKey: string
@@ -210,6 +243,7 @@ function FragmentGroup({
   onToggle: () => void
   items: Factura[]
   wholesalers: string[]
+  onEdit: (f: Factura) => void
   onDelete: (f: Factura) => void
 }) {
   return (
@@ -284,14 +318,24 @@ function FragmentGroup({
                 )}
               </td>
               <td className="px-6 py-4 text-right">
-                <button
-                  type="button"
-                  onClick={() => onDelete(f)}
-                  className="rounded-xl p-1.5 text-slate-400 transition-all hover:bg-white/5 hover:text-red-400"
-                  aria-label="Eliminar"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
+                <span className="flex items-center justify-end gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => onEdit(f)}
+                    className="rounded-xl p-1.5 text-slate-400 transition-all hover:bg-white/5 hover:text-white"
+                    aria-label="Editar"
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onDelete(f)}
+                    className="rounded-xl p-1.5 text-slate-400 transition-all hover:bg-white/5 hover:text-red-400"
+                    aria-label="Eliminar"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </span>
               </td>
             </tr>
           )

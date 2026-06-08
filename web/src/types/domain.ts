@@ -18,3 +18,6 @@ export interface Factura {
   notas: string | null
   pagada: boolean
 }
+
+/** Datos de una factura al crear/editar (sin id ni user_id, que los gestiona la capa de datos). */
+export type FacturaInput = Omit<Factura, 'id' | 'user_id'>
