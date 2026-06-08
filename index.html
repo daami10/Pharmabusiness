@@ -2701,6 +2701,13 @@ function renderTable(records) {
   checkBudgetAlerts(allFacturas);
   renderCalendar();
   updateTipoCounts();
+  if (typeof currentVencModalStatus !== 'undefined' && currentVencModalStatus && !document.getElementById('venc-list-modal').classList.contains('hidden')) {
+    showVencListModal(currentVencModalStatus);
+  }
+  const prevModal = document.getElementById('prevision-modal');
+  if (prevModal && !prevModal.classList.contains('hidden')) {
+    renderPrevision();
+  }
 }
 
 function toggleMesGroup(safeKey) {
@@ -3698,6 +3705,9 @@ function renderCalListFiltered() {
     const vd = new Date(f.FechaVencimiento+'T00:00:00').toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'numeric'});
     const imp = typeof f.Importe==='number' ? f.Importe.toLocaleString('es-ES',{minimumFractionDigits:2})+' €' : '';
     const rid = r.id.replace(/'/g,"\\'");
+    const isAbono = f.Tipo === 'Abono';
+    const editFn = isAbono ? `openEditAbonoModal('${rid}')` : `openEditModal('${rid}')`;
+    const deleteFn = isAbono ? `deleteAbono('${rid}')` : `deleteFactura('${rid}')`;
     const actionBtn = s !== 'paid'
       ? `<button onclick="markAsPaid('${rid}')" class="text-2xs text-emerald-400 hover:text-white font-bold bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-2.5 py-1.5 hover:bg-emerald-500/25 transition-all whitespace-nowrap">✓ Pagada</button>`
       : `<button onclick="markAsUnpaid('${rid}')" class="text-2xs text-slate-400 hover:text-white font-bold bg-white/5 border border-white/5 rounded-lg px-2.5 py-1.5 hover:bg-white/10 transition-all whitespace-nowrap">↺ Desmarcar</button>`;
@@ -3713,7 +3723,11 @@ function renderCalListFiltered() {
         </div>
         <div class="flex flex-col items-end gap-2 shrink-0">
           <span class="text-3xs font-extrabold ${cfg.text} px-2 py-0.5 rounded-full ${cfg.bg} ${cfg.border} border uppercase tracking-wider">${cfg.label}</span>
-          ${actionBtn}
+          <div class="flex items-center gap-1.5">
+            <button onclick="${editFn}" class="text-slate-400 hover:text-white p-1.5 rounded-xl hover:bg-white/5 transition-all" title="Editar"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
+            <button onclick="${deleteFn}" class="text-slate-400 hover:text-red-400 p-1.5 rounded-xl hover:bg-white/5 transition-all" title="Eliminar"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+            ${actionBtn}
+          </div>
         </div>
       </div>
     </div>`;
@@ -4036,6 +4050,10 @@ async function saveSeguro() {
   allSeguros.sort((a,b) => (b.fecha || '').localeCompare(a.fecha || ''));
   renderSeguros();
   closeSeguroModal();
+  const prevModal = document.getElementById('prevision-modal');
+  if (prevModal && !prevModal.classList.contains('hidden')) {
+    renderPrevision();
+  }
 }
 
 async function deleteSeguro(id) {
@@ -4044,6 +4062,10 @@ async function deleteSeguro(id) {
   if (error) { alert('Error: ' + error.message); return; }
   allSeguros = allSeguros.filter(s => s.id !== id);
   renderSeguros();
+  const prevModal = document.getElementById('prevision-modal');
+  if (prevModal && !prevModal.classList.contains('hidden')) {
+    renderPrevision();
+  }
 }
 
 function openTrabajadorModal() {
@@ -4124,6 +4146,10 @@ async function saveNomina() {
   allNominas.sort((a,b) => (b.fecha || '').localeCompare(a.fecha || ''));
   renderNominas();
   closeNominaModal();
+  const prevModal = document.getElementById('prevision-modal');
+  if (prevModal && !prevModal.classList.contains('hidden')) {
+    renderPrevision();
+  }
 }
 
 async function deleteNomina(id) {
@@ -4132,6 +4158,10 @@ async function deleteNomina(id) {
   if (error) { alert('Error: ' + error.message); return; }
   allNominas = allNominas.filter(n => n.id !== id);
   renderNominas();
+  const prevModal = document.getElementById('prevision-modal');
+  if (prevModal && !prevModal.classList.contains('hidden')) {
+    renderPrevision();
+  }
 }
 
 // ─── Fiscalidad ───────────────────────────────────────────────────────────────
@@ -4371,6 +4401,10 @@ async function saveFiscal() {
   if (!document.getElementById('tab-analisis').classList.contains('hidden')) loadAnalisis(true);
 
   closeFiscalModal();
+  const prevModal = document.getElementById('prevision-modal');
+  if (prevModal && !prevModal.classList.contains('hidden')) {
+    renderPrevision();
+  }
 }
 
 async function deleteFiscal(id) {
@@ -4380,6 +4414,10 @@ async function deleteFiscal(id) {
   allFiscalidad = allFiscalidad.filter(f => f.id !== id);
   renderFiscalidad();
   if (!document.getElementById('tab-analisis').classList.contains('hidden')) loadAnalisis(true);
+  const prevModal = document.getElementById('prevision-modal');
+  if (prevModal && !prevModal.classList.contains('hidden')) {
+    renderPrevision();
+  }
 }
 
 // ─── Modal Vencimientos Interactivo ───────────────────────────────────────────
@@ -4472,6 +4510,10 @@ function renderVencModalListFiltered() {
     const isPaid = getEffectiveVencStatus(r) === 'paid';
     const rid = r.id.replace(/'/g, "\\'");
     
+    const isAbono = f.Tipo === 'Abono';
+    const editFn = isAbono ? `openEditAbonoModal('${rid}')` : `openEditModal('${rid}')`;
+    const deleteFn = isAbono ? `deleteAbono('${rid}')` : `deleteFactura('${rid}')`;
+
     const actionBtn = !isPaid 
       ? `<button onclick="modalMarkAsPaid('${rid}')" class="flex items-center gap-1 text-xs font-bold bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 px-3 py-1.5 rounded-xl transition-all duration-200">✓ Pagada</button>`
       : `<button onclick="modalMarkAsUnpaid('${rid}')" class="flex items-center gap-1 text-xs font-semibold bg-white/5 border border-white/5 text-slate-400 hover:bg-white/10 hover:text-white px-3 py-1.5 rounded-xl transition-all duration-200">↺ Desmarcar</button>`;
@@ -4486,7 +4528,13 @@ function renderVencModalListFiltered() {
       </td>
       <td class="py-4 text-sm text-slate-400 font-mono">${esc(f.NumFactura) || '—'}</td>
       <td class="py-4 text-right text-sm font-extrabold text-white">${imp}</td>
-      <td class="py-4 text-right pl-4">${actionBtn}</td>
+      <td class="py-4 text-right pl-4">
+        <div class="flex items-center justify-end gap-1.5">
+          <button onclick="${editFn}" class="text-slate-400 hover:text-white p-1.5 rounded-xl hover:bg-white/5 transition-all" title="Editar"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
+          <button onclick="${deleteFn}" class="text-slate-400 hover:text-red-400 p-1.5 rounded-xl hover:bg-white/5 transition-all" title="Eliminar"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+          ${actionBtn}
+        </div>
+      </td>
     </tr>`;
   }).join('');
 
@@ -4932,12 +4980,19 @@ function renderPrevision() {
       itemsHTML += `<div class="mb-3">
         <h4 class="text-2xs font-extrabold uppercase text-blue-400 mb-1.5 tracking-wider">Facturas Proveedores</h4>
         <div class="space-y-1.5">
-          ${data.invoices.map(f => `
-            <div class="flex justify-between items-center bg-white/5 border border-white/5 px-3.5 py-2.5 rounded-xl text-xs">
-              <span class="font-semibold text-slate-300 truncate max-w-[260px]">${esc(f.fields.Laboratorio || 'Otros Proveedores')}</span>
-              <span class="font-bold text-white shrink-0">${(f.fields.Importe || 0).toLocaleString('es-ES', {minimumFractionDigits:2})} €</span>
-            </div>
-          `).join('')}
+          ${data.invoices.map(f => {
+            const rid = f.id.replace(/'/g, "\\'");
+            return `<div class="flex justify-between items-center bg-white/5 border border-white/5 px-3.5 py-2.5 rounded-xl text-xs gap-3">
+              <span class="font-semibold text-slate-300 truncate max-w-[240px]">${esc(f.fields.Laboratorio || 'Otros Proveedores')}</span>
+              <div class="flex items-center gap-2.5 shrink-0">
+                <span class="font-bold text-white">${(f.fields.Importe || 0).toLocaleString('es-ES', {minimumFractionDigits:2})} €</span>
+                <div class="flex items-center gap-1 border-l border-white/10 pl-2">
+                  <button onclick="openEditModal('${rid}')" class="text-slate-400 hover:text-white p-1 rounded transition-all" title="Editar"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
+                  <button onclick="deleteFactura('${rid}')" class="text-slate-400 hover:text-red-400 p-1 rounded transition-all" title="Eliminar"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+                </div>
+              </div>
+            </div>`;
+          }).join('')}
         </div>
       </div>`;
     }
