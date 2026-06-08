@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { ChangeEvent } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Sparkles } from 'lucide-react'
 import { Dialog } from '@/components/ui/Dialog'
-import { getWholesalers } from '@/lib/config/wholesalers'
+import { useWholesalersStore } from '@/stores/wholesalersStore'
 import { useCreateFactura, useUpdateFactura } from '@/lib/queries/facturas'
 import { scanInvoice } from './lib/ocr'
 import type { Factura, FacturaInput } from '@/types/domain'
@@ -65,7 +65,7 @@ export function FacturaModal({
   onClose: () => void
   factura: Factura | null
 }) {
-  const wholesalers = useMemo(() => getWholesalers(), [])
+  const wholesalers = useWholesalersStore((s) => s.wholesalers)
   const createFactura = useCreateFactura()
   const updateFactura = useUpdateFactura()
   const [serverError, setServerError] = useState('')

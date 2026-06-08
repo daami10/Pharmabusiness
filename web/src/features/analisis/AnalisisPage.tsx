@@ -1,14 +1,15 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { Bar, Doughnut } from 'react-chartjs-2'
 import type { ChartOptions } from 'chart.js'
-import { Trophy } from 'lucide-react'
+import { Download, Trophy } from 'lucide-react'
 import { palette } from '@/lib/chartSetup'
+import { AnalisisReport } from './AnalisisReport'
 import { useFacturas } from '@/lib/queries/facturas'
 import { useFiscalidad } from '@/lib/queries/fiscalidad'
 import { useNominas, useSeguros } from '@/lib/queries/trabajadores'
 import { useYearStore } from '@/stores/yearStore'
-import { getWholesalers } from '@/lib/config/wholesalers'
+import { useWholesalersStore } from '@/stores/wholesalersStore'
 import { formatMoney } from '@/lib/utils/money'
 import { analyzeFacturas, filterByDateRange } from './lib/analisis-view'
 import type { AnalisisCategory } from './lib/analisis-view'
@@ -37,11 +38,13 @@ export function AnalisisPage() {
   const nominas = useNominas()
   const seguros = useSeguros()
 
-  const wholesalers = useMemo(() => getWholesalers(), [])
+  const wholesalers = useWholesalersStore((s) => s.wholesalers)
   const [category, setCategory] = useState<AnalisisCategory>('')
   const [desde, setDesde] = useState('')
   const [hasta, setHasta] = useState('')
   const [rankingOpen, setRankingOpen] = useState(false)
+  const reportRef = useRef<HTMLDivElement>(null)
+  const [exporting, setExporting] = useState(false)
 
   const hasRange = !!(desde || hasta)
   const inRange = (fecha: string | null) => {
@@ -90,12 +93,47 @@ export function AnalisisPage() {
     { value: 'Otro', label: 'Otros' },
   ]
 
+  const period = hasRange ? `${desde || 'inicio'} – ${hasta || 'actual'}` : `Año ${year}`
+
+  async function exportPDF() {
+    if (!reportRef.current) return
+    setExporting(true)
+    try {
+      const html2pdf = (await import('html2pdf.js')).default
+      await html2pdf()
+        .set({
+          margin: 10,
+          filename: `analisis_gfarma_${new Date().toISOString().slice(0, 10)}.pdf`,
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: { scale: 2, useCORS: true },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        })
+        .from(reportRef.current)
+        .save()
+    } finally {
+      setExporting(false)
+    }
+  }
+
   return (
     <div className="mx-auto max-w-7xl px-6 py-8">
-      <h1 className="text-3xl font-extrabold tracking-tight text-white">Análisis</h1>
-      <p className="mt-1 text-sm text-slate-400">
-        {hasRange ? 'Periodo seleccionado' : `Año ${year}`}.
-      </p>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-extrabold tracking-tight text-white">Análisis</h1>
+          <p className="mt-1 text-sm text-slate-400">
+            {hasRange ? 'Periodo seleccionado' : `Año ${year}`}.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={exportPDF}
+          disabled={exporting || !analysis.byLab.length}
+          className="flex items-center gap-2 rounded-xl border border-white/10 px-4 py-2.5 text-sm font-bold text-slate-300 transition-all hover:bg-white/5 disabled:opacity-50"
+        >
+          <Download className="h-4 w-4" />
+          {exporting ? 'Generando…' : 'Exportar PDF'}
+        </button>
+      </div>
 
       {/* Filtros */}
       <div className="mt-6 flex flex-wrap items-end gap-4">
@@ -237,6 +275,22 @@ export function AnalisisPage() {
         onClose={() => setRankingOpen(false)}
         items={analysis.byLab}
       />
+
+      {/* Informe imprimible (fuera de pantalla) para el export a PDF */}
+      <div
+        ref={reportRef}
+        style={{ position: 'absolute', left: '-9999px', top: 0 }}
+        aria-hidden
+      >
+        <AnalisisReport
+          period={period}
+          generatedAt={new Date().toLocaleString('es-ES')}
+          analysis={analysis}
+          fiscalTotal={fiscalTotal}
+          trabTotal={trabTotal}
+          granTotal={granTotal}
+        />
+      </div>
     </div>
   )
 }

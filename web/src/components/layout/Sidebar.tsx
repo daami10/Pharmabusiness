@@ -1,10 +1,22 @@
 import { NavLink } from 'react-router-dom'
-import { LogOut } from 'lucide-react'
+import { LogOut, Settings, ShieldCheck } from 'lucide-react'
 import { useAuth } from '@/features/auth/AuthProvider'
 import { NAV_ITEMS } from './nav'
 
-export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function Sidebar({
+  open,
+  onClose,
+  onSettings,
+  onPrivacy,
+}: {
+  open: boolean
+  onClose: () => void
+  onSettings: () => void
+  onPrivacy: () => void
+}) {
   const { signOut } = useAuth()
+  const secondaryCls =
+    'flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-400 transition-all hover:bg-white/5 hover:text-white'
 
   return (
     <>
@@ -46,14 +58,24 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
           </nav>
         </div>
 
-        <button
-          type="button"
-          onClick={() => void signOut()}
-          className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-500 transition-all hover:bg-red-500/10 hover:text-red-400"
-        >
-          <LogOut className="h-5 w-5" />
-          Salir
-        </button>
+        <div className="space-y-1.5">
+          <button type="button" onClick={onSettings} className={secondaryCls}>
+            <Settings className="h-5 w-5" />
+            Configuración
+          </button>
+          <button type="button" onClick={onPrivacy} className={secondaryCls}>
+            <ShieldCheck className="h-5 w-5" />
+            Privacidad
+          </button>
+          <button
+            type="button"
+            onClick={() => void signOut()}
+            className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-500 transition-all hover:bg-red-500/10 hover:text-red-400"
+          >
+            <LogOut className="h-5 w-5" />
+            Salir
+          </button>
+        </div>
       </aside>
     </>
   )
