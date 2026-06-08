@@ -11,6 +11,13 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  // En dev, /api/scan no existe localmente (es una función serverless). Define
+  // VITE_API_PROXY_TARGET=https://<deploy> para probar el OCR contra ella.
+  server: {
+    proxy: process.env.VITE_API_PROXY_TARGET
+      ? { '/api': { target: process.env.VITE_API_PROXY_TARGET, changeOrigin: true } }
+      : undefined,
+  },
   test: {
     globals: true,
     environment: 'jsdom',

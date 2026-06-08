@@ -1,5 +1,38 @@
 export type VencStatus = 'overdue' | 'neardue' | 'pending' | 'paid'
 
+const MESES = [
+  'Enero',
+  'Febrero',
+  'Marzo',
+  'Abril',
+  'Mayo',
+  'Junio',
+  'Julio',
+  'Agosto',
+  'Septiembre',
+  'Octubre',
+  'Noviembre',
+  'Diciembre',
+]
+
+/** Formatea una fecha ISO (`YYYY-MM-DD`) como `dd/mm/aaaa`. Devuelve `—` si está vacía. */
+export function formatDate(iso: string | null | undefined): string {
+  if (!iso) return '—'
+  return new Date(`${iso}T00:00:00`).toLocaleDateString('es-ES', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  })
+}
+
+/** Etiqueta de un mes a partir de su clave `YYYY-MM`, p.ej. `Junio 2026`. */
+export function monthLabel(monthKey: string): string {
+  const [y, m] = monthKey.split('-')
+  const idx = parseInt(m, 10) - 1
+  if (Number.isNaN(idx) || idx < 0 || idx > 11) return 'Sin fecha'
+  return `${MESES[idx]} ${y}`
+}
+
 /** Estado de vencimiento de una factura según su fecha y si está pagada. */
 export function getVencStatus(fechaVenc: string, pagada: boolean): VencStatus {
   if (pagada) return 'paid'
