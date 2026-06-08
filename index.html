@@ -4368,7 +4368,7 @@ async function saveFiscal() {
   allFiscalidad.sort((a,b) => (b.fecha || '').localeCompare(a.fecha || ''));
   renderFiscalidad();
   
-  if (activeTab === 'analisis') loadAnalisis(true);
+  if (!document.getElementById('tab-analisis').classList.contains('hidden')) loadAnalisis(true);
 
   closeFiscalModal();
 }
@@ -4379,7 +4379,7 @@ async function deleteFiscal(id) {
   if (error) { alert('Error: ' + error.message); return; }
   allFiscalidad = allFiscalidad.filter(f => f.id !== id);
   renderFiscalidad();
-  if (activeTab === 'analisis') loadAnalisis(true);
+  if (!document.getElementById('tab-analisis').classList.contains('hidden')) loadAnalisis(true);
 }
 
 // ─── Modal Vencimientos Interactivo ───────────────────────────────────────────
