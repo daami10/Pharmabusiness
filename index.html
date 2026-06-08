@@ -2174,6 +2174,8 @@ function clearSessionState() {
   allNominas = [];
   allFiscalidad = [];
 
+  localStorage.removeItem('pb_wholesalers');
+
   // Reset active filter variables
   activeTipo = '';
   activeVencStatus = '';
@@ -5200,24 +5202,27 @@ document.addEventListener('DOMContentLoaded', () => {
   const privPanel = document.getElementById('privacy-modal');
   if (privPanel) privPanel.onclick = e => { if (e.target === privPanel) closePrivacyModal(); };
   const saveBtn = document.getElementById('admin-save');
-  if (saveBtn) saveBtn.onclick = () => {
-    const g   = document.getElementById('admin-gemini');
-    const mod = document.getElementById('admin-model');
-    localStorage.setItem(K.g, g   ? g.value.trim()   : '');
-    localStorage.setItem(K.m, mod ? mod.value.trim() : '');
-    
-    if (selectedAdminWholesalers.length > 0) {
-      localStorage.setItem('pb_wholesalers', JSON.stringify(selectedAdminWholesalers));
-      initDynamicWholesalers();
-      filterFacturas();
-      if (!document.getElementById('tab-analisis').classList.contains('hidden')) {
-        loadAnalisis(false);
+  if (saveBtn) {
+    saveBtn.onclick = () => {
+      const g   = document.getElementById('admin-gemini');
+      const mod = document.getElementById('admin-model');
+      localStorage.setItem(K.g, g   ? g.value.trim()   : '');
+      localStorage.setItem(K.m, mod ? mod.value.trim() : '');
+      
+      if (selectedAdminWholesalers.length > 0) {
+        localStorage.setItem('pb_wholesalers', JSON.stringify(selectedAdminWholesalers));
+        initDynamicWholesalers();
+        filterFacturas();
+        if (!document.getElementById('tab-analisis').classList.contains('hidden')) {
+          loadAnalisis(false);
+        }
+        closeAdmin();
+        sb.auth.updateUser({ data: { wholesalers: selectedAdminWholesalers } }).catch(console.error);
+      } else {
+        alert('Por favor, selecciona al menos un mayorista.');
       }
-      closeAdmin();
-    } else {
-      alert('Por favor, selecciona al menos un mayorista.');
-    }
-  };
+    };
+  }
 
   // Guardar configuración inicial de mayoristas
   const onbSaveBtn = document.getElementById('onb-wholesalers-save');
@@ -5231,6 +5236,7 @@ document.addEventListener('DOMContentLoaded', () => {
           loadAnalisis(false);
         }
         document.getElementById('wholesaler-onboarding-modal').classList.add('hidden');
+        sb.auth.updateUser({ data: { wholesalers: selectedOnbWholesalers } }).catch(console.error);
       } else {
         alert('Por favor, selecciona al menos un mayorista.');
       }
@@ -5276,18 +5282,38 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!currentWholes.includes('Cofares')) {
           localStorage.setItem('pb_wholesalers', JSON.stringify(['FedeFarma', 'Cofares']));
           initDynamicWholesalers();
+          sb.auth.updateUser({ data: { wholesalers: ['FedeFarma', 'Cofares'] } }).catch(console.error);
         }
       }
       
-      // Mostrar onboarding de mayoristas si es la primera vez que inicia sesión en este navegador
-      if (localStorage.getItem('pb_wholesalers') === null) {
-        if (session.user.email === 'demo@gfarma.com') {
-          selectedOnbWholesalers = ['FedeFarma', 'Cofares'];
+      // Recobrar mayoristas desde el metadata de usuario en la base de datos si existe
+      const metaWholesalers = session.user.user_metadata?.wholesalers;
+      if (metaWholesalers && Array.isArray(metaWholesalers) && metaWholesalers.length > 0) {
+        localStorage.setItem('pb_wholesalers', JSON.stringify(metaWholesalers));
+        initDynamicWholesalers();
+        document.getElementById('wholesaler-onboarding-modal').classList.add('hidden');
+      } else {
+        // Si no existen en metadata, verificamos en localStorage
+        const localWholes = localStorage.getItem('pb_wholesalers');
+        if (localWholes) {
+          // Si ya existen localmente en este navegador, los sincronizamos con el metadata de Supabase
+          try {
+            const parsed = JSON.parse(localWholes);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              sb.auth.updateUser({ data: { wholesalers: parsed } }).catch(console.error);
+            }
+          } catch(e) {}
+          document.getElementById('wholesaler-onboarding-modal').classList.add('hidden');
         } else {
-          selectedOnbWholesalers = ['FedeFarma'];
+          // Si no existen ni en base de datos ni localmente, es la primera vez que la farmacia entra
+          if (session.user.email === 'demo@gfarma.com') {
+            selectedOnbWholesalers = ['FedeFarma', 'Cofares'];
+          } else {
+            selectedOnbWholesalers = ['FedeFarma'];
+          }
+          updateOnbUI();
+          document.getElementById('wholesaler-onboarding-modal').classList.remove('hidden');
         }
-        updateOnbUI();
-        document.getElementById('wholesaler-onboarding-modal').classList.remove('hidden');
       }
       
       const sf = document.getElementById('search-facturas');
