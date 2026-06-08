@@ -741,14 +741,10 @@
   </div>
 
   <!-- Detailed breakdown bar -->
-  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
     <div class="bg-gradient-to-br from-blue-500/10 to-indigo-900/5 border border-blue-500/20 rounded-2xl p-4.5 shadow-xl glass-card">
       <p class="text-xs font-bold text-blue-400 uppercase tracking-wider mb-1">Total Impuestos</p>
       <p id="kpi-fiscal-total" class="text-3xl font-black text-white leading-none">0,00 €</p>
-    </div>
-    <div class="bg-gradient-to-br from-orange-500/10 to-orange-900/5 border border-orange-500/20 rounded-2xl p-4.5 shadow-xl glass-card">
-      <p class="text-xs font-bold text-orange-400 uppercase tracking-wider mb-1">IVA / IRPF</p>
-      <p id="kpi-fiscal-iva" class="text-2xl font-bold text-orange-500 leading-none">0,00 €</p>
     </div>
     <div class="bg-gradient-to-br from-purple-500/10 to-purple-900/5 border border-purple-500/20 rounded-2xl p-4.5 shadow-xl glass-card">
       <p class="text-xs font-bold text-purple-400 uppercase tracking-wider mb-1">Cuotas Autónomo</p>
@@ -800,7 +796,6 @@
         <label class="block text-sm font-medium text-slate-300 mb-1.5">Concepto</label>
         <select id="fiscal-concepto" class="w-full px-4 py-2.5 rounded-xl border border-white/5 bg-slate-950/40 text-slate-100 placeholder-slate-500 focus:border-[#00f2fe]/40 focus:ring-0 focus:outline-none text-sm transition-all cursor-pointer">
           <option value="Cuota de Autónomos" class="bg-[#0f172a]">Cuota de Autónomos</option>
-          <option value="IVA" class="bg-[#0f172a]">Declaración de IVA</option>
           <option value="IRPF" class="bg-[#0f172a]">Declaración de IRPF</option>
           <option value="Declaración de la Renta" class="bg-[#0f172a]">Declaración de la Renta</option>
           <option value="Impuesto de Sociedades" class="bg-[#0f172a]">Impuesto de Sociedades</option>
@@ -840,6 +835,10 @@
       <div>
         <label class="block text-sm font-medium text-slate-300 mb-1.5">Notas (opcional)</label>
         <input id="fiscal-notas" type="text" placeholder="Observaciones..." class="w-full px-4 py-2.5 rounded-xl border border-white/5 bg-slate-950/40 text-slate-100 placeholder-slate-500 focus:border-[#00f2fe]/40 focus:ring-0 focus:outline-none text-sm transition-all">
+      </div>
+      <div class="flex items-center gap-2 mt-2 select-none" id="fiscal-repetir-container">
+        <input type="checkbox" id="fiscal-repetir" class="w-4 h-4 rounded border-white/10 bg-slate-950/40 text-blue-500 focus:ring-0 focus:ring-offset-0 cursor-pointer">
+        <label for="fiscal-repetir" class="text-xs text-slate-300 cursor-pointer">Repetir mensualmente hasta fin de año contable</label>
       </div>
     </div>
     <div class="px-6 pb-5 flex gap-3">
@@ -976,6 +975,10 @@
         <label class="block text-sm font-medium text-slate-300 mb-1.5">Notas (opcional)</label>
         <input id="seguro-notas" type="text" placeholder="Observaciones..." class="w-full px-4 py-2.5 rounded-xl border border-white/5 bg-slate-950/40 text-slate-100 placeholder-slate-500 focus:border-[#00f2fe]/40 focus:ring-0 focus:outline-none text-sm transition-all">
       </div>
+      <div class="flex items-center gap-2 mt-2 select-none" id="seguro-repetir-container">
+        <input type="checkbox" id="seguro-repetir" class="w-4 h-4 rounded border-white/10 bg-slate-950/40 text-blue-500 focus:ring-0 focus:ring-offset-0 cursor-pointer">
+        <label for="seguro-repetir" class="text-xs text-slate-300 cursor-pointer">Repetir mensualmente hasta fin de año contable</label>
+      </div>
     </div>
     <div class="px-6 pb-5 flex gap-3">
       <button onclick="closeSeguroModal()" class="flex-1 px-4 py-2.5 rounded-xl border border-white/5 text-sm font-semibold text-slate-400 hover:bg-white/5 hover:text-white transition-colors bg-transparent">Cancelar</button>
@@ -1052,6 +1055,10 @@
       <div>
         <label class="block text-sm font-medium text-slate-300 mb-1.5">Concepto (opcional)</label>
         <input id="nomina-concepto" type="text" placeholder="Ej: Paga doble" class="w-full px-4 py-2.5 rounded-xl border border-white/5 bg-slate-950/40 text-slate-100 placeholder-slate-500 focus:border-[#00f2fe]/40 focus:ring-0 focus:outline-none text-sm transition-all">
+      </div>
+      <div class="flex items-center gap-2 mt-2 select-none" id="nomina-repetir-container">
+        <input type="checkbox" id="nomina-repetir" class="w-4 h-4 rounded border-white/10 bg-slate-950/40 text-blue-500 focus:ring-0 focus:ring-offset-0 cursor-pointer">
+        <label for="nomina-repetir" class="text-xs text-slate-300 cursor-pointer">Repetir mensualmente hasta fin de año contable</label>
       </div>
     </div>
     <div class="px-6 pb-5 flex gap-3">
@@ -2162,6 +2169,8 @@ function clearSessionState() {
   allNominas = [];
   allFiscalidad = [];
 
+  localStorage.removeItem('pb_wholesalers');
+
   // Reset active filter variables
   activeTipo = '';
   activeVencStatus = '';
@@ -2701,6 +2710,13 @@ function renderTable(records) {
   checkBudgetAlerts(allFacturas);
   renderCalendar();
   updateTipoCounts();
+  if (typeof currentVencModalStatus !== 'undefined' && currentVencModalStatus && !document.getElementById('venc-list-modal').classList.contains('hidden')) {
+    showVencListModal(currentVencModalStatus);
+  }
+  const prevModal = document.getElementById('prevision-modal');
+  if (prevModal && !prevModal.classList.contains('hidden')) {
+    renderPrevision();
+  }
 }
 
 function toggleMesGroup(safeKey) {
@@ -3698,6 +3714,9 @@ function renderCalListFiltered() {
     const vd = new Date(f.FechaVencimiento+'T00:00:00').toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'numeric'});
     const imp = typeof f.Importe==='number' ? f.Importe.toLocaleString('es-ES',{minimumFractionDigits:2})+' €' : '';
     const rid = r.id.replace(/'/g,"\\'");
+    const isAbono = f.Tipo === 'Abono';
+    const editFn = isAbono ? `openEditAbonoModal('${rid}')` : `openEditModal('${rid}')`;
+    const deleteFn = isAbono ? `deleteAbono('${rid}')` : `deleteFactura('${rid}')`;
     const actionBtn = s !== 'paid'
       ? `<button onclick="markAsPaid('${rid}')" class="text-2xs text-emerald-400 hover:text-white font-bold bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-2.5 py-1.5 hover:bg-emerald-500/25 transition-all whitespace-nowrap">✓ Pagada</button>`
       : `<button onclick="markAsUnpaid('${rid}')" class="text-2xs text-slate-400 hover:text-white font-bold bg-white/5 border border-white/5 rounded-lg px-2.5 py-1.5 hover:bg-white/10 transition-all whitespace-nowrap">↺ Desmarcar</button>`;
@@ -3713,7 +3732,11 @@ function renderCalListFiltered() {
         </div>
         <div class="flex flex-col items-end gap-2 shrink-0">
           <span class="text-3xs font-extrabold ${cfg.text} px-2 py-0.5 rounded-full ${cfg.bg} ${cfg.border} border uppercase tracking-wider">${cfg.label}</span>
-          ${actionBtn}
+          <div class="flex items-center gap-1.5">
+            <button onclick="${editFn}" class="text-slate-400 hover:text-white p-1.5 rounded-xl hover:bg-white/5 transition-all" title="Editar"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
+            <button onclick="${deleteFn}" class="text-slate-400 hover:text-red-400 p-1.5 rounded-xl hover:bg-white/5 transition-all" title="Eliminar"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+            ${actionBtn}
+          </div>
         </div>
       </div>
     </div>`;
@@ -3993,6 +4016,8 @@ function openSeguroModal() {
   document.getElementById('seguro-anio').value = String(now.getFullYear());
   document.getElementById('seguro-importe').value = '';
   document.getElementById('seguro-notas').value = '';
+  document.getElementById('seguro-repetir').checked = false;
+  document.getElementById('seguro-repetir-container').classList.remove('hidden');
   document.getElementById('seguro-modal').classList.remove('hidden');
 }
 function openEditSeguroModal(id) {
@@ -4008,6 +4033,7 @@ function openEditSeguroModal(id) {
   }
   document.getElementById('seguro-importe').value = s.importe || '';
   document.getElementById('seguro-notas').value = s.notes || s.notas || '';
+  document.getElementById('seguro-repetir-container').classList.add('hidden');
   document.getElementById('seguro-modal').classList.remove('hidden');
 }
 function closeSeguroModal() { document.getElementById('seguro-modal').classList.add('hidden'); }
@@ -4028,14 +4054,32 @@ async function saveSeguro() {
     const idx = allSeguros.findIndex(r => r.id === editingId);
     if (idx !== -1) allSeguros[idx] = data;
   } else {
-    const { data, error } = await sb.from('seguros_sociales').insert([{ user_id: user.id, fecha, importe, notas }]).select().single();
-    if (error) { alert('Error: ' + error.message); return; }
-    allSeguros.unshift(data);
+    const repetir = document.getElementById('seguro-repetir')?.checked;
+    if (repetir) {
+      const months = getRemainingMonths(mes);
+      const records = months.map(m => ({
+        user_id: user.id,
+        fecha: `${anio}-${m}-01`,
+        importe,
+        notas
+      }));
+      const { data, error } = await sb.from('seguros_sociales').insert(records).select();
+      if (error) { alert('Error: ' + error.message); return; }
+      allSeguros.push(...data);
+    } else {
+      const { data, error } = await sb.from('seguros_sociales').insert([{ user_id: user.id, fecha, importe, notas }]).select().single();
+      if (error) { alert('Error: ' + error.message); return; }
+      allSeguros.unshift(data);
+    }
   }
   
   allSeguros.sort((a,b) => (b.fecha || '').localeCompare(a.fecha || ''));
   renderSeguros();
   closeSeguroModal();
+  const prevModal = document.getElementById('prevision-modal');
+  if (prevModal && !prevModal.classList.contains('hidden')) {
+    renderPrevision();
+  }
 }
 
 async function deleteSeguro(id) {
@@ -4044,6 +4088,10 @@ async function deleteSeguro(id) {
   if (error) { alert('Error: ' + error.message); return; }
   allSeguros = allSeguros.filter(s => s.id !== id);
   renderSeguros();
+  const prevModal = document.getElementById('prevision-modal');
+  if (prevModal && !prevModal.classList.contains('hidden')) {
+    renderPrevision();
+  }
 }
 
 function openTrabajadorModal() {
@@ -4074,6 +4122,8 @@ function openNominaModal() {
   const sel = document.getElementById('nomina-trabajador');
   sel.innerHTML = '<option value="">Seleccionar trabajador...</option>' +
     allTrabajadores.map(t => `<option value="${t.id}" data-nombre="${esc(t.nombre)}">${esc(t.nombre)}</option>`).join('');
+  document.getElementById('nomina-repetir').checked = false;
+  document.getElementById('nomina-repetir-container').classList.remove('hidden');
   document.getElementById('nomina-modal').classList.remove('hidden');
 }
 function openEditNominaModal(id) {
@@ -4093,6 +4143,7 @@ function openEditNominaModal(id) {
   }
   document.getElementById('nomina-importe').value = n.importe || '';
   document.getElementById('nomina-concepto').value = n.concepto || n.concepto_nombre || '';
+  document.getElementById('nomina-repetir-container').classList.add('hidden');
   document.getElementById('nomina-modal').classList.remove('hidden');
 }
 function closeNominaModal() { document.getElementById('nomina-modal').classList.add('hidden'); }
@@ -4116,14 +4167,34 @@ async function saveNomina() {
     const idx = allNominas.findIndex(r => r.id === editingId);
     if (idx !== -1) allNominas[idx] = data;
   } else {
-    const { data, error } = await sb.from('nominas').insert([{ user_id: user.id, trabajador_id, trabajador_nombre, fecha, importe, concepto }]).select().single();
-    if (error) { alert('Error: ' + error.message); return; }
-    allNominas.unshift(data);
+    const repetir = document.getElementById('nomina-repetir')?.checked;
+    if (repetir) {
+      const months = getRemainingMonths(mes);
+      const records = months.map(m => ({
+        user_id: user.id,
+        trabajador_id,
+        trabajador_nombre,
+        fecha: `${anio}-${m}-01`,
+        importe,
+        concepto
+      }));
+      const { data, error } = await sb.from('nominas').insert(records).select();
+      if (error) { alert('Error: ' + error.message); return; }
+      allNominas.push(...data);
+    } else {
+      const { data, error } = await sb.from('nominas').insert([{ user_id: user.id, trabajador_id, trabajador_nombre, fecha, importe, concepto }]).select().single();
+      if (error) { alert('Error: ' + error.message); return; }
+      allNominas.unshift(data);
+    }
   }
   
   allNominas.sort((a,b) => (b.fecha || '').localeCompare(a.fecha || ''));
   renderNominas();
   closeNominaModal();
+  const prevModal = document.getElementById('prevision-modal');
+  if (prevModal && !prevModal.classList.contains('hidden')) {
+    renderPrevision();
+  }
 }
 
 async function deleteNomina(id) {
@@ -4132,6 +4203,19 @@ async function deleteNomina(id) {
   if (error) { alert('Error: ' + error.message); return; }
   allNominas = allNominas.filter(n => n.id !== id);
   renderNominas();
+  const prevModal = document.getElementById('prevision-modal');
+  if (prevModal && !prevModal.classList.contains('hidden')) {
+    renderPrevision();
+  }
+}
+
+function getRemainingMonths(startMonthStr) {
+  const startMonth = parseInt(startMonthStr, 10);
+  const months = [];
+  for (let m = startMonth; m <= 12; m++) {
+    months.push(String(m).padStart(2, '0'));
+  }
+  return months;
 }
 
 // ─── Fiscalidad ───────────────────────────────────────────────────────────────
@@ -4216,7 +4300,6 @@ function renderFiscalidad() {
     document.getElementById('fiscal-table').classList.add('hidden');
     
     document.getElementById('kpi-fiscal-total').textContent = '0,00 €';
-    document.getElementById('kpi-fiscal-iva').textContent = '0,00 €';
     document.getElementById('kpi-fiscal-autonomo').textContent = '0,00 €';
     document.getElementById('kpi-fiscal-renta').textContent = '0,00 €';
     return;
@@ -4225,7 +4308,6 @@ function renderFiscalidad() {
   document.getElementById('fiscal-table').classList.remove('hidden');
 
   let totalImpuestos = 0;
-  let totalIvaIrpf = 0;
   let totalAutonomo = 0;
   let totalRentaSoc = 0;
 
@@ -4235,15 +4317,12 @@ function renderFiscalidad() {
     totalImpuestos += imp;
     if (f.concepto === 'Cuota de Autónomos') {
       totalAutonomo += imp;
-    } else if (f.concepto === 'IVA' || f.concepto === 'IRPF') {
-      totalIvaIrpf += imp;
-    } else if (f.concepto === 'Declaración de la Renta' || f.concepto === 'Impuesto de Sociedades') {
+    } else if (f.concepto === 'Declaración de la Renta' || f.concepto === 'Impuesto de Sociedades' || f.concepto === 'IRPF') {
       totalRentaSoc += imp;
     }
   });
 
   document.getElementById('kpi-fiscal-total').textContent = totalImpuestos.toLocaleString('es-ES', {minimumFractionDigits:2}) + ' €';
-  document.getElementById('kpi-fiscal-iva').textContent = totalIvaIrpf.toLocaleString('es-ES', {minimumFractionDigits:2}) + ' €';
   document.getElementById('kpi-fiscal-autonomo').textContent = totalAutonomo.toLocaleString('es-ES', {minimumFractionDigits:2}) + ' €';
   document.getElementById('kpi-fiscal-renta').textContent = totalRentaSoc.toLocaleString('es-ES', {minimumFractionDigits:2}) + ' €';
 
@@ -4319,6 +4398,8 @@ function openFiscalModal() {
   document.getElementById('fiscal-anio').value = String(now.getFullYear());
   document.getElementById('fiscal-importe').value = '';
   document.getElementById('fiscal-notas').value = '';
+  document.getElementById('fiscal-repetir').checked = false;
+  document.getElementById('fiscal-repetir-container').classList.remove('hidden');
   document.getElementById('fiscal-modal').classList.remove('hidden');
 }
 function openEditFiscalModal(id) {
@@ -4335,6 +4416,7 @@ function openEditFiscalModal(id) {
   }
   document.getElementById('fiscal-importe').value = f.importe || '';
   document.getElementById('fiscal-notas').value = f.notas || '';
+  document.getElementById('fiscal-repetir-container').classList.add('hidden');
   document.getElementById('fiscal-modal').classList.remove('hidden');
 }
 function closeFiscalModal() {
@@ -4360,9 +4442,24 @@ async function saveFiscal() {
     const idx = allFiscalidad.findIndex(r => r.id === editingId);
     if (idx !== -1) allFiscalidad[idx] = data;
   } else {
-    const { data, error } = await sb.from('fiscalidad').insert([{ user_id: user.id, concepto, fecha, importe, notas }]).select().single();
-    if (error) { alert('Error: ' + error.message); return; }
-    allFiscalidad.unshift(data);
+    const repetir = document.getElementById('fiscal-repetir')?.checked;
+    if (repetir) {
+      const months = getRemainingMonths(mes);
+      const records = months.map(m => ({
+        user_id: user.id,
+        concepto,
+        fecha: `${anio}-${m}-01`,
+        importe,
+        notas
+      }));
+      const { data, error } = await sb.from('fiscalidad').insert(records).select();
+      if (error) { alert('Error: ' + error.message); return; }
+      allFiscalidad.push(...data);
+    } else {
+      const { data, error } = await sb.from('fiscalidad').insert([{ user_id: user.id, concepto, fecha, importe, notas }]).select().single();
+      if (error) { alert('Error: ' + error.message); return; }
+      allFiscalidad.unshift(data);
+    }
   }
 
   allFiscalidad.sort((a,b) => (b.fecha || '').localeCompare(a.fecha || ''));
@@ -4371,6 +4468,10 @@ async function saveFiscal() {
   if (!document.getElementById('tab-analisis').classList.contains('hidden')) loadAnalisis(true);
 
   closeFiscalModal();
+  const prevModal = document.getElementById('prevision-modal');
+  if (prevModal && !prevModal.classList.contains('hidden')) {
+    renderPrevision();
+  }
 }
 
 async function deleteFiscal(id) {
@@ -4380,6 +4481,10 @@ async function deleteFiscal(id) {
   allFiscalidad = allFiscalidad.filter(f => f.id !== id);
   renderFiscalidad();
   if (!document.getElementById('tab-analisis').classList.contains('hidden')) loadAnalisis(true);
+  const prevModal = document.getElementById('prevision-modal');
+  if (prevModal && !prevModal.classList.contains('hidden')) {
+    renderPrevision();
+  }
 }
 
 // ─── Modal Vencimientos Interactivo ───────────────────────────────────────────
@@ -4472,6 +4577,10 @@ function renderVencModalListFiltered() {
     const isPaid = getEffectiveVencStatus(r) === 'paid';
     const rid = r.id.replace(/'/g, "\\'");
     
+    const isAbono = f.Tipo === 'Abono';
+    const editFn = isAbono ? `openEditAbonoModal('${rid}')` : `openEditModal('${rid}')`;
+    const deleteFn = isAbono ? `deleteAbono('${rid}')` : `deleteFactura('${rid}')`;
+
     const actionBtn = !isPaid 
       ? `<button onclick="modalMarkAsPaid('${rid}')" class="flex items-center gap-1 text-xs font-bold bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 px-3 py-1.5 rounded-xl transition-all duration-200">✓ Pagada</button>`
       : `<button onclick="modalMarkAsUnpaid('${rid}')" class="flex items-center gap-1 text-xs font-semibold bg-white/5 border border-white/5 text-slate-400 hover:bg-white/10 hover:text-white px-3 py-1.5 rounded-xl transition-all duration-200">↺ Desmarcar</button>`;
@@ -4486,7 +4595,13 @@ function renderVencModalListFiltered() {
       </td>
       <td class="py-4 text-sm text-slate-400 font-mono">${esc(f.NumFactura) || '—'}</td>
       <td class="py-4 text-right text-sm font-extrabold text-white">${imp}</td>
-      <td class="py-4 text-right pl-4">${actionBtn}</td>
+      <td class="py-4 text-right pl-4">
+        <div class="flex items-center justify-end gap-1.5">
+          <button onclick="${editFn}" class="text-slate-400 hover:text-white p-1.5 rounded-xl hover:bg-white/5 transition-all" title="Editar"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
+          <button onclick="${deleteFn}" class="text-slate-400 hover:text-red-400 p-1.5 rounded-xl hover:bg-white/5 transition-all" title="Eliminar"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+          ${actionBtn}
+        </div>
+      </td>
     </tr>`;
   }).join('');
 
@@ -4932,12 +5047,19 @@ function renderPrevision() {
       itemsHTML += `<div class="mb-3">
         <h4 class="text-2xs font-extrabold uppercase text-blue-400 mb-1.5 tracking-wider">Facturas Proveedores</h4>
         <div class="space-y-1.5">
-          ${data.invoices.map(f => `
-            <div class="flex justify-between items-center bg-white/5 border border-white/5 px-3.5 py-2.5 rounded-xl text-xs">
-              <span class="font-semibold text-slate-300 truncate max-w-[260px]">${esc(f.fields.Laboratorio || 'Otros Proveedores')}</span>
-              <span class="font-bold text-white shrink-0">${(f.fields.Importe || 0).toLocaleString('es-ES', {minimumFractionDigits:2})} €</span>
-            </div>
-          `).join('')}
+          ${data.invoices.map(f => {
+            const rid = f.id.replace(/'/g, "\\'");
+            return `<div class="flex justify-between items-center bg-white/5 border border-white/5 px-3.5 py-2.5 rounded-xl text-xs gap-3">
+              <span class="font-semibold text-slate-300 truncate max-w-[240px]">${esc(f.fields.Laboratorio || 'Otros Proveedores')}</span>
+              <div class="flex items-center gap-2.5 shrink-0">
+                <span class="font-bold text-white">${(f.fields.Importe || 0).toLocaleString('es-ES', {minimumFractionDigits:2})} €</span>
+                <div class="flex items-center gap-1 border-l border-white/10 pl-2">
+                  <button onclick="openEditModal('${rid}')" class="text-slate-400 hover:text-white p-1 rounded transition-all" title="Editar"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
+                  <button onclick="deleteFactura('${rid}')" class="text-slate-400 hover:text-red-400 p-1 rounded transition-all" title="Eliminar"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+                </div>
+              </div>
+            </div>`;
+          }).join('')}
         </div>
       </div>`;
     }
@@ -5070,24 +5192,27 @@ document.addEventListener('DOMContentLoaded', () => {
   const privPanel = document.getElementById('privacy-modal');
   if (privPanel) privPanel.onclick = e => { if (e.target === privPanel) closePrivacyModal(); };
   const saveBtn = document.getElementById('admin-save');
-  if (saveBtn) saveBtn.onclick = () => {
-    const g   = document.getElementById('admin-gemini');
-    const mod = document.getElementById('admin-model');
-    localStorage.setItem(K.g, g   ? g.value.trim()   : '');
-    localStorage.setItem(K.m, mod ? mod.value.trim() : '');
-    
-    if (selectedAdminWholesalers.length > 0) {
-      localStorage.setItem('pb_wholesalers', JSON.stringify(selectedAdminWholesalers));
-      initDynamicWholesalers();
-      filterFacturas();
-      if (!document.getElementById('tab-analisis').classList.contains('hidden')) {
-        loadAnalisis(false);
+  if (saveBtn) {
+    saveBtn.onclick = () => {
+      const g   = document.getElementById('admin-gemini');
+      const mod = document.getElementById('admin-model');
+      localStorage.setItem(K.g, g   ? g.value.trim()   : '');
+      localStorage.setItem(K.m, mod ? mod.value.trim() : '');
+      
+      if (selectedAdminWholesalers.length > 0) {
+        localStorage.setItem('pb_wholesalers', JSON.stringify(selectedAdminWholesalers));
+        initDynamicWholesalers();
+        filterFacturas();
+        if (!document.getElementById('tab-analisis').classList.contains('hidden')) {
+          loadAnalisis(false);
+        }
+        closeAdmin();
+        sb.auth.updateUser({ data: { wholesalers: selectedAdminWholesalers } }).catch(console.error);
+      } else {
+        alert('Por favor, selecciona al menos un mayorista.');
       }
-      closeAdmin();
-    } else {
-      alert('Por favor, selecciona al menos un mayorista.');
-    }
-  };
+    };
+  }
 
   // Guardar configuración inicial de mayoristas
   const onbSaveBtn = document.getElementById('onb-wholesalers-save');
@@ -5101,6 +5226,7 @@ document.addEventListener('DOMContentLoaded', () => {
           loadAnalisis(false);
         }
         document.getElementById('wholesaler-onboarding-modal').classList.add('hidden');
+        sb.auth.updateUser({ data: { wholesalers: selectedOnbWholesalers } }).catch(console.error);
       } else {
         alert('Por favor, selecciona al menos un mayorista.');
       }
@@ -5146,18 +5272,38 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!currentWholes.includes('Cofares')) {
           localStorage.setItem('pb_wholesalers', JSON.stringify(['FedeFarma', 'Cofares']));
           initDynamicWholesalers();
+          sb.auth.updateUser({ data: { wholesalers: ['FedeFarma', 'Cofares'] } }).catch(console.error);
         }
       }
       
-      // Mostrar onboarding de mayoristas si es la primera vez que inicia sesión en este navegador
-      if (localStorage.getItem('pb_wholesalers') === null) {
-        if (session.user.email === 'demo@gfarma.com') {
-          selectedOnbWholesalers = ['FedeFarma', 'Cofares'];
+      // Recobrar mayoristas desde el metadata de usuario en la base de datos si existe
+      const metaWholesalers = session.user.user_metadata?.wholesalers;
+      if (metaWholesalers && Array.isArray(metaWholesalers) && metaWholesalers.length > 0) {
+        localStorage.setItem('pb_wholesalers', JSON.stringify(metaWholesalers));
+        initDynamicWholesalers();
+        document.getElementById('wholesaler-onboarding-modal').classList.add('hidden');
+      } else {
+        // Si no existen en metadata, verificamos en localStorage
+        const localWholes = localStorage.getItem('pb_wholesalers');
+        if (localWholes) {
+          // Si ya existen localmente en este navegador, los sincronizamos con el metadata de Supabase
+          try {
+            const parsed = JSON.parse(localWholes);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              sb.auth.updateUser({ data: { wholesalers: parsed } }).catch(console.error);
+            }
+          } catch(e) {}
+          document.getElementById('wholesaler-onboarding-modal').classList.add('hidden');
         } else {
-          selectedOnbWholesalers = ['FedeFarma'];
+          // Si no existen ni en base de datos ni localmente, es la primera vez que la farmacia entra
+          if (session.user.email === 'demo@gfarma.com') {
+            selectedOnbWholesalers = ['FedeFarma', 'Cofares'];
+          } else {
+            selectedOnbWholesalers = ['FedeFarma'];
+          }
+          updateOnbUI();
+          document.getElementById('wholesaler-onboarding-modal').classList.remove('hidden');
         }
-        updateOnbUI();
-        document.getElementById('wholesaler-onboarding-modal').classList.remove('hidden');
       }
       
       const sf = document.getElementById('search-facturas');
