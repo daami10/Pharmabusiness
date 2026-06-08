@@ -16,5 +16,11 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: './src/test/setup.ts',
     css: true,
+    // Valores ficticios para que los módulos que importan el cliente Supabase
+    // no fallen al cargarse en los tests (no se hacen llamadas reales).
+    env: {
+      VITE_SUPABASE_URL: 'http://localhost:54321',
+      VITE_SUPABASE_ANON_KEY: 'test-anon-key',
+    },
   },
 })
