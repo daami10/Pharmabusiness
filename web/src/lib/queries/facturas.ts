@@ -47,6 +47,17 @@ export function useUpdateFactura() {
   })
 }
 
+export function useSetPagada() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ id, pagada }: { id: string; pagada: boolean }) => {
+      const { error } = await supabase.from('facturas').update({ pagada }).eq('id', id)
+      if (error) throw new Error(error.message)
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: FACTURAS_KEY }),
+  })
+}
+
 export function useDeleteFactura() {
   const qc = useQueryClient()
   return useMutation({

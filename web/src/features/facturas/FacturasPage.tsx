@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { ChevronDown, Download, Pencil, Plus, Search, Trash2 } from 'lucide-react'
 import { FacturaModal } from './FacturaModal'
+import { Calendar } from './Calendar'
 import { downloadFacturasCSV } from './lib/csv'
 import { useFacturas, useDeleteFactura } from '@/lib/queries/facturas'
 import { useYearStore } from '@/stores/yearStore'
@@ -225,6 +226,8 @@ export function FacturasPage() {
           <span className="text-lg font-black text-white">{formatMoney(total)}</span>
         </div>
       )}
+
+      <Calendar />
 
       <FacturaModal
         open={modalOpen}
