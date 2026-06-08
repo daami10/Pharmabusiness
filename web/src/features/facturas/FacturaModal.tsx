@@ -1,10 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
+import type { ChangeEvent } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { Sparkles } from 'lucide-react'
 import { Dialog } from '@/components/ui/Dialog'
 import { getWholesalers } from '@/lib/config/wholesalers'
 import { useCreateFactura, useUpdateFactura } from '@/lib/queries/facturas'
+import { scanInvoice } from './lib/ocr'
 import type { Factura, FacturaInput } from '@/types/domain'
 
 const schema = z.object({
@@ -66,6 +69,8 @@ export function FacturaModal({
   const createFactura = useCreateFactura()
   const updateFactura = useUpdateFactura()
   const [serverError, setServerError] = useState('')
+  const [ocrStatus, setOcrStatus] = useState<'idle' | 'loading' | 'ok'>('idle')
+  const [ocrError, setOcrError] = useState('')
 
   const {
     register,
@@ -81,7 +86,30 @@ export function FacturaModal({
 
   function handleClose() {
     setServerError('')
+    setOcrError('')
+    setOcrStatus('idle')
     onClose()
+  }
+
+  async function handleScanFile(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    setOcrError('')
+    setOcrStatus('loading')
+    try {
+      const r = await scanInvoice(file)
+      if (r.laboratorio) setValue('laboratorio', r.laboratorio)
+      if (r.numFactura) setValue('num_factura', r.numFactura)
+      if (r.importe > 0) setValue('importe', String(r.importe))
+      if (/^\d{4}-\d{2}-\d{2}$/.test(r.fecha)) setValue('fecha', r.fecha)
+      if (/^\d{4}-\d{2}-\d{2}$/.test(r.vencimiento))
+        setValue('fecha_vencimiento', r.vencimiento)
+      setOcrStatus('ok')
+    } catch (err) {
+      setOcrStatus('idle')
+      setOcrError(err instanceof Error ? err.message : 'Error al analizar la imagen')
+    }
   }
 
   const onSubmit = handleSubmit(async (v) => {
@@ -112,6 +140,33 @@ export function FacturaModal({
       title={factura ? 'Editar factura' : 'Nueva factura'}
     >
       <form onSubmit={onSubmit} className="space-y-4" noValidate>
+        {/* Escaneo con IA (OCR) */}
+        <div className="rounded-xl border border-dashed border-accent-blue/25 bg-accent-blue/5 p-4">
+          <label
+            className={`flex items-center justify-center gap-2 text-sm font-semibold text-accent-blue ${
+              ocrStatus === 'loading' ? 'cursor-wait opacity-70' : 'cursor-pointer'
+            }`}
+          >
+            <Sparkles className="h-4 w-4" />
+            {ocrStatus === 'loading' ? 'Analizando imagen…' : 'Escanear factura con IA'}
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              disabled={ocrStatus === 'loading'}
+              onChange={handleScanFile}
+            />
+          </label>
+          {ocrStatus === 'ok' && (
+            <p className="mt-2 text-center text-xs text-emerald-400">
+              ✓ Datos extraídos. Revísalos antes de guardar.
+            </p>
+          )}
+          {ocrError && (
+            <p className="mt-2 text-center text-xs text-red-400">{ocrError}</p>
+          )}
+        </div>
+
         <div>
           <label className="mb-1 block text-xs font-semibold text-slate-400">
             Categoría

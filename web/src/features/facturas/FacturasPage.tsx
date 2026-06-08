@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
-import { ChevronDown, Pencil, Plus, Search, Trash2 } from 'lucide-react'
+import { ChevronDown, Download, Pencil, Plus, Search, Trash2 } from 'lucide-react'
 import { FacturaModal } from './FacturaModal'
+import { downloadFacturasCSV } from './lib/csv'
 import { useFacturas, useDeleteFactura } from '@/lib/queries/facturas'
 import { useYearStore } from '@/stores/yearStore'
 import { getWholesalers, isWholesaler } from '@/lib/config/wholesalers'
@@ -123,14 +124,25 @@ export function FacturasPage() {
             Gastos de proveedores y abonos de {year}.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={openCreate}
-          className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-accent-blue px-5 py-2.5 text-sm font-bold text-slate-950 shadow-lg transition-all hover:opacity-90"
-        >
-          <Plus className="h-4 w-4" strokeWidth={2.5} />
-          Nueva factura
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => downloadFacturasCSV(visible)}
+            disabled={!visible.length}
+            className="flex items-center gap-2 rounded-xl border border-white/10 px-4 py-2.5 text-sm font-bold text-slate-300 transition-all hover:bg-white/5 disabled:opacity-50"
+          >
+            <Download className="h-4 w-4" />
+            Exportar CSV
+          </button>
+          <button
+            type="button"
+            onClick={openCreate}
+            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-accent-blue px-5 py-2.5 text-sm font-bold text-slate-950 shadow-lg transition-all hover:opacity-90"
+          >
+            <Plus className="h-4 w-4" strokeWidth={2.5} />
+            Nueva factura
+          </button>
+        </div>
       </div>
 
       {/* Filtros */}
