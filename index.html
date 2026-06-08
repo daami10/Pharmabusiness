@@ -741,14 +741,10 @@
   </div>
 
   <!-- Detailed breakdown bar -->
-  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
     <div class="bg-gradient-to-br from-blue-500/10 to-indigo-900/5 border border-blue-500/20 rounded-2xl p-4.5 shadow-xl glass-card">
       <p class="text-xs font-bold text-blue-400 uppercase tracking-wider mb-1">Total Impuestos</p>
       <p id="kpi-fiscal-total" class="text-3xl font-black text-white leading-none">0,00 €</p>
-    </div>
-    <div class="bg-gradient-to-br from-orange-500/10 to-orange-900/5 border border-orange-500/20 rounded-2xl p-4.5 shadow-xl glass-card">
-      <p class="text-xs font-bold text-orange-400 uppercase tracking-wider mb-1">IVA / IRPF</p>
-      <p id="kpi-fiscal-iva" class="text-2xl font-bold text-orange-500 leading-none">0,00 €</p>
     </div>
     <div class="bg-gradient-to-br from-purple-500/10 to-purple-900/5 border border-purple-500/20 rounded-2xl p-4.5 shadow-xl glass-card">
       <p class="text-xs font-bold text-purple-400 uppercase tracking-wider mb-1">Cuotas Autónomo</p>
@@ -800,7 +796,6 @@
         <label class="block text-sm font-medium text-slate-300 mb-1.5">Concepto</label>
         <select id="fiscal-concepto" class="w-full px-4 py-2.5 rounded-xl border border-white/5 bg-slate-950/40 text-slate-100 placeholder-slate-500 focus:border-[#00f2fe]/40 focus:ring-0 focus:outline-none text-sm transition-all cursor-pointer">
           <option value="Cuota de Autónomos" class="bg-[#0f172a]">Cuota de Autónomos</option>
-          <option value="IVA" class="bg-[#0f172a]">Declaración de IVA</option>
           <option value="IRPF" class="bg-[#0f172a]">Declaración de IRPF</option>
           <option value="Declaración de la Renta" class="bg-[#0f172a]">Declaración de la Renta</option>
           <option value="Impuesto de Sociedades" class="bg-[#0f172a]">Impuesto de Sociedades</option>
@@ -4305,7 +4300,6 @@ function renderFiscalidad() {
     document.getElementById('fiscal-table').classList.add('hidden');
     
     document.getElementById('kpi-fiscal-total').textContent = '0,00 €';
-    document.getElementById('kpi-fiscal-iva').textContent = '0,00 €';
     document.getElementById('kpi-fiscal-autonomo').textContent = '0,00 €';
     document.getElementById('kpi-fiscal-renta').textContent = '0,00 €';
     return;
@@ -4314,7 +4308,6 @@ function renderFiscalidad() {
   document.getElementById('fiscal-table').classList.remove('hidden');
 
   let totalImpuestos = 0;
-  let totalIvaIrpf = 0;
   let totalAutonomo = 0;
   let totalRentaSoc = 0;
 
@@ -4324,15 +4317,12 @@ function renderFiscalidad() {
     totalImpuestos += imp;
     if (f.concepto === 'Cuota de Autónomos') {
       totalAutonomo += imp;
-    } else if (f.concepto === 'IVA' || f.concepto === 'IRPF') {
-      totalIvaIrpf += imp;
-    } else if (f.concepto === 'Declaración de la Renta' || f.concepto === 'Impuesto de Sociedades') {
+    } else if (f.concepto === 'Declaración de la Renta' || f.concepto === 'Impuesto de Sociedades' || f.concepto === 'IRPF') {
       totalRentaSoc += imp;
     }
   });
 
   document.getElementById('kpi-fiscal-total').textContent = totalImpuestos.toLocaleString('es-ES', {minimumFractionDigits:2}) + ' €';
-  document.getElementById('kpi-fiscal-iva').textContent = totalIvaIrpf.toLocaleString('es-ES', {minimumFractionDigits:2}) + ' €';
   document.getElementById('kpi-fiscal-autonomo').textContent = totalAutonomo.toLocaleString('es-ES', {minimumFractionDigits:2}) + ' €';
   document.getElementById('kpi-fiscal-renta').textContent = totalRentaSoc.toLocaleString('es-ES', {minimumFractionDigits:2}) + ' €';
 
