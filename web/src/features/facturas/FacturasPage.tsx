@@ -1,5 +1,13 @@
 import { useMemo, useState, useEffect } from 'react'
-import { ChevronDown, Download, Pencil, Plus, Search, Trash2 } from 'lucide-react'
+import {
+  AlertTriangle,
+  ChevronDown,
+  Download,
+  Pencil,
+  Plus,
+  Search,
+  Trash2,
+} from 'lucide-react'
 import { useLocation } from 'react-router-dom'
 import { FacturaModal } from './FacturaModal'
 import { Calendar } from './Calendar'
@@ -8,6 +16,8 @@ import { useFacturas, useDeleteFactura } from '@/lib/queries/facturas'
 import { useYearStore } from '@/stores/yearStore'
 import { isWholesaler } from '@/lib/config/wholesalers'
 import { useWholesalersStore } from '@/stores/wholesalersStore'
+import { useBudgetsStore } from '@/stores/budgetsStore'
+import { computeBudgetAlerts } from './lib/budgets'
 import { formatMoney } from '@/lib/utils/money'
 import { formatDate } from '@/lib/utils/dates'
 import type { VencStatus } from '@/lib/utils/dates'
@@ -119,6 +129,21 @@ export function FacturasPage() {
 
   const groups = useMemo(() => groupByMonth(visible), [visible])
 
+  // Alertas de presupuesto: gasto del AÑO activo por laboratorio vs límite
+  // configurado (independiente de los filtros de la pestaña, igual que el legacy).
+  const budgets = useBudgetsStore((s) => s.budgets)
+  const yearFacturas = useMemo(
+    () =>
+      facturas.filter(
+        (f) => (f.fecha ?? f.fecha_vencimiento ?? '').slice(0, 4) === String(year),
+      ),
+    [facturas, year],
+  )
+  const budgetAlerts = useMemo(
+    () => computeBudgetAlerts(yearFacturas, budgets),
+    [yearFacturas, budgets],
+  )
+
   const isOpen = (key: string, idx: number) =>
     key in overrides ? overrides[key] : idx === 0
 
@@ -183,6 +208,25 @@ export function FacturasPage() {
           </button>
         </div>
       </div>
+
+      {/* Alertas de presupuesto */}
+      {budgetAlerts.length > 0 && (
+        <div className="mt-4 space-y-2">
+          {budgetAlerts.map((a) => (
+            <div
+              key={a.lab}
+              className="flex items-center gap-3 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3"
+            >
+              <AlertTriangle className="h-4 w-4 shrink-0 text-red-400" />
+              <p className="text-sm text-red-300">
+                <strong className="font-bold">{a.lab}</strong> ha superado su presupuesto:{' '}
+                <strong className="font-bold">{formatMoney(a.spent)}</strong> gastado de{' '}
+                {formatMoney(a.limit)} máximo
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Filtros */}
       <div className="mt-6 rounded-2xl border border-white/5 bg-slate-900/40 p-4 space-y-4">
