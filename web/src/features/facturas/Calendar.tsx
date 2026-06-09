@@ -17,10 +17,10 @@ const DOT: Record<VencStatus, string> = {
   paid: 'bg-emerald-500',
 }
 const STAT_CARDS: { status: VencStatus; label: string; color: string }[] = [
-  { status: 'overdue', label: 'Vencidas', color: 'text-red-500' },
-  { status: 'neardue', label: 'Próximas', color: 'text-orange-500' },
-  { status: 'pending', label: 'Pendientes', color: 'text-accent-blue' },
-  { status: 'paid', label: 'Pagadas', color: 'text-emerald-500' },
+  { status: 'overdue', label: 'VENCIDAS', color: 'text-red-500' },
+  { status: 'neardue', label: 'PRÓXIMAS (7 DÍAS)', color: 'text-orange-500' },
+  { status: 'pending', label: 'PENDIENTES', color: 'text-accent-blue' },
+  { status: 'paid', label: 'PAGADAS', color: 'text-emerald-500' },
 ]
 
 const CARD_CLASSES: Record<VencStatus, string> = {
@@ -87,6 +87,16 @@ export function Calendar({
 
   const listTotal = listItems.reduce((sum, f) => sum + f.importe, 0)
   const todayStr = new Date().toISOString().slice(0, 10)
+
+  function scrollToDay(dateStr: string) {
+    const id = `cal-item-${dateStr.replace(/-/g, '')}`
+    const el = document.getElementById(id)
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+      el.classList.add('ring-2', 'ring-blue-400')
+      setTimeout(() => el.classList.remove('ring-2', 'ring-blue-400'), 1500)
+    }
+  }
 
   function prevMonth() {
     if (month0 === 0) {
@@ -165,12 +175,14 @@ export function Calendar({
               if (cell.day === null) return <div key={`e${i}`} />
               const recs = byDay.get(cell.dateStr!) ?? []
               const isToday = cell.dateStr === todayStr
+              const hasRecs = recs.length > 0
               return (
                 <div
                   key={cell.dateStr}
-                  className={`flex aspect-square flex-col items-center justify-start rounded-lg pt-1 ${
+                  onClick={() => hasRecs && cell.dateStr && scrollToDay(cell.dateStr)}
+                  className={`flex aspect-square flex-col items-center justify-start rounded-lg pt-1 transition-all select-none ${
                     isToday ? 'ring-2 ring-accent-blue' : ''
-                  }`}
+                  } ${hasRecs ? 'cursor-pointer hover:bg-white/5' : ''}`}
                 >
                   <span
                     className={`text-xs ${isToday ? 'font-black text-accent-blue' : 'text-slate-300'}`}
@@ -221,10 +233,12 @@ export function Calendar({
             {listItems.map((f) => {
               const isPaid = getEffectiveVencStatus(f) === 'paid'
               const vs = getEffectiveVencStatus(f) as VencStatus
+              const dateId = f.fecha_vencimiento ? f.fecha_vencimiento.replace(/-/g, '') : ''
               return (
                 <div
                   key={f.id}
-                  className={`flex items-center justify-between gap-2 rounded-xl border border-white/5 bg-slate-950/30 p-3 border-l-4 ${
+                  id={`cal-item-${dateId}`}
+                  className={`flex items-center justify-between gap-2 rounded-xl border border-white/5 bg-slate-950/30 p-3 border-l-4 transition-all duration-300 scroll-mt-2 ${
                     vs === 'overdue'
                       ? 'border-l-red-500'
                       : vs === 'neardue'

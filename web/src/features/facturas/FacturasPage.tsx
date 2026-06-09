@@ -158,21 +158,12 @@ export function FacturasPage() {
     <div className="mx-auto max-w-7xl px-6 py-8">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-white">Facturas</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight text-white">Facturas de Laboratorios</h1>
           <p className="mt-1 text-sm text-slate-400">
-            Gastos de proveedores y abonos de {year}.
+            Registro centralizado por proveedor farmacéutico
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => downloadFacturasCSV(visible)}
-            disabled={!visible.length}
-            className="flex items-center gap-2 rounded-xl border border-white/10 px-4 py-2.5 text-sm font-bold text-slate-300 transition-all hover:bg-white/5 disabled:opacity-50"
-          >
-            <Download className="h-4 w-4" />
-            Exportar CSV
-          </button>
           <button
             type="button"
             onClick={openCreate}
@@ -183,6 +174,39 @@ export function FacturasPage() {
           </button>
         </div>
       </div>
+
+      {/* Calendario (Posicionado ARRIBA de los filtros) */}
+      <Calendar
+        onEdit={openEdit}
+        onDelete={onDelete}
+        vencStatus={vencStatus}
+        setVencStatus={setVencStatus}
+      />
+
+      {/* Barra de Filtro de Vencimiento Activo */}
+      {vencStatus && (
+        <div className="mt-6 flex items-center justify-between rounded-xl bg-blue-500/10 border border-blue-500/20 px-4 py-2.5 text-sm">
+          <span className="text-slate-300">
+            Filtro activo de vencimiento:{' '}
+            <strong className="text-white">
+              {vencStatus === 'overdue'
+                ? 'Vencidas'
+                : vencStatus === 'neardue'
+                  ? 'Próximas'
+                  : vencStatus === 'pending'
+                    ? 'Pendientes'
+                    : 'Pagadas'}
+            </strong>
+          </span>
+          <button
+            type="button"
+            onClick={() => setVencStatus('')}
+            className="text-xs font-bold text-blue-400 hover:text-blue-300"
+          >
+            Limpiar filtro
+          </button>
+        </div>
+      )}
 
       {/* Filtros */}
       <div className="mt-6 rounded-2xl border border-white/5 bg-slate-900/40 p-4 space-y-4">
@@ -215,8 +239,32 @@ export function FacturasPage() {
             <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
           </div>
 
+          {/* Exportar CSV */}
+          <button
+            type="button"
+            onClick={() => downloadFacturasCSV(visible)}
+            disabled={!visible.length}
+            className="flex items-center gap-2 rounded-xl border border-white/10 px-4 py-2.5 text-sm font-bold text-slate-300 transition-all hover:bg-white/5 disabled:opacity-50"
+          >
+            <Download className="h-4 w-4" />
+            Exportar CSV
+          </button>
+
+          {/* Actualizar Manual */}
+          <button
+            type="button"
+            onClick={() => refetch()}
+            className="rounded-xl border border-white/10 px-4 py-2.5 text-sm font-bold text-slate-300 transition-all hover:bg-white/5"
+          >
+            Actualizar
+          </button>
+        </div>
+
+        {/* Importe y Categoría */}
+        <div className="flex flex-wrap items-center gap-6 pt-3 border-t border-white/5">
           {/* Rango de Importe */}
           <div className="flex items-center gap-2">
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">IMPORTE:</span>
             <input
               type="text"
               value={minImporte}
@@ -241,72 +289,33 @@ export function FacturasPage() {
                 }}
                 className="text-xs font-bold text-red-400 hover:text-red-300 px-2 py-1"
               >
-                Limpiar
+                ✕
               </button>
             )}
           </div>
 
-          {/* Actualizar Manual */}
-          <button
-            type="button"
-            onClick={() => refetch()}
-            className="rounded-xl border border-white/10 px-4 py-2.5 text-sm font-bold text-slate-300 transition-all hover:bg-white/5"
-          >
-            Actualizar
-          </button>
-        </div>
-
-        {/* Categorías */}
-        <div className="flex flex-wrap gap-2 pt-2 border-t border-white/5">
-          {categories.map((c) => (
-            <button
-              key={c.value || 'all'}
-              type="button"
-              onClick={() => setCategory(c.value)}
-              className={`rounded-xl border px-3.5 py-1.5 text-xs font-bold transition-all ${
-                category === c.value
-                  ? 'border-blue-400/20 bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg'
-                  : 'border-white/5 bg-white/5 text-slate-300 hover:bg-white/10'
-              }`}
-            >
-              {c.label}
-            </button>
-          ))}
+          {/* Categorías */}
+          <div className="flex flex-wrap items-center gap-3 flex-1 min-w-[280px]">
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">CATEGORÍA:</span>
+            <div className="flex flex-wrap gap-2">
+              {categories.map((c) => (
+                <button
+                  key={c.value || 'all'}
+                  type="button"
+                  onClick={() => setCategory(c.value)}
+                  className={`rounded-xl border px-3.5 py-1.5 text-xs font-bold transition-all ${
+                    category === c.value
+                      ? 'border-blue-400/20 bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg'
+                      : 'border-white/5 bg-white/5 text-slate-300 hover:bg-white/10'
+                  }`}
+                >
+                  {c.label}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
-
-      {/* Calendario (Posicionado ARRIBA de las facturas) */}
-      <Calendar
-        onEdit={openEdit}
-        onDelete={onDelete}
-        vencStatus={vencStatus}
-        setVencStatus={setVencStatus}
-      />
-
-      {/* Barra de Filtro de Vencimiento Activo */}
-      {vencStatus && (
-        <div className="mt-6 flex items-center justify-between rounded-xl bg-blue-500/10 border border-blue-500/20 px-4 py-2.5 text-sm">
-          <span className="text-slate-300">
-            Filtro activo de vencimiento:{' '}
-            <strong className="text-white">
-              {vencStatus === 'overdue'
-                ? 'Vencidas'
-                : vencStatus === 'neardue'
-                  ? 'Próximas'
-                  : vencStatus === 'pending'
-                    ? 'Pendientes'
-                    : 'Pagadas'}
-            </strong>
-          </span>
-          <button
-            type="button"
-            onClick={() => setVencStatus('')}
-            className="text-xs font-bold text-blue-400 hover:text-blue-300"
-          >
-            Limpiar filtro
-          </button>
-        </div>
-      )}
 
       {/* Estados */}
       {isLoading && (
