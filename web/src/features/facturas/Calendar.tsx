@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Pencil, Trash2 } from 'lucide-react'
 import { useFacturas, useSetPagada } from '@/lib/queries/facturas'
 import { formatMoney } from '@/lib/utils/money'
 import { formatDate, monthLabel } from '@/lib/utils/dates'
@@ -22,6 +22,14 @@ const STAT_CARDS: { status: VencStatus; label: string; color: string }[] = [
   { status: 'pending', label: 'Pendientes', color: 'text-accent-blue' },
   { status: 'paid', label: 'Pagadas', color: 'text-emerald-500' },
 ]
+
+const CARD_CLASSES: Record<VencStatus, string> = {
+  overdue: 'bg-gradient-to-br from-red-500/15 via-red-500/5 to-transparent border-red-500/20 hover:border-red-500/40 shadow-[0_0_20px_rgba(239,68,68,0.08)]',
+  neardue: 'bg-gradient-to-br from-orange-500/15 via-orange-500/5 to-transparent border-orange-500/20 hover:border-orange-500/40 shadow-[0_0_20px_rgba(249,115,22,0.08)]',
+  pending: 'bg-gradient-to-br from-blue-500/15 via-blue-500/5 to-transparent border-blue-500/20 hover:border-blue-500/40 shadow-[0_0_20px_rgba(59,130,246,0.08)]',
+  paid: 'bg-gradient-to-br from-emerald-500/15 via-emerald-500/5 to-transparent border-emerald-500/20 hover:border-emerald-500/40 shadow-[0_0_20px_rgba(16,185,129,0.08)]',
+}
+
 const WEEKDAYS = ['L', 'M', 'X', 'J', 'V', 'S', 'D']
 type ListFilter = 'total' | 'pending' | 'overdue' | 'paid'
 
@@ -30,7 +38,16 @@ function worstStatus(facturas: Factura[]): VencStatus {
   return STATUS_ORDER.find((s) => present.has(s)) ?? 'paid'
 }
 
-export function Calendar() {
+export function Calendar({
+  onEdit,
+  onDelete,
+  setVencStatus,
+}: {
+  onEdit?: (f: Factura) => void
+  onDelete?: (f: Factura) => void
+  vencStatus?: string
+  setVencStatus?: (s: '' | VencStatus) => void
+}) {
   const now = new Date()
   const { data } = useFacturas()
   const setPagada = useSetPagada()
@@ -100,8 +117,11 @@ export function Calendar() {
           <button
             key={c.status}
             type="button"
-            onClick={() => setModalStatus(c.status)}
-            className="rounded-2xl border border-white/5 bg-white/5 p-4 text-left transition-all hover:bg-white/10"
+            onClick={() => {
+              setModalStatus(c.status)
+              if (setVencStatus) setVencStatus(c.status)
+            }}
+            className={`rounded-2xl border p-4 text-left transition-all duration-300 hover:-translate-y-0.5 glass-card ${CARD_CLASSES[c.status]}`}
           >
             <p className={`text-3xl font-black leading-none ${c.color}`}>
               {stats[c.status]}
@@ -113,7 +133,7 @@ export function Calendar() {
 
       <div className="mt-4 grid gap-4 lg:grid-cols-2">
         {/* Rejilla */}
-        <div className="rounded-2xl border border-white/5 bg-white/5 p-4">
+        <div className="rounded-2xl border border-white/5 bg-slate-900/40 p-4 glass-card">
           <div className="mb-3 flex items-center justify-between">
             <button
               type="button"
@@ -169,7 +189,7 @@ export function Calendar() {
         </div>
 
         {/* Lista lateral */}
-        <div className="flex flex-col rounded-2xl border border-white/5 bg-white/5 p-4">
+        <div className="flex flex-col rounded-2xl border border-white/5 bg-slate-900/40 p-4 glass-card">
           <div className="mb-3 flex flex-wrap gap-1.5">
             {(['total', 'pending', 'overdue', 'paid'] as ListFilter[]).map((f) => (
               <button
@@ -178,7 +198,7 @@ export function Calendar() {
                 onClick={() => setListFilter(f)}
                 className={`rounded-lg px-2.5 py-1 text-xs font-bold transition-all ${
                   listFilter === f
-                    ? 'bg-slate-200 text-slate-900'
+                    ? 'bg-slate-200 text-slate-900 shadow-md'
                     : 'bg-white/5 text-slate-400 hover:text-white'
                 }`}
               >
@@ -200,33 +220,63 @@ export function Calendar() {
             )}
             {listItems.map((f) => {
               const isPaid = getEffectiveVencStatus(f) === 'paid'
+              const vs = getEffectiveVencStatus(f) as VencStatus
               return (
                 <div
                   key={f.id}
-                  className="flex items-center justify-between gap-2 rounded-xl border border-white/5 bg-slate-950/30 p-3"
+                  className={`flex items-center justify-between gap-2 rounded-xl border border-white/5 bg-slate-950/30 p-3 border-l-4 ${
+                    vs === 'overdue'
+                      ? 'border-l-red-500'
+                      : vs === 'neardue'
+                        ? 'border-l-orange-500'
+                        : vs === 'pending'
+                          ? 'border-l-accent-blue'
+                          : 'border-l-emerald-500'
+                  }`}
                 >
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-bold text-white">
-                      {f.laboratorio || '—'}
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center">
+                      <span className={`h-2 w-2 rounded-full shrink-0 ${DOT[vs]} mr-1.5`} />
+                      <p className="truncate text-sm font-bold text-white">
+                        {f.laboratorio || '—'}
+                      </p>
+                    </div>
+                    <p className="text-xs text-slate-400 mt-0.5">
+                      Venc: {formatDate(f.fecha_vencimiento)}
                     </p>
-                    <p className="text-xs text-slate-400">
-                      {formatDate(f.fecha_vencimiento)}
-                    </p>
-                    <p className="text-sm font-black text-white">
+                    <p className="text-sm font-black text-white mt-0.5">
                       {formatMoney(f.importe)}
                     </p>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setPagada.mutate({ id: f.id, pagada: !isPaid })}
-                    className={`shrink-0 whitespace-nowrap rounded-lg border px-2.5 py-1.5 text-xs font-bold transition-all ${
-                      isPaid
-                        ? 'border-white/5 bg-white/5 text-slate-400 hover:text-white'
-                        : 'border-emerald-500/20 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20'
-                    }`}
-                  >
-                    {isPaid ? '↺ Desmarcar' : '✓ Pagada'}
-                  </button>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => onEdit?.(f)}
+                      className="rounded-lg p-1.5 text-slate-400 transition-all hover:bg-white/5 hover:text-white"
+                      aria-label="Editar"
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onDelete?.(f)}
+                      className="rounded-lg p-1.5 text-slate-400 transition-all hover:bg-white/5 hover:text-red-400"
+                      aria-label="Eliminar"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPagada.mutate({ id: f.id, pagada: !isPaid })}
+                      className={`whitespace-nowrap rounded-lg border px-2 py-1 text-[11px] font-bold transition-all ${
+                        isPaid
+                          ? 'border-white/5 bg-white/5 text-slate-400 hover:text-white'
+                          : 'border-emerald-500/20 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20'
+                      }`}
+                    >
+                      {isPaid ? '↺' : '✓'}
+                    </button>
+                  </div>
                 </div>
               )
             })}
@@ -244,7 +294,12 @@ export function Calendar() {
         </div>
       </div>
 
-      <VencListModal status={modalStatus} onClose={() => setModalStatus(null)} />
+      <VencListModal
+        status={modalStatus}
+        onClose={() => setModalStatus(null)}
+        onEdit={onEdit}
+        onDelete={onDelete}
+      />
     </section>
   )
 }

@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { ChevronDown, Download, Pencil, Plus, Search, Trash2 } from 'lucide-react'
+import { useLocation } from 'react-router-dom'
 import { FacturaModal } from './FacturaModal'
 import { Calendar } from './Calendar'
 import { downloadFacturasCSV } from './lib/csv'
@@ -9,6 +10,7 @@ import { isWholesaler } from '@/lib/config/wholesalers'
 import { useWholesalersStore } from '@/stores/wholesalersStore'
 import { formatMoney } from '@/lib/utils/money'
 import { formatDate } from '@/lib/utils/dates'
+import type { VencStatus } from '@/lib/utils/dates'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import type { Factura } from '@/types/domain'
 import {
@@ -18,6 +20,22 @@ import {
   netTotal,
 } from './lib/facturas-view'
 import type { FacturaCategory } from './lib/facturas-view'
+
+const MESES = [
+  { value: '', label: 'Todos los meses' },
+  { value: '01', label: 'Enero' },
+  { value: '02', label: 'Febrero' },
+  { value: '03', label: 'Marzo' },
+  { value: '04', label: 'Abril' },
+  { value: '05', label: 'Mayo' },
+  { value: '06', label: 'Junio' },
+  { value: '07', label: 'Julio' },
+  { value: '08', label: 'Agosto' },
+  { value: '09', label: 'Septiembre' },
+  { value: '10', label: 'Octubre' },
+  { value: '11', label: 'Noviembre' },
+  { value: '12', label: 'Diciembre' },
+]
 
 const TIPO_BADGE: Record<string, string> = {
   Laboratorio: 'bg-blue-500/10 border-blue-500/20 text-blue-400',
@@ -33,18 +51,37 @@ function tipoBadgeClass(tipo: string, wholesalers: string[]): string {
 }
 
 export function FacturasPage() {
-  const { data, isLoading, isError, error } = useFacturas()
+  const { data, isLoading, isError, error, refetch } = useFacturas()
   const deleteFactura = useDeleteFactura()
   const year = useYearStore((s) => s.year)
+  const location = useLocation()
 
   const wholesalers = useWholesalersStore((s) => s.wholesalers)
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState<FacturaCategory>('')
+  const [month, setMonth] = useState('')
+  const [minImporte, setMinImporte] = useState('')
+  const [maxImporte, setMaxImporte] = useState('')
+  const [vencStatus, setVencStatus] = useState<'' | VencStatus>('')
+  
   // Estado de expansión: solo guardamos las desviaciones del usuario respecto al
   // valor por defecto (primer grupo abierto, resto cerrados).
   const [overrides, setOverrides] = useState<Record<string, boolean>>({})
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState<Factura | null>(null)
+  const [initialFile, setInitialFile] = useState<File | null>(null)
+
+  useEffect(() => {
+    if (location.state?.openCreate) {
+      setTimeout(() => {
+        setEditing(null)
+        setInitialFile(location.state.scanFile || null)
+        setModalOpen(true)
+      }, 0)
+      // Limpiar el estado de navegación para evitar reapertura
+      window.history.replaceState({}, document.title)
+    }
+  }, [location])
 
   const facturas = useMemo(() => data ?? [], [data])
 
@@ -53,10 +90,10 @@ export function FacturasPage() {
     () =>
       filterFacturas(
         facturas,
-        { year: String(year), search, category: '', vencStatus: '' },
+        { year: String(year), search, category: '', vencStatus: '', month, minImporte, maxImporte },
         wholesalers,
       ),
-    [facturas, year, search, wholesalers],
+    [facturas, year, search, wholesalers, month, minImporte, maxImporte],
   )
 
   const counts = useMemo(() => {
@@ -74,10 +111,10 @@ export function FacturasPage() {
     () =>
       filterFacturas(
         facturas,
-        { year: String(year), search, category, vencStatus: '' },
+        { year: String(year), search, category, vencStatus, month, minImporte, maxImporte },
         wholesalers,
       ),
-    [facturas, year, search, category, wholesalers],
+    [facturas, year, search, category, vencStatus, wholesalers, month, minImporte, maxImporte],
   )
 
   const groups = useMemo(() => groupByMonth(visible), [visible])
@@ -148,18 +185,79 @@ export function FacturasPage() {
       </div>
 
       {/* Filtros */}
-      <div className="mt-6 space-y-3">
-        <div className="relative max-w-md">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar por laboratorio o nº de factura…"
-            className="w-full rounded-xl border border-white/5 bg-slate-950/40 py-2.5 pl-10 pr-4 text-sm text-slate-100 placeholder-slate-500 focus:border-accent-blue/40 focus:outline-none"
-          />
+      <div className="mt-6 rounded-2xl border border-white/5 bg-slate-900/40 p-4 space-y-4">
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Buscar */}
+          <div className="relative flex-1 min-w-[240px]">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Buscar por laboratorio o nº de factura…"
+              className="w-full rounded-xl border border-white/5 bg-slate-950/40 py-2.5 pl-10 pr-4 text-sm text-slate-100 placeholder-slate-500 focus:border-accent-blue/40 focus:outline-none"
+            />
+          </div>
+
+          {/* Mes */}
+          <div className="relative min-w-[160px]">
+            <select
+              value={month}
+              onChange={(e) => setMonth(e.target.value)}
+              className="w-full appearance-none rounded-xl border border-white/5 bg-slate-950/40 py-2.5 pl-4 pr-10 text-sm text-slate-200 focus:border-accent-blue/40 focus:outline-none"
+            >
+              {MESES.map((m) => (
+                <option key={m.value} value={m.value} className="bg-slate-950 text-slate-200">
+                  {m.label}
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+          </div>
+
+          {/* Rango de Importe */}
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              value={minImporte}
+              onChange={(e) => setMinImporte(e.target.value)}
+              placeholder="Desde €"
+              className="w-24 rounded-xl border border-white/5 bg-slate-950/40 py-2.5 px-3 text-sm text-slate-100 placeholder-slate-500 focus:border-accent-blue/40 focus:outline-none"
+            />
+            <span className="text-slate-500">—</span>
+            <input
+              type="text"
+              value={maxImporte}
+              onChange={(e) => setMaxImporte(e.target.value)}
+              placeholder="Hasta €"
+              className="w-24 rounded-xl border border-white/5 bg-slate-950/40 py-2.5 px-3 text-sm text-slate-100 placeholder-slate-500 focus:border-accent-blue/40 focus:outline-none"
+            />
+            {(minImporte || maxImporte) && (
+              <button
+                type="button"
+                onClick={() => {
+                  setMinImporte('')
+                  setMaxImporte('')
+                }}
+                className="text-xs font-bold text-red-400 hover:text-red-300 px-2 py-1"
+              >
+                Limpiar
+              </button>
+            )}
+          </div>
+
+          {/* Actualizar Manual */}
+          <button
+            type="button"
+            onClick={() => refetch()}
+            className="rounded-xl border border-white/10 px-4 py-2.5 text-sm font-bold text-slate-300 transition-all hover:bg-white/5"
+          >
+            Actualizar
+          </button>
         </div>
-        <div className="flex flex-wrap gap-2">
+
+        {/* Categorías */}
+        <div className="flex flex-wrap gap-2 pt-2 border-t border-white/5">
           {categories.map((c) => (
             <button
               key={c.value || 'all'}
@@ -176,6 +274,39 @@ export function FacturasPage() {
           ))}
         </div>
       </div>
+
+      {/* Calendario (Posicionado ARRIBA de las facturas) */}
+      <Calendar
+        onEdit={openEdit}
+        onDelete={onDelete}
+        vencStatus={vencStatus}
+        setVencStatus={setVencStatus}
+      />
+
+      {/* Barra de Filtro de Vencimiento Activo */}
+      {vencStatus && (
+        <div className="mt-6 flex items-center justify-between rounded-xl bg-blue-500/10 border border-blue-500/20 px-4 py-2.5 text-sm">
+          <span className="text-slate-300">
+            Filtro activo de vencimiento:{' '}
+            <strong className="text-white">
+              {vencStatus === 'overdue'
+                ? 'Vencidas'
+                : vencStatus === 'neardue'
+                  ? 'Próximas'
+                  : vencStatus === 'pending'
+                    ? 'Pendientes'
+                    : 'Pagadas'}
+            </strong>
+          </span>
+          <button
+            type="button"
+            onClick={() => setVencStatus('')}
+            className="text-xs font-bold text-blue-400 hover:text-blue-300"
+          >
+            Limpiar filtro
+          </button>
+        </div>
+      )}
 
       {/* Estados */}
       {isLoading && (
@@ -194,7 +325,7 @@ export function FacturasPage() {
 
       {/* Tabla agrupada por mes */}
       {!isLoading && !isError && groups.length > 0 && (
-        <div className="mt-6 overflow-hidden rounded-2xl border border-white/5">
+        <div className="mt-6 overflow-hidden rounded-2xl border border-white/5 glass-card">
           <table className="w-full text-left">
             <tbody className="divide-y divide-white/5">
               {groups.map((g, idx) => (
@@ -219,7 +350,7 @@ export function FacturasPage() {
 
       {/* Total */}
       {!isLoading && !isError && groups.length > 0 && (
-        <div className="mt-4 flex items-center justify-between rounded-2xl border border-white/5 bg-white/5 px-6 py-4">
+        <div className="mt-4 flex items-center justify-between rounded-2xl border border-white/5 glass-card px-6 py-4">
           <span className="text-sm text-slate-400">
             {nFacturas} factura{nFacturas !== 1 ? 's' : ''}
             {nAbonos > 0 && ` · ${nAbonos} abono${nAbonos !== 1 ? 's' : ''}`}
@@ -228,12 +359,14 @@ export function FacturasPage() {
         </div>
       )}
 
-      <Calendar />
-
       <FacturaModal
         open={modalOpen}
-        onClose={() => setModalOpen(false)}
+        onClose={() => {
+          setModalOpen(false)
+          setInitialFile(null)
+        }}
         factura={editing}
+        initialFile={initialFile}
       />
     </div>
   )

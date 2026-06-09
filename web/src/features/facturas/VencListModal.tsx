@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import { Search } from 'lucide-react'
+import { Search, Pencil, Trash2 } from 'lucide-react'
 import { Dialog } from '@/components/ui/Dialog'
 import { useFacturas, useSetPagada } from '@/lib/queries/facturas'
 import { formatMoney } from '@/lib/utils/money'
 import { formatDate } from '@/lib/utils/dates'
 import type { VencStatus } from '@/lib/utils/dates'
 import { getEffectiveVencStatus } from './lib/facturas-view'
+import type { Factura } from '@/types/domain'
 
 const TITLES: Record<VencStatus, string> = {
   overdue: 'Facturas vencidas (impagadas)',
@@ -17,9 +18,13 @@ const TITLES: Record<VencStatus, string> = {
 export function VencListModal({
   status,
   onClose,
+  onEdit,
+  onDelete,
 }: {
   status: VencStatus | null
   onClose: () => void
+  onEdit?: (f: Factura) => void
+  onDelete?: (f: Factura) => void
 }) {
   const { data } = useFacturas()
   const setPagada = useSetPagada()
@@ -86,10 +91,33 @@ export function VencListModal({
                   {formatDate(f.fecha_vencimiento ?? f.fecha)}
                 </p>
               </div>
-              <div className="flex shrink-0 items-center gap-3">
-                <span className="text-sm font-extrabold text-white">
+              <div className="flex shrink-0 items-center gap-1.5">
+                <span className="text-sm font-extrabold text-white mr-1.5">
                   {formatMoney(f.importe)}
                 </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onEdit?.(f)
+                    onClose()
+                  }}
+                  className="rounded-lg p-1.5 text-slate-400 transition-all hover:bg-white/5 hover:text-white"
+                  aria-label="Editar"
+                >
+                  <Pencil className="h-3.5 w-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (confirm(`¿Eliminar la factura de ${f.laboratorio}?`)) {
+                      onDelete?.(f)
+                    }
+                  }}
+                  className="rounded-lg p-1.5 text-slate-400 transition-all hover:bg-white/5 hover:text-red-400"
+                  aria-label="Eliminar"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
                 <button
                   type="button"
                   onClick={() => setPagada.mutate({ id: f.id, pagada: !isPaid })}
@@ -99,7 +127,7 @@ export function VencListModal({
                       : 'border-emerald-500/20 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20'
                   }`}
                 >
-                  {isPaid ? '↺ Desmarcar' : '✓ Pagada'}
+                  {isPaid ? '↺' : '✓'}
                 </button>
               </div>
             </div>
