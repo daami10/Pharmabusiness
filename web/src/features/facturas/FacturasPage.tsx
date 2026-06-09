@@ -73,9 +73,11 @@ export function FacturasPage() {
 
   useEffect(() => {
     if (location.state?.openCreate) {
-      setEditing(null)
-      setInitialFile(location.state.scanFile || null)
-      setModalOpen(true)
+      setTimeout(() => {
+        setEditing(null)
+        setInitialFile(location.state.scanFile || null)
+        setModalOpen(true)
+      }, 0)
       // Limpiar el estado de navegación para evitar reapertura
       window.history.replaceState({}, document.title)
     }

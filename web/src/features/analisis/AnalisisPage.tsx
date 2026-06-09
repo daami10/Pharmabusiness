@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { Bar, Doughnut } from 'react-chartjs-2'
 import type { ChartOptions } from 'chart.js'
 import { Download, Trophy, FileText, Landmark, Users, TrendingDown, ArrowUpDown } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import { palette } from '@/lib/chartSetup'
 import { AnalisisReport } from './AnalisisReport'
 import { useFacturas } from '@/lib/queries/facturas'
@@ -459,7 +460,7 @@ function Kpi({
   value: string
   small?: boolean
   highlight?: boolean
-  icon: any
+  icon: LucideIcon
   color?: string
 }) {
   return (
