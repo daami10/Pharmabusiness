@@ -17,7 +17,8 @@ export function fiscalKpis(items: Fiscal[]): FiscalKpis {
     if (f.concepto === 'Cuota de Autónomos') k.autonomo += f.importe
     else if (
       f.concepto === 'Declaración de la Renta' ||
-      f.concepto === 'Impuesto de Sociedades'
+      f.concepto === 'Impuesto de Sociedades' ||
+      f.concepto === 'IRPF'
     )
       k.renta += f.importe
   }

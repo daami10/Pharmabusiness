@@ -14,6 +14,7 @@ import { formatMoney } from '@/lib/utils/money'
 import { monthLabel } from '@/lib/utils/dates'
 import { isWholesaler } from '@/lib/config/wholesalers'
 import { RankingModal } from './RankingModal'
+import { stackedByWholesaler } from './lib/analisis-view'
 
 const eur = (v: string | number) => `${Number(v).toLocaleString('es-ES')} €`
 
@@ -21,6 +22,17 @@ const barOptions: ChartOptions<'bar'> = {
   responsive: true,
   plugins: { legend: { display: false } },
   scales: { y: { ticks: { callback: eur } } },
+}
+
+const barOptionsStacked: ChartOptions<'bar'> = {
+  responsive: true,
+  plugins: {
+    legend: { display: true, position: 'top', labels: { boxWidth: 12, font: { size: 10 } } },
+  },
+  scales: {
+    x: { stacked: true },
+    y: { stacked: true, ticks: { callback: eur } },
+  },
 }
 
 const donutOptions: ChartOptions<'doughnut'> = {
@@ -297,6 +309,12 @@ export function AnalisisPage() {
       byLab: bEntries.map(([lab, amount]) => ({ lab, amount })),
     }
   }, [category, facturasOnly, fiscalStats, trabStats, wholesalers])
+
+  // Evolución mensual apilada por mayorista (solo categoría "Mayorista").
+  const stackedData = useMemo(
+    () => (category === 'Mayorista' ? stackedByWholesaler(facturasOnly, wholesalers) : null),
+    [category, facturasOnly, wholesalers],
+  )
 
   // Abonos calculations
   const totalAbonos = useMemo(() => {
@@ -664,23 +682,38 @@ export function AnalisisPage() {
             </div>
           </div>
 
-          {/* Evolución Mensual */}
-          <ChartCard title="Evolución Mensual" wide>
+          {/* Evolución Mensual (apilada por mayorista en la categoría "Mayorista") */}
+          <ChartCard
+            title={stackedData ? 'Evolución Mensual por Mayorista' : 'Evolución Mensual'}
+            wide
+          >
             <div className="h-[240px]">
               <Bar
-                data={{
-                  labels: chartsData.monthlyLabels,
-                  datasets: [
-                    {
-                      label: '€',
-                      data: chartsData.monthlyData,
-                      backgroundColor: chartsData.monthlyColor,
-                      borderRadius: 4,
-                    },
-                  ],
-                }}
+                data={
+                  stackedData
+                    ? {
+                        labels: stackedData.months.map((m) => m.label),
+                        datasets: stackedData.series.map((s, idx) => ({
+                          label: s.wholesaler,
+                          data: s.data,
+                          backgroundColor: palette(stackedData.series.length)[idx],
+                          borderRadius: 4,
+                        })),
+                      }
+                    : {
+                        labels: chartsData.monthlyLabels,
+                        datasets: [
+                          {
+                            label: '€',
+                            data: chartsData.monthlyData,
+                            backgroundColor: chartsData.monthlyColor,
+                            borderRadius: 4,
+                          },
+                        ],
+                      }
+                }
                 options={{
-                  ...barOptions,
+                  ...(stackedData ? barOptionsStacked : barOptions),
                   maintainAspectRatio: false,
                 }}
               />

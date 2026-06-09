@@ -1,5 +1,5 @@
 import { useMemo, useState, useRef } from 'react'
-import type { ChangeEvent } from 'react'
+import type { ChangeEvent, DragEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { BarChart3, FileText, Landmark, TrendingUp, Users, Plus, Sparkles, ChevronRight, FileUp } from 'lucide-react'
 import { useFacturas } from '@/lib/queries/facturas'
@@ -21,7 +21,8 @@ export function InicioPage() {
   
   const [previsionOpen, setPrevisionOpen] = useState(false)
   const [fastActionOpen, setFastActionOpen] = useState(false)
-  
+  const [dragging, setDragging] = useState(false)
+
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const monthKey = `${year}-${String(new Date().getMonth() + 1).padStart(2, '0')}`
@@ -83,11 +84,31 @@ export function InicioPage() {
     },
   ]
 
+  // Lanza el escaneo IA: navega a Facturas abriendo el modal con el archivo.
+  const scanFile = (file: File | undefined) => {
+    if (file) navigate('/facturas', { state: { openCreate: true, scanFile: file } })
+  }
+
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      navigate('/facturas', { state: { openCreate: true, scanFile: file } })
+    scanFile(e.target.files?.[0])
+  }
+
+  // Drag & drop: la zona resalta al arrastrar; además se acepta soltar el archivo
+  // en cualquier punto de Inicio (paridad con el drop global del legacy).
+  const onDragOver = (e: DragEvent) => {
+    if (e.dataTransfer.types.includes('Files')) {
+      e.preventDefault()
+      setDragging(true)
     }
+  }
+  const onDragLeave = (e: DragEvent) => {
+    // Solo desactivar al salir del contenedor, no al pasar entre hijos.
+    if (e.currentTarget === e.target) setDragging(false)
+  }
+  const onDrop = (e: DragEvent) => {
+    e.preventDefault()
+    setDragging(false)
+    scanFile(e.dataTransfer.files?.[0])
   }
 
   const triggerFastAction = (action: string) => {
@@ -106,7 +127,12 @@ export function InicioPage() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-6 py-8 fade-in">
+    <div
+      className="mx-auto max-w-7xl px-6 py-8 fade-in"
+      onDragOver={onDragOver}
+      onDragLeave={onDragLeave}
+      onDrop={onDrop}
+    >
       <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-extrabold tracking-tight text-white">Inicio</h1>
@@ -236,11 +262,19 @@ export function InicioPage() {
 
           <div
             onClick={() => fileInputRef.current?.click()}
-            className="border-2 border-dashed border-white/10 hover:border-[#00f2fe]/40 hover:bg-[#00f2fe]/5 rounded-xl p-5 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-2 py-8 group"
+            className={`border-2 border-dashed rounded-xl p-5 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-2 py-8 group ${
+              dragging
+                ? 'border-[#00f2fe]/60 bg-[#00f2fe]/10'
+                : 'border-white/10 hover:border-[#00f2fe]/40 hover:bg-[#00f2fe]/5'
+            }`}
           >
-            <FileUp className="h-8 w-8 text-slate-500 group-hover:text-[#00f2fe] transition-colors" />
+            <FileUp
+              className={`h-8 w-8 transition-colors ${
+                dragging ? 'text-[#00f2fe]' : 'text-slate-500 group-hover:text-[#00f2fe]'
+              }`}
+            />
             <span className="text-xs text-slate-300 group-hover:text-white transition-colors font-bold">
-              Arrastra o haz clic para escanear factura
+              {dragging ? 'Suelta la factura para escanearla' : 'Arrastra o haz clic para escanear factura'}
             </span>
             <span className="text-3xs text-slate-500">Soporta imágenes de facturas (Gemini IA)</span>
             <input
