@@ -33,10 +33,23 @@ export function Sidebar({
         }`}
       >
         <div className="space-y-8">
-          <span className="select-none text-2xl font-bold tracking-tight text-white">
-            <span className="text-accent-blue">G</span>Farma
-          </span>
-          <nav className="space-y-1.5">
+          {/* Logo con cruz médica SVG */}
+          <div className="flex items-center gap-3 shrink-0 select-none">
+            <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round">
+              <defs>
+                <linearGradient id="cross-grad-sidebar" x1="0%" y1="100%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#3b82f6" />
+                  <stop offset="50%" stopColor="#00f2fe" />
+                  <stop offset="100%" stopColor="#10b981" />
+                </linearGradient>
+              </defs>
+              <path d="M9 3H15V6.5C15 7.3 15.7 8 16.5 8H20V14H16.5C15.7 14 15 14.7 15 15.5V19H9V15.5C9 14.7 8.3 14 7.5 14H4V8H7.5C8.3 8 9 7.3 9 6.5V3Z" stroke="url(#cross-grad-sidebar)" />
+              <path d="M7 11.5H9.5L10.8 8L12.8 15L14.2 11.5H17" stroke="url(#cross-grad-sidebar)" strokeWidth="2" />
+            </svg>
+            <span className="text-2xl font-bold tracking-tight text-white"><span className="text-[#00f2fe]">G</span>Farma</span>
+          </div>
+
+          <nav className="space-y-2.5">
             {NAV_ITEMS.map(({ to, label, icon: Icon, end }) => (
               <NavLink
                 key={to}
@@ -44,10 +57,10 @@ export function Sidebar({
                 end={end}
                 onClick={onClose}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-all ${
+                  `flex items-center gap-3.5 px-4 py-3.5 text-sm font-semibold transition-all border border-transparent ${
                     isActive
-                      ? 'bg-accent-blue/10 text-accent-blue'
-                      : 'text-slate-400 hover:bg-white/5 hover:text-white'
+                      ? 'tab-active'
+                      : 'text-slate-400 hover:text-white hover:bg-white/5'
                   }`
                 }
               >
@@ -57,6 +70,7 @@ export function Sidebar({
             ))}
           </nav>
         </div>
+
 
         <div className="space-y-1.5">
           <button type="button" onClick={onSettings} className={secondaryCls}>

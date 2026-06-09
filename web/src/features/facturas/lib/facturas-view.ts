@@ -10,6 +10,9 @@ export interface FacturaFilters {
   search: string
   category: FacturaCategory
   vencStatus: '' | VencStatus
+  month?: string
+  minImporte?: string
+  maxImporte?: string
 }
 
 /** Estado de vencimiento efectivo (los abonos no vencen; sin fecha de venc. = pagada). */
@@ -36,6 +39,8 @@ export function filterFacturas(
   wholesalers: string[],
 ): Factura[] {
   const s = filters.search.toLowerCase().trim()
+  const min = filters.minImporte && filters.minImporte !== '' ? parseFloat(filters.minImporte.replace(',', '.')) : null
+  const max = filters.maxImporte && filters.maxImporte !== '' ? parseFloat(filters.maxImporte.replace(',', '.')) : null
   return facturas.filter((f) => {
     const dateVal = f.fecha ?? f.fecha_vencimiento ?? ''
     if (dateVal.slice(0, 4) !== filters.year) return false
@@ -46,9 +51,15 @@ export function filterFacturas(
     ) {
       return false
     }
+    if (filters.month && (f.fecha ?? '').slice(5, 7) !== filters.month) return false
     if (!matchesCategory(f, filters.category, wholesalers)) return false
     if (filters.vencStatus && getEffectiveVencStatus(f) !== filters.vencStatus)
       return false
+    
+    const imp = f.importe ?? 0
+    if (min !== null && imp < min) return false
+    if (max !== null && imp > max) return false
+
     return true
   })
 }

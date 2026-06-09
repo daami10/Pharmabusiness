@@ -60,10 +60,12 @@ export function FacturaModal({
   open,
   onClose,
   factura,
+  initialFile,
 }: {
   open: boolean
   onClose: () => void
   factura: Factura | null
+  initialFile?: File | null
 }) {
   const wholesalers = useWholesalersStore((s) => s.wholesalers)
   const createFactura = useCreateFactura()
@@ -83,6 +85,30 @@ export function FacturaModal({
   useEffect(() => {
     if (open) reset(factura ? toForm(factura) : emptyForm())
   }, [open, factura, reset])
+
+  // Trigger OCR scan automatically if an initial file is provided
+  useEffect(() => {
+    if (open && initialFile && !factura) {
+      const runScan = async () => {
+        setOcrError('')
+        setOcrStatus('loading')
+        try {
+          const r = await scanInvoice(initialFile)
+          if (r.laboratorio) setValue('laboratorio', r.laboratorio)
+          if (r.numFactura) setValue('num_factura', r.numFactura)
+          if (r.importe > 0) setValue('importe', String(r.importe))
+          if (/^\d{4}-\d{2}-\d{2}$/.test(r.fecha)) setValue('fecha', r.fecha)
+          if (/^\d{4}-\d{2}-\d{2}$/.test(r.vencimiento))
+            setValue('fecha_vencimiento', r.vencimiento)
+          setOcrStatus('ok')
+        } catch (err) {
+          setOcrStatus('idle')
+          setOcrError(err instanceof Error ? err.message : 'Error al analizar la imagen')
+        }
+      }
+      runScan()
+    }
+  }, [open, initialFile, factura, setValue])
 
   function handleClose() {
     setServerError('')
