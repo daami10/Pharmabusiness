@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { ChevronLeft, ChevronRight, Pencil, Trash2 } from 'lucide-react'
 import { useFacturas, useSetPagada } from '@/lib/queries/facturas'
 import { formatMoney } from '@/lib/utils/money'
@@ -8,6 +8,7 @@ import { getEffectiveVencStatus } from './lib/facturas-view'
 import { buildCalendarGrid, getMonthVencimientos, vencStats } from './lib/calendar'
 import { VencListModal } from './VencListModal'
 import type { Factura } from '@/types/domain'
+import { useYearStore } from '@/stores/yearStore'
 
 const STATUS_ORDER: VencStatus[] = ['overdue', 'neardue', 'pending', 'paid']
 const DOT: Record<VencStatus, string> = {
@@ -51,10 +52,15 @@ export function Calendar({
   const now = new Date()
   const { data } = useFacturas()
   const setPagada = useSetPagada()
-  const [year, setYear] = useState(now.getFullYear())
+  const globalYear = useYearStore((s) => s.year)
+  const [year, setYear] = useState(globalYear)
   const [month0, setMonth0] = useState(now.getMonth())
   const [modalStatus, setModalStatus] = useState<VencStatus | null>(null)
   const [listFilter, setListFilter] = useState<ListFilter>('pending')
+
+  useEffect(() => {
+    setYear(globalYear)
+  }, [globalYear])
 
   const facturas = useMemo(() => data ?? [], [data])
   const stats = useMemo(() => vencStats(facturas), [facturas])
