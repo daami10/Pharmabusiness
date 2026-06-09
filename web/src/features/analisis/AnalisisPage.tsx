@@ -25,7 +25,7 @@ const barOptions: ChartOptions<'bar'> = {
 
 const donutOptions: ChartOptions<'doughnut'> = {
   responsive: true,
-  cutout: '62%',
+  cutout: '65%',
   plugins: {
     legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } },
   },
@@ -215,14 +215,22 @@ export function AnalisisPage() {
       }
       const mEntries = [...monthlyMap.entries()].sort((a, b) => a[0].localeCompare(b[0]))
 
+      const monthlyDatasets = [
+        {
+          label: '€',
+          data: mEntries.map(([, v]) => v),
+          backgroundColor: 'rgba(16,185,129,0.7)',
+          borderRadius: 4,
+        },
+      ]
+
       return {
         labsLabels: bEntries.map(([l]) => l),
         labsData: bEntries.map(([, v]) => v),
-        labsColor: 'rgba(16,185,129,0.8)',
+        labsColor: 'rgba(16,185,129,0.8)' as string | string[],
         donutColors: palette(bEntries.length),
         monthlyLabels: mEntries.map(([k]) => formatMonthLabel(k)),
-        monthlyData: mEntries.map(([, v]) => v),
-        monthlyColor: 'rgba(16,185,129,0.7)',
+        monthlyDatasets,
         byLab: bEntries.map(([lab, amount]) => ({ lab, amount })),
       }
     }
@@ -248,14 +256,103 @@ export function AnalisisPage() {
       }
       const mEntries = [...monthlyMap.entries()].sort((a, b) => a[0].localeCompare(b[0]))
 
+      const monthlyDatasets = [
+        {
+          label: '€',
+          data: mEntries.map(([, v]) => v),
+          backgroundColor: 'rgba(249,115,22,0.7)',
+          borderRadius: 4,
+        },
+      ]
+
       return {
         labsLabels: bEntries.map(([l]) => l),
         labsData: bEntries.map(([, v]) => v),
-        labsColor: 'rgba(249,115,22,0.8)',
+        labsColor: 'rgba(249,115,22,0.8)' as string | string[],
         donutColors: palette(bEntries.length),
         monthlyLabels: mEntries.map(([k]) => formatMonthLabel(k)),
-        monthlyData: mEntries.map(([, v]) => v),
-        monthlyColor: 'rgba(249,115,22,0.7)',
+        monthlyDatasets,
+        byLab: bEntries.map(([lab, amount]) => ({ lab, amount })),
+      }
+    }
+
+    if (category === 'Mayorista') {
+      const filteredInvoices = facturasOnly.filter((f) => isWholesaler(f.tipo, wholesalers))
+
+      const labMap = new Map<string, number>()
+      for (const f of filteredInvoices) {
+        const lab = f.laboratorio || 'Sin nombre'
+        labMap.set(lab, (labMap.get(lab) ?? 0) + f.importe)
+      }
+      const bEntries = [...labMap.entries()].sort((a, b) => b[1] - a[1])
+
+      const uniqueMonthsSet = new Set<string>()
+      for (const f of filteredInvoices) {
+        if (f.fecha) {
+          uniqueMonthsSet.add(f.fecha.slice(0, 7))
+        }
+      }
+      const sortedMonths = [...uniqueMonthsSet].sort((a, b) => a.localeCompare(b))
+
+      const values: Record<string, Record<string, number>> = {}
+      for (const m of sortedMonths) {
+        values[m] = {}
+        for (const w of wholesalers) {
+          values[m][w] = 0
+        }
+      }
+
+      for (const f of filteredInvoices) {
+        if (f.fecha) {
+          const k = f.fecha.slice(0, 7)
+          const t = f.tipo || 'Otro'
+          if (wholesalers.includes(t)) {
+            values[k][t] = (values[k][t] ?? 0) + f.importe
+          }
+        }
+      }
+
+      const baseColors = [
+        'rgba(37, 99, 235, 0.8)',   // blue
+        'rgba(5, 150, 105, 0.8)',   // green/emerald
+        'rgba(124, 58, 237, 0.8)',  // purple
+        'rgba(234, 88, 12, 0.8)',   // orange
+        'rgba(8, 145, 178, 0.8)',   // cyan
+      ]
+      const donutBaseColors = ['#2563EB', '#059669', '#7C3AED', '#EA580C', '#0891B2']
+
+      const labsColors = bEntries.slice(0, 15).map(([l]) => {
+        const wIdx = wholesalers.indexOf(l)
+        return wIdx !== -1 ? baseColors[wIdx % baseColors.length] : 'rgba(124, 58, 237, 0.8)'
+      })
+
+      const donutColors = bEntries.slice(0, 10).map(([l]) => {
+        const wIdx = wholesalers.indexOf(l)
+        return wIdx !== -1 ? donutBaseColors[wIdx % donutBaseColors.length] : '#7C3AED'
+      })
+
+      const datasetsColors = [
+        'rgba(37, 99, 235, 0.7)',   // blue
+        'rgba(5, 150, 105, 0.7)',   // green/emerald
+        'rgba(124, 58, 237, 0.7)',  // purple
+        'rgba(234, 88, 12, 0.7)',   // orange
+        'rgba(8, 145, 178, 0.7)',   // cyan
+      ]
+
+      const monthlyDatasets = wholesalers.map((w, idx) => ({
+        label: w,
+        data: sortedMonths.map((m) => values[m][w] ?? 0),
+        backgroundColor: datasetsColors[idx % datasetsColors.length],
+        borderRadius: 4,
+      }))
+
+      return {
+        labsLabels: bEntries.slice(0, 15).map(([l]) => l),
+        labsData: bEntries.slice(0, 15).map(([, v]) => v),
+        labsColor: labsColors,
+        donutColors,
+        monthlyLabels: sortedMonths.map((k) => formatMonthLabel(k)),
+        monthlyDatasets,
         byLab: bEntries.map(([lab, amount]) => ({ lab, amount })),
       }
     }
@@ -263,7 +360,6 @@ export function AnalisisPage() {
     // Normal category or total ('')
     const filteredInvoices = facturasOnly.filter((f) => {
       if (!category) return true
-      if (category === 'Mayorista') return isWholesaler(f.tipo, wholesalers)
       return f.tipo === category
     })
 
@@ -282,9 +378,16 @@ export function AnalisisPage() {
     }
     const mEntries = [...monthlyMap.entries()].sort((a, b) => a[0].localeCompare(b[0]))
 
-    let labsColor = 'rgba(37,99,235,0.8)'
-    if (category === 'Mayorista') labsColor = 'rgba(124,58,237,0.8)'
-    else if (category === 'Otro') labsColor = 'rgba(107,114,128,0.8)'
+    const labsColor = category === 'Otro' ? 'rgba(107,114,128,0.8)' : 'rgba(37,99,235,0.8)'
+
+    const monthlyDatasets = [
+      {
+        label: '€',
+        data: mEntries.map(([, v]) => v),
+        backgroundColor: category === '' ? 'rgba(37,99,235,0.7)' : labsColor,
+        borderRadius: 4,
+      },
+    ]
 
     return {
       labsLabels: bEntries.slice(0, 15).map(([l]) => l),
@@ -292,8 +395,7 @@ export function AnalisisPage() {
       labsColor,
       donutColors: palette(Math.min(bEntries.length, 10)),
       monthlyLabels: mEntries.map(([k]) => formatMonthLabel(k)),
-      monthlyData: mEntries.map(([, v]) => v),
-      monthlyColor: 'rgba(37,99,235,0.7)',
+      monthlyDatasets,
       byLab: bEntries.map(([lab, amount]) => ({ lab, amount })),
     }
   }, [category, facturasOnly, fiscalStats, trabStats, wholesalers])
@@ -451,16 +553,24 @@ export function AnalisisPage() {
           className="px-3 py-1.5 rounded-lg border border-white/5 text-xs bg-slate-950/40 text-slate-200 focus:border-[#00f2fe]/40 focus:outline-none transition-all"
         />
         {hasRange && (
-          <button
-            type="button"
-            onClick={() => {
-              setDesde('')
-              setHasta('')
-            }}
-            className="text-xs text-[#00f2fe] hover:text-[#00f2fe]/80 font-bold transition-colors"
-          >
-            Limpiar
-          </button>
+          <div className="flex items-center gap-3 w-full sm:w-auto sm:ml-auto">
+            <button
+              type="button"
+              onClick={() => {
+                setDesde('')
+                setHasta('')
+              }}
+              className="text-xs text-[#00f2fe] hover:text-[#00f2fe]/80 font-bold transition-colors"
+            >
+              Limpiar
+            </button>
+            <span
+              id="analisis-filter-info"
+              className="text-xs text-slate-500 font-semibold bg-white/5 px-2.5 py-1 rounded-lg"
+            >
+              {facturasOnly.length} factura{facturasOnly.length !== 1 ? 's' : ''} y {abonosOnly.length} abono{abonosOnly.length !== 1 ? 's' : ''} en el rango
+            </span>
+          </div>
         )}
       </div>
 
@@ -653,12 +763,15 @@ export function AnalisisPage() {
                         data: chartsData.labsData.slice(0, 10),
                         backgroundColor: chartsData.donutColors,
                         borderWidth: 2,
-                        borderColor: '#0f172a',
+                        borderColor: '#ffffff',
                         hoverOffset: 6,
                       },
                     ],
                   }}
-                  options={donutOptions}
+                  options={{
+                    ...donutOptions,
+                    cutout: '65%'
+                  }}
                 />
               </ChartCard>
             </div>
@@ -670,18 +783,34 @@ export function AnalisisPage() {
               <Bar
                 data={{
                   labels: chartsData.monthlyLabels,
-                  datasets: [
-                    {
-                      label: '€',
-                      data: chartsData.monthlyData,
-                      backgroundColor: chartsData.monthlyColor,
-                      borderRadius: 4,
-                    },
-                  ],
+                  datasets: chartsData.monthlyDatasets,
                 }}
                 options={{
                   ...barOptions,
                   maintainAspectRatio: false,
+                  plugins: {
+                    ...barOptions.plugins,
+                    legend: {
+                      display: category === 'Mayorista',
+                      position: 'top',
+                      labels: {
+                        font: { size: 10 },
+                        color: '#94a3b8',
+                      }
+                    }
+                  },
+                  scales: {
+                    ...barOptions.scales,
+                    y: {
+                      ...barOptions.scales?.y,
+                      stacked: category === 'Mayorista',
+                      ticks: { callback: eur }
+                    },
+                    x: {
+                      ...barOptions.scales?.x,
+                      stacked: category === 'Mayorista'
+                    }
+                  }
                 }}
               />
             </div>
@@ -697,16 +826,16 @@ export function AnalisisPage() {
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 <div className="bg-gradient-to-br from-emerald-500/10 to-emerald-950/5 border border-emerald-500/20 rounded-2xl p-5 shadow-2xl glass-card">
-                  <p className="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2">Total Abonado</p>
+                  <p className="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2">TOTAL ABONADO</p>
                   <p className="text-2xl font-black text-emerald-500 leading-none">{formatMoney(totalAbonos)}</p>
                 </div>
                 <div className="bg-gradient-to-br from-emerald-500/10 to-emerald-950/5 border border-emerald-500/20 rounded-2xl p-5 shadow-2xl glass-card">
-                  <p className="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2">Nº Abonos</p>
+                  <p className="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2">Nº ABONOS</p>
                   <p className="text-2xl font-black text-emerald-500 leading-none">{countAbonos}</p>
                 </div>
                 <div className="bg-gradient-to-br from-blue-500/10 to-indigo-950/5 border border-blue-500/20 rounded-2xl p-5 shadow-2xl glass-card">
-                  <p className="text-xs font-bold text-blue-400 uppercase tracking-wider mb-2">Balance Neto</p>
-                  <p className="text-2xl font-black text-[#00f2fe] leading-none">{formatMoney(balanceNeto)}</p>
+                  <p className="text-xs font-bold text-blue-400 uppercase tracking-wider mb-2">BALANCE NETO</p>
+                  <p className={`text-2xl font-black leading-none ${balanceNeto >= 0 ? 'text-white' : 'text-emerald-400'}`}>{formatMoney(balanceNeto)}</p>
                 </div>
               </div>
 
@@ -793,11 +922,16 @@ export function AnalisisPage() {
             topLab: topKpis.top,
             avg: topKpis.avg,
             byLab: chartsData.byLab,
-            byMonth: chartsData.monthlyLabels.map((l, i) => ({
-              key: String(i),
-              label: l,
-              amount: chartsData.monthlyData[i],
-            })),
+            byMonth: chartsData.monthlyLabels.map((l, i) => {
+              const amount = category === 'Mayorista'
+                ? chartsData.monthlyDatasets.reduce((sum, ds) => sum + (ds.data[i] ?? 0), 0)
+                : (chartsData.monthlyDatasets[0]?.data[i] ?? 0)
+              return {
+                key: String(i),
+                label: l,
+                amount,
+              }
+            }),
           }}
           fiscalTotal={totalFiscalCons}
           trabTotal={totalTrabajadoresCons}
