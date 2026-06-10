@@ -1082,45 +1082,48 @@ export function AnalisisPage() {
 
       {/* Informe imprimible (fuera de pantalla) para el export a PDF */}
       <div
-        ref={reportRef}
         style={{
           position: 'fixed',
           left: 0,
           top: 0,
-          width: '794px',
+          width: 0,
+          height: 0,
+          overflow: 'hidden',
           zIndex: -9999,
           pointerEvents: 'none',
         }}
         aria-hidden
       >
-        <AnalisisReport
-          period={period}
-          generatedAt={new Date().toLocaleString('es-ES')}
-          analysis={{
-            total: topKpis.total,
-            count: topKpis.count,
-            topLab: topKpis.top,
-            avg: topKpis.avg,
-            byLab: chartsData.byLab,
-            byMonth: chartsData.monthlyLabels.map((l, i) => {
-              const amount =
-                category === 'Mayorista'
-                  ? chartsData.monthlyDatasets.reduce(
-                      (sum, ds) => sum + (ds.data[i] ?? 0),
-                      0,
-                    )
-                  : (chartsData.monthlyDatasets[0]?.data[i] ?? 0)
-              return {
-                key: String(i),
-                label: l,
-                amount,
-              }
-            }),
-          }}
-          fiscalTotal={totalFiscalCons}
-          trabTotal={totalTrabajadoresCons}
-          granTotal={totalGastosConsolidado}
-        />
+        <div ref={reportRef}>
+          <AnalisisReport
+            period={period}
+            generatedAt={new Date().toLocaleString('es-ES')}
+            analysis={{
+              total: topKpis.total,
+              count: topKpis.count,
+              topLab: topKpis.top,
+              avg: topKpis.avg,
+              byLab: chartsData.byLab,
+              byMonth: chartsData.monthlyLabels.map((l, i) => {
+                const amount =
+                  category === 'Mayorista'
+                    ? chartsData.monthlyDatasets.reduce(
+                        (sum, ds) => sum + (ds.data[i] ?? 0),
+                        0,
+                      )
+                    : (chartsData.monthlyDatasets[0]?.data[i] ?? 0)
+                return {
+                  key: String(i),
+                  label: l,
+                  amount,
+                }
+              }),
+            }}
+            fiscalTotal={totalFiscalCons}
+            trabTotal={totalTrabajadoresCons}
+            granTotal={totalGastosConsolidado}
+          />
+        </div>
       </div>
     </div>
   )
