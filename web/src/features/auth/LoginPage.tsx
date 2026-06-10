@@ -3,18 +3,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Navigate } from 'react-router-dom'
-import {
-  ArrowLeft,
-  Calendar,
-  Coins,
-  Eye,
-  EyeOff,
-  Lock,
-  Mail,
-  ShieldCheck,
-  Sparkles,
-  TrendingUp,
-} from 'lucide-react'
+import { ArrowLeft, Eye, EyeOff, Lock, Mail } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from './AuthProvider'
 
@@ -141,123 +130,92 @@ export function LoginPage() {
   if (session && mode !== 'reset_password') return <Navigate to="/" replace />
 
   return (
-    <main className="grid min-h-screen grid-cols-1 lg:grid-cols-2 bg-[#090d16] overflow-hidden">
-      {/* Columna Izquierda: Showcase de Funcionalidades */}
-      <section className="relative hidden flex-col justify-between p-12 bg-radial-[at_top_left,#0d1a33_0%,#04080f_90%] border-r border-white/5 lg:flex">
-        {/* Glow orbs background decoration */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-          <div className="absolute top-1/4 left-1/4 w-[350px] h-[350px] rounded-full bg-gradient-to-br from-blue-500/15 to-[#00f2fe]/5 blur-[100px]" />
-          <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] rounded-full bg-gradient-to-tr from-purple-500/10 to-[#00f2fe]/5 blur-[120px]" />
-        </div>
+    <main className="relative flex min-h-screen flex-col items-center justify-center bg-[#070b13] p-4 sm:p-6 overflow-hidden">
+      {/* Background neon curves and glow orbs */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-gradient-to-br from-[#00f2fe]/15 to-transparent blur-[120px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full bg-gradient-to-tr from-purple-500/15 to-[#00f2fe]/5 blur-[150px]" />
+        <div className="absolute top-[35%] left-[25%] w-[45%] h-[45%] rounded-full bg-blue-500/8 blur-[130px]" />
 
-        {/* Cabecera */}
-        <div className="relative z-10">
-          <h1 className="text-3xl font-black text-white tracking-tight">
-            <span className="text-accent-blue">G</span>Farma
-          </h1>
-        </div>
+        {/* Neon wave curves */}
+        <svg
+          className="absolute w-full h-full opacity-25 min-w-[1024px]"
+          viewBox="0 0 1440 900"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <linearGradient id="neon-wave-1" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#00f2fe" stopOpacity="0.8" />
+              <stop offset="50%" stopColor="#3b82f6" stopOpacity="0.3" />
+              <stop offset="100%" stopColor="#a855f7" stopOpacity="0.8" />
+            </linearGradient>
+            <linearGradient id="neon-wave-2" x1="0%" y1="100%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#a855f7" stopOpacity="0.6" />
+              <stop offset="100%" stopColor="#00f2fe" stopOpacity="0.6" />
+            </linearGradient>
+          </defs>
+          <path
+            d="M-100 200 C 300 400, 700 100, 1100 500 C 1300 700, 1500 600, 1600 500"
+            stroke="url(#neon-wave-1)"
+            strokeWidth="12"
+            strokeLinecap="round"
+            className="blur-[8px]"
+          />
+          <path
+            d="M-50 450 C 400 200, 800 650, 1200 300 C 1350 150, 1500 250, 1550 300"
+            stroke="url(#neon-wave-2)"
+            strokeWidth="8"
+            strokeLinecap="round"
+            className="blur-[6px]"
+          />
+        </svg>
+      </div>
 
-        {/* Características */}
-        <div className="relative z-10 max-w-lg my-auto space-y-10">
-          <h2 className="text-3xl font-black text-white leading-tight">
-            La contabilidad y vencimientos de tu farmacia,{' '}
-            <span className="bg-gradient-to-r from-accent-blue via-blue-400 to-indigo-400 bg-clip-text text-transparent">
-              bajo control total
-            </span>
-            .
-          </h2>
-
-          <div className="space-y-6">
-            <div className="flex items-start gap-4">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-blue-500/20 bg-blue-500/10 text-accent-blue shadow-[0_0_15px_rgba(0,242,254,0.1)]">
-                <Sparkles className="h-5 w-5" />
-              </div>
-              <div>
-                <h3 className="text-sm font-bold text-slate-100">
-                  Escáner OCR Inteligente
-                </h3>
-                <p className="mt-1 text-xs text-slate-400 leading-relaxed">
-                  Sube tus facturas PDF o imágenes y deja que la IA extraiga los importes,
-                  proveedores y fechas de vencimiento de forma automatizada.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-4">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-purple-500/20 bg-purple-500/10 text-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.1)]">
-                <Calendar className="h-5 w-5" />
-              </div>
-              <div>
-                <h3 className="text-sm font-bold text-slate-100">
-                  Calendario de Vencimientos
-                </h3>
-                <p className="mt-1 text-xs text-slate-400 leading-relaxed">
-                  Visualiza tus próximos pagos mensuales con un código de colores
-                  intuitivo y gestiona facturas pagadas o pendientes a golpe de clic.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-4">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.1)]">
-                <TrendingUp className="h-5 w-5" />
-              </div>
-              <div>
-                <h3 className="text-sm font-bold text-slate-100">
-                  Gráficos y Reportes PDF
-                </h3>
-                <p className="mt-1 text-xs text-slate-400 leading-relaxed">
-                  Analiza desgloses por mayoristas y laboratorios con gráficos apilados y
-                  descarga informes A4 en PDF listos para imprimir.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-4">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-orange-500/20 bg-orange-500/10 text-orange-400 shadow-[0_0_15px_rgba(249,115,22,0.1)]">
-                <Coins className="h-5 w-5" />
-              </div>
-              <div>
-                <h3 className="text-sm font-bold text-slate-100">
-                  Fiscalidad Flexible y Personal
-                </h3>
-                <p className="mt-1 text-xs text-slate-400 leading-relaxed">
-                  Configura conceptos de impuestos libres, personaliza tus gastos y
-                  supervisa las nóminas y seguros sociales de tus trabajadores.
-                </p>
-              </div>
-            </div>
+      <div className="relative z-10 w-full max-w-sm flex flex-col items-center">
+        {/* Modern logo above the card */}
+        <div className="flex items-center gap-2.5 mb-6">
+          <div className="relative flex items-center justify-center w-8 h-8">
+            <svg
+              className="w-full h-full"
+              viewBox="0 0 32 32"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <defs>
+                <linearGradient id="g-logo-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#00f2fe" />
+                  <stop offset="50%" stopColor="#3b82f6" />
+                  <stop offset="100%" stopColor="#9d4edd" />
+                </linearGradient>
+              </defs>
+              <path
+                d="M25 16C25 20.9706 20.9706 25 16 25C11.0294 25 7 20.9706 7 16C7 11.0294 11.0294 7 16 7C19.5 7 22.5 9 24 12"
+                stroke="url(#g-logo-grad)"
+                strokeWidth="3.5"
+                strokeLinecap="round"
+              />
+              <path
+                d="M16 16H25"
+                stroke="url(#g-logo-grad)"
+                strokeWidth="3.5"
+                strokeLinecap="round"
+              />
+            </svg>
           </div>
+          <span className="text-2xl font-black tracking-tight text-white select-none">
+            GFarma
+          </span>
         </div>
 
-        {/* Footer */}
-        <div className="relative z-10 flex items-center gap-2 text-2xs text-slate-500">
-          <ShieldCheck className="h-4 w-4 text-emerald-500/60" />
-          <span>© 2026 GFarma. Seguridad cifrada y protección de datos RLS activa.</span>
-        </div>
-      </section>
-
-      {/* Columna Derecha: Formulario (Login, Register, Forgot, Reset) */}
-      <section className="flex items-center justify-center p-6 bg-[#090d16] relative">
-        {/* Glow orb for mobile layout background */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none z-0 lg:hidden">
-          <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[300px] h-[300px] rounded-full bg-blue-500/10 blur-[90px]" />
-        </div>
-
-        {/* Card contenedor glassmorphic */}
-        <div className="relative z-10 w-full max-w-sm rounded-3xl border border-accent-blue/30 bg-[#090d16]/40 p-8 shadow-[0_0_50px_rgba(0,242,254,0.15)] backdrop-blur-xl glass-card">
+        {/* Card Contenedor */}
+        <div className="w-full rounded-3xl border border-[#00f2fe]/25 bg-[#0b101d]/60 p-8 shadow-[0_0_40px_rgba(0,242,254,0.15)] backdrop-blur-xl">
           {/* Modos: Login y Registro */}
           {(mode === 'login' || mode === 'register') && (
             <>
               <div className="text-center mb-6">
-                <h1 className="text-2xl font-black tracking-tight text-white lg:hidden">
-                  <span className="text-accent-blue">G</span>Farma
-                </h1>
-                <h2 className="text-xl font-black tracking-tight text-white mt-1">
-                  Bienvenido a{' '}
-                  <span className="bg-gradient-to-r from-accent-blue to-blue-400 bg-clip-text text-transparent">
-                    GFarma
-                  </span>
+                <h2 className="text-xl font-bold tracking-tight text-white">
+                  Bienvenido a GFarma
                 </h2>
                 <p className="mt-1 text-xs text-slate-400 leading-normal">
                   {mode === 'login'
@@ -279,7 +237,7 @@ export function LoginPage() {
                       placeholder="ejemplo@correo.com"
                       autoComplete="email"
                       {...register('email')}
-                      className="w-full rounded-xl border border-white/10 bg-slate-950/60 pl-10 pr-4 py-3 text-xs text-slate-100 placeholder-slate-600 focus:border-accent-blue/60 focus:ring-1 focus:ring-accent-blue/30 focus:outline-none transition-all"
+                      className="w-full rounded-xl border border-white/10 bg-slate-950/60 pl-10 pr-4 py-3 text-xs text-slate-100 placeholder-slate-600 focus:border-[#00f2fe]/60 focus:ring-1 focus:ring-[#00f2fe]/30 focus:shadow-[0_0_12px_rgba(0,242,254,0.25)] focus:outline-none transition-all"
                     />
                   </div>
                   {errors.email && (
@@ -303,7 +261,7 @@ export function LoginPage() {
                         mode === 'login' ? 'current-password' : 'new-password'
                       }
                       {...register('password')}
-                      className="w-full rounded-xl border border-white/10 bg-slate-950/60 pl-10 pr-10 py-3 text-xs text-slate-100 placeholder-slate-600 focus:border-accent-blue/60 focus:ring-1 focus:ring-accent-blue/30 focus:outline-none transition-all"
+                      className="w-full rounded-xl border border-white/10 bg-slate-950/60 pl-10 pr-10 py-3 text-xs text-slate-100 placeholder-slate-600 focus:border-[#00f2fe]/60 focus:ring-1 focus:ring-[#00f2fe]/30 focus:shadow-[0_0_12px_rgba(0,242,254,0.25)] focus:outline-none transition-all"
                     />
                     <button
                       type="button"
@@ -470,7 +428,7 @@ export function LoginPage() {
                       placeholder="ejemplo@correo.com"
                       value={recoveryEmail}
                       onChange={(e) => setRecoveryEmail(e.target.value)}
-                      className="w-full rounded-xl border border-white/10 bg-slate-950/60 pl-10 pr-4 py-3 text-xs text-slate-100 placeholder-slate-600 focus:border-accent-blue/60 focus:ring-1 focus:ring-accent-blue/30 focus:outline-none transition-all"
+                      className="w-full rounded-xl border border-white/10 bg-slate-950/60 pl-10 pr-4 py-3 text-xs text-slate-100 placeholder-slate-600 focus:border-[#00f2fe]/60 focus:ring-1 focus:ring-[#00f2fe]/30 focus:shadow-[0_0_12px_rgba(0,242,254,0.25)] focus:outline-none transition-all"
                       required
                     />
                   </div>
@@ -517,7 +475,7 @@ export function LoginPage() {
                       placeholder="••••••••"
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
-                      className="w-full rounded-xl border border-white/10 bg-slate-950/60 pl-10 pr-4 py-3 text-xs text-slate-100 placeholder-slate-600 focus:border-accent-blue/60 focus:ring-1 focus:ring-accent-blue/30 focus:outline-none transition-all"
+                      className="w-full rounded-xl border border-white/10 bg-slate-950/60 pl-10 pr-4 py-3 text-xs text-slate-100 placeholder-slate-600 focus:border-[#00f2fe]/60 focus:ring-1 focus:ring-[#00f2fe]/30 focus:shadow-[0_0_12px_rgba(0,242,254,0.25)] focus:outline-none transition-all"
                       required
                     />
                   </div>
@@ -545,7 +503,7 @@ export function LoginPage() {
             </>
           )}
         </div>
-      </section>
+      </div>
     </main>
   )
 }
