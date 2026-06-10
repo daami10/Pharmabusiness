@@ -6,6 +6,7 @@ import { SettingsModal } from '@/features/settings/SettingsModal'
 import { PrivacyModal } from '@/features/settings/PrivacyModal'
 import { OnboardingModal } from '@/features/settings/OnboardingModal'
 import { isOnboardingPending } from '@/lib/config/wholesalers'
+import { Chatbot } from './Chatbot'
 
 export function AppShell() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -42,6 +43,7 @@ export function AppShell() {
         />
         <PrivacyModal open={privacyOpen} onClose={() => setPrivacyOpen(false)} />
         <OnboardingModal open={onboardingOpen} onClose={() => setOnboardingOpen(false)} />
+        <Chatbot />
       </div>
     </div>
   )

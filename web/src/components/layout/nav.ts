@@ -6,13 +6,14 @@ export interface NavItem {
   label: string
   icon: LucideIcon
   end?: boolean
+  requiredTier: 'basic' | 'premium'
 }
 
 export const NAV_ITEMS: NavItem[] = [
-  { to: '/', label: 'Inicio', icon: Home, end: true },
-  { to: '/facturas', label: 'Facturas', icon: FileText },
-  { to: '/analisis', label: 'Análisis', icon: BarChart3 },
-  { to: '/abonos', label: 'Abonos', icon: RefreshCcw },
-  { to: '/fiscalidad', label: 'Fiscalidad', icon: Landmark },
-  { to: '/trabajadores', label: 'Trabajadores', icon: Users },
+  { to: '/', label: 'Inicio', icon: Home, end: true, requiredTier: 'basic' },
+  { to: '/facturas', label: 'Facturas', icon: FileText, requiredTier: 'basic' },
+  { to: '/analisis', label: 'Análisis', icon: BarChart3, requiredTier: 'premium' },
+  { to: '/abonos', label: 'Abonos', icon: RefreshCcw, requiredTier: 'basic' },
+  { to: '/fiscalidad', label: 'Fiscalidad', icon: Landmark, requiredTier: 'premium' },
+  { to: '/trabajadores', label: 'Trabajadores', icon: Users, requiredTier: 'premium' },
 ]

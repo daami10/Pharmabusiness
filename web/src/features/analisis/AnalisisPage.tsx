@@ -27,7 +27,11 @@ const barOptions: ChartOptions<'bar'> = {
 const barOptionsStacked: ChartOptions<'bar'> = {
   responsive: true,
   plugins: {
-    legend: { display: true, position: 'top', labels: { boxWidth: 12, font: { size: 10 } } },
+    legend: {
+      display: true,
+      position: 'top',
+      labels: { boxWidth: 12, font: { size: 10 } },
+    },
   },
   scales: {
     x: { stacked: true },
@@ -43,7 +47,13 @@ const donutOptions: ChartOptions<'doughnut'> = {
   },
 }
 
-export type AnalisisCategory = '' | 'Laboratorio' | 'Mayorista' | 'Otro' | 'Fiscalidad' | 'Trabajadores'
+export type AnalisisCategory =
+  | ''
+  | 'Laboratorio'
+  | 'Mayorista'
+  | 'Otro'
+  | 'Fiscalidad'
+  | 'Trabajadores'
 
 function formatMonthLabel(key: string): string {
   if (!key || key === '0000-00') return 'Sin fecha'
@@ -70,16 +80,19 @@ export function AnalisisPage() {
 
   const hasRange = !!(desde || hasta)
 
-  const inRange = useCallback((fecha: string | null | undefined) => {
-    if (!fecha) return false
-    const f = fecha.slice(0, 10)
-    if (hasRange) {
-      if (desde && f < desde) return false
-      if (hasta && f > hasta) return false
-      return true
-    }
-    return f.slice(0, 4) === yearStr
-  }, [desde, hasta, yearStr, hasRange])
+  const inRange = useCallback(
+    (fecha: string | null | undefined) => {
+      if (!fecha) return false
+      const f = fecha.slice(0, 10)
+      if (hasRange) {
+        if (desde && f < desde) return false
+        if (hasta && f > hasta) return false
+        return true
+      }
+      return f.slice(0, 4) === yearStr
+    },
+    [desde, hasta, yearStr, hasRange],
+  )
 
   const rangedFacturas = useMemo(() => {
     const all = facturas.data ?? []
@@ -99,7 +112,7 @@ export function AnalisisPage() {
     const items = facturasOnly.filter((f) => f.tipo === 'Laboratorio')
     return {
       total: items.reduce((sum, f) => sum + f.importe, 0),
-      count: items.length
+      count: items.length,
     }
   }, [facturasOnly])
 
@@ -107,15 +120,17 @@ export function AnalisisPage() {
     const items = facturasOnly.filter((f) => isWholesaler(f.tipo, wholesalers))
     return {
       total: items.reduce((sum, f) => sum + f.importe, 0),
-      count: items.length
+      count: items.length,
     }
   }, [facturasOnly, wholesalers])
 
   const otroStats = useMemo(() => {
-    const items = facturasOnly.filter((f) => f.tipo !== 'Laboratorio' && !isWholesaler(f.tipo, wholesalers))
+    const items = facturasOnly.filter(
+      (f) => f.tipo !== 'Laboratorio' && !isWholesaler(f.tipo, wholesalers),
+    )
     return {
       total: items.reduce((sum, f) => sum + f.importe, 0),
-      count: items.length
+      count: items.length,
     }
   }, [facturasOnly, wholesalers])
 
@@ -124,7 +139,7 @@ export function AnalisisPage() {
     return {
       total: items.reduce((sum, f) => sum + f.importe, 0),
       count: items.length,
-      items
+      items,
     }
   }, [fiscal.data, inRange])
 
@@ -132,10 +147,12 @@ export function AnalisisPage() {
     const seg = (seguros.data ?? []).filter((s) => inRange(s.fecha))
     const nom = (nominas.data ?? []).filter((n) => inRange(n.fecha))
     return {
-      total: seg.reduce((sum, s) => sum + s.importe, 0) + nom.reduce((sum, n) => sum + n.importe, 0),
+      total:
+        seg.reduce((sum, s) => sum + s.importe, 0) +
+        nom.reduce((sum, n) => sum + n.importe, 0),
       count: seg.length + nom.length,
       seg,
-      nom
+      nom,
     }
   }, [seguros.data, nominas.data, inRange])
 
@@ -148,7 +165,8 @@ export function AnalisisPage() {
 
   const totalFiscalCons = fiscalStats.total
   const totalTrabajadoresCons = trabStats.total
-  const totalGastosConsolidado = totalFacturasCons + totalFiscalCons + totalTrabajadoresCons
+  const totalGastosConsolidado =
+    totalFacturasCons + totalFiscalCons + totalTrabajadoresCons
 
   // Top 4 KPIs (Total Invertido, Nº Facturas, Top Proveedor, Promedio / Factura)
   const topKpis = useMemo(() => {
@@ -157,7 +175,8 @@ export function AnalisisPage() {
       for (const f of fiscalStats.items) {
         conceptTotals[f.concepto] = (conceptTotals[f.concepto] ?? 0) + f.importe
       }
-      const topConcept = Object.entries(conceptTotals).sort((a, b) => b[1] - a[1])[0]?.[0] ?? '—'
+      const topConcept =
+        Object.entries(conceptTotals).sort((a, b) => b[1] - a[1])[0]?.[0] ?? '—'
       const avg = fiscalStats.count ? fiscalStats.total / fiscalStats.count : 0
       return {
         total: fiscalStats.total,
@@ -200,13 +219,21 @@ export function AnalisisPage() {
     const top = sortedLabs[0]?.[0] ?? '—'
 
     // If category is total (''), the total investment is consolidated
-    const total = category === '' ? (invoicesTotal + fiscalStats.total + trabStats.total) : invoicesTotal
+    const total =
+      category === ''
+        ? invoicesTotal + fiscalStats.total + trabStats.total
+        : invoicesTotal
 
     return {
       total,
       count: category === '' ? facturasOnly.length : count,
       top,
-      avg: category === '' ? (facturasOnly.length ? invoicesTotal / facturasOnly.length : 0) : avg,
+      avg:
+        category === ''
+          ? facturasOnly.length
+            ? invoicesTotal / facturasOnly.length
+            : 0
+          : avg,
     }
   }, [category, facturasOnly, fiscalStats, trabStats, wholesalers])
 
@@ -217,7 +244,9 @@ export function AnalisisPage() {
       for (const f of fiscalStats.items) {
         conceptMap.set(f.concepto, (conceptMap.get(f.concepto) ?? 0) + f.importe)
       }
-      const bEntries = [...conceptMap.entries()].filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1])
+      const bEntries = [...conceptMap.entries()]
+        .filter(([, v]) => v > 0)
+        .sort((a, b) => b[1] - a[1])
 
       const monthlyMap = new Map<string, number>()
       for (const f of fiscalStats.items) {
@@ -249,17 +278,22 @@ export function AnalisisPage() {
 
     if (category === 'Trabajadores') {
       const breakdownMap = new Map<string, number>()
-      breakdownMap.set('Seg. Sociales', trabStats.seg.reduce((sum, s) => sum + s.importe, 0))
+      breakdownMap.set(
+        'Seg. Sociales',
+        trabStats.seg.reduce((sum, s) => sum + s.importe, 0),
+      )
       for (const n of trabStats.nom) {
         const name = n.trabajador_nombre || 'Sin nombre'
         breakdownMap.set(name, (breakdownMap.get(name) ?? 0) + n.importe)
       }
-      const bEntries = [...breakdownMap.entries()].filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1])
+      const bEntries = [...breakdownMap.entries()]
+        .filter(([, v]) => v > 0)
+        .sort((a, b) => b[1] - a[1])
 
       const monthlyMap = new Map<string, number>()
       const allEntries = [
         ...trabStats.seg.map((s) => ({ fecha: s.fecha, importe: s.importe })),
-        ...trabStats.nom.map((n) => ({ fecha: n.fecha, importe: n.importe }))
+        ...trabStats.nom.map((n) => ({ fecha: n.fecha, importe: n.importe })),
       ]
       for (const r of allEntries) {
         if (!r.fecha) continue
@@ -289,7 +323,9 @@ export function AnalisisPage() {
     }
 
     if (category === 'Mayorista') {
-      const filteredInvoices = facturasOnly.filter((f) => isWholesaler(f.tipo, wholesalers))
+      const filteredInvoices = facturasOnly.filter((f) =>
+        isWholesaler(f.tipo, wholesalers),
+      )
 
       const labMap = new Map<string, number>()
       for (const f of filteredInvoices) {
@@ -325,17 +361,19 @@ export function AnalisisPage() {
       }
 
       const baseColors = [
-        'rgba(37, 99, 235, 0.8)',   // blue
-        'rgba(5, 150, 105, 0.8)',   // green/emerald
-        'rgba(124, 58, 237, 0.8)',  // purple
-        'rgba(234, 88, 12, 0.8)',   // orange
-        'rgba(8, 145, 178, 0.8)',   // cyan
+        'rgba(37, 99, 235, 0.8)', // blue
+        'rgba(5, 150, 105, 0.8)', // green/emerald
+        'rgba(124, 58, 237, 0.8)', // purple
+        'rgba(234, 88, 12, 0.8)', // orange
+        'rgba(8, 145, 178, 0.8)', // cyan
       ]
       const donutBaseColors = ['#2563EB', '#059669', '#7C3AED', '#EA580C', '#0891B2']
 
       const labsColors = bEntries.slice(0, 15).map(([l]) => {
         const wIdx = wholesalers.indexOf(l)
-        return wIdx !== -1 ? baseColors[wIdx % baseColors.length] : 'rgba(124, 58, 237, 0.8)'
+        return wIdx !== -1
+          ? baseColors[wIdx % baseColors.length]
+          : 'rgba(124, 58, 237, 0.8)'
       })
 
       const donutColors = bEntries.slice(0, 10).map(([l]) => {
@@ -344,11 +382,11 @@ export function AnalisisPage() {
       })
 
       const datasetsColors = [
-        'rgba(37, 99, 235, 0.7)',   // blue
-        'rgba(5, 150, 105, 0.7)',   // green/emerald
-        'rgba(124, 58, 237, 0.7)',  // purple
-        'rgba(234, 88, 12, 0.7)',   // orange
-        'rgba(8, 145, 178, 0.7)',   // cyan
+        'rgba(37, 99, 235, 0.7)', // blue
+        'rgba(5, 150, 105, 0.7)', // green/emerald
+        'rgba(124, 58, 237, 0.7)', // purple
+        'rgba(234, 88, 12, 0.7)', // orange
+        'rgba(8, 145, 178, 0.7)', // cyan
       ]
 
       const monthlyDatasets = wholesalers.map((w, idx) => ({
@@ -390,7 +428,8 @@ export function AnalisisPage() {
     }
     const mEntries = [...monthlyMap.entries()].sort((a, b) => a[0].localeCompare(b[0]))
 
-    const labsColor = category === 'Otro' ? 'rgba(107,114,128,0.8)' : 'rgba(37,99,235,0.8)'
+    const labsColor =
+      category === 'Otro' ? 'rgba(107,114,128,0.8)' : 'rgba(37,99,235,0.8)'
 
     const monthlyDatasets = [
       {
@@ -414,7 +453,8 @@ export function AnalisisPage() {
 
   // Evolución mensual apilada por mayorista (solo categoría "Mayorista").
   const stackedData = useMemo(
-    () => (category === 'Mayorista' ? stackedByWholesaler(facturasOnly, wholesalers) : null),
+    () =>
+      category === 'Mayorista' ? stackedByWholesaler(facturasOnly, wholesalers) : null,
     [category, facturasOnly, wholesalers],
   )
 
@@ -424,7 +464,7 @@ export function AnalisisPage() {
   }, [abonosOnly])
 
   const countAbonos = abonosOnly.length
-  const balanceNeto = (facturasOnly.reduce((sum, f) => sum + f.importe, 0)) - totalAbonos
+  const balanceNeto = facturasOnly.reduce((sum, f) => sum + f.importe, 0) - totalAbonos
 
   const byLabAbono = useMemo(() => {
     const map = new Map<string, number>()
@@ -479,10 +519,13 @@ export function AnalisisPage() {
   }, [facturasOnly, byLabAbono])
 
   const balanceColors = useMemo(() => {
-    return balances.map(({ balance }) => (balance >= 0 ? 'rgba(37,99,235,0.7)' : 'rgba(16,185,129,0.7)'))
+    return balances.map(({ balance }) =>
+      balance >= 0 ? 'rgba(37,99,235,0.7)' : 'rgba(16,185,129,0.7)',
+    )
   }, [balances])
 
-  const showAbonos = abonosOnly.length > 0 && category !== 'Fiscalidad' && category !== 'Trabajadores'
+  const showAbonos =
+    abonosOnly.length > 0 && category !== 'Fiscalidad' && category !== 'Trabajadores'
 
   const categoriesList: { value: AnalisisCategory; label: string }[] = [
     { value: '', label: 'Total' },
@@ -527,7 +570,9 @@ export function AnalisisPage() {
       {/* Cabecera */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-white">Análisis de Inversiones</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight text-white">
+            Análisis de Inversiones
+          </h1>
           <p className="mt-1 text-sm text-slate-400">
             Gasto acumulado por laboratorio y evolución temporal
           </p>
@@ -556,7 +601,9 @@ export function AnalisisPage() {
       {/* Filtro Rango de Fechas */}
       <div className="mt-6 flex flex-wrap items-center gap-3 bg-slate-900/30 border border-white/5 rounded-2xl px-5 py-4 shadow-2xl">
         <Landmark className="w-4 h-4 text-[#00f2fe] shrink-0" />
-        <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Rango:</span>
+        <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+          Rango:
+        </span>
         <input
           type="date"
           value={desde}
@@ -586,7 +633,8 @@ export function AnalisisPage() {
               id="analisis-filter-info"
               className="text-xs text-slate-500 font-semibold bg-white/5 px-2.5 py-1 rounded-lg"
             >
-              {facturasOnly.length} factura{facturasOnly.length !== 1 ? 's' : ''} y {abonosOnly.length} abono{abonosOnly.length !== 1 ? 's' : ''} en el rango
+              {facturasOnly.length} factura{facturasOnly.length !== 1 ? 's' : ''} y{' '}
+              {abonosOnly.length} abono{abonosOnly.length !== 1 ? 's' : ''} en el rango
             </span>
           </div>
         )}
@@ -595,35 +643,59 @@ export function AnalisisPage() {
       {/* Los 4 KPI cards superiores */}
       <div className="mt-6 grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="glass-card rounded-2xl p-5 shadow-2xl border border-white/5">
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Total Invertido</p>
-          <p className="text-2xl font-black text-white leading-none">{formatMoney(topKpis.total)}</p>
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+            Total Invertido
+          </p>
+          <p className="text-2xl font-black text-white leading-none">
+            {formatMoney(topKpis.total)}
+          </p>
         </div>
         <div className="glass-card rounded-2xl p-5 shadow-2xl border border-white/5">
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Nº Facturas</p>
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+            Nº Facturas
+          </p>
           <p className="text-2xl font-black text-white leading-none">{topKpis.count}</p>
         </div>
         <div
           onClick={() => {
-            if (category !== 'Fiscalidad' && category !== 'Trabajadores' && chartsData.byLab.length) {
-              setRankingOpen(true);
+            if (
+              category !== 'Fiscalidad' &&
+              category !== 'Trabajadores' &&
+              chartsData.byLab.length
+            ) {
+              setRankingOpen(true)
             }
           }}
           className={`glass-card rounded-2xl p-5 shadow-2xl border border-white/5 transition-all select-none ${
-            category !== 'Fiscalidad' && category !== 'Trabajadores' && chartsData.byLab.length ? 'cursor-pointer hover:scale-[1.02] glass-card-hover' : ''
+            category !== 'Fiscalidad' &&
+            category !== 'Trabajadores' &&
+            chartsData.byLab.length
+              ? 'cursor-pointer hover:scale-[1.02] glass-card-hover'
+              : ''
           }`}
         >
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Top Proveedor</p>
-          <p className="text-2xl font-black text-white leading-none truncate">{topKpis.top}</p>
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+            Top Proveedor
+          </p>
+          <p className="text-2xl font-black text-white leading-none truncate">
+            {topKpis.top}
+          </p>
         </div>
         <div className="glass-card rounded-2xl p-5 shadow-2xl border border-white/5">
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Promedio / Factura</p>
-          <p className="text-2xl font-black text-white leading-none">{formatMoney(topKpis.avg)}</p>
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+            Promedio / Factura
+          </p>
+          <p className="text-2xl font-black text-white leading-none">
+            {formatMoney(topKpis.avg)}
+          </p>
         </div>
       </div>
 
       {/* Selector Ver gráficas de: */}
       <div className="mt-6 flex items-center gap-3 flex-wrap">
-        <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Ver gráficas de:</span>
+        <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+          Ver gráficas de:
+        </span>
         {categoriesList.map((c) => (
           <button
             key={c.value}
@@ -646,75 +718,115 @@ export function AnalisisPage() {
         <div
           onClick={() => setCategory('Laboratorio')}
           className={`bg-gradient-to-br from-blue-500/10 to-blue-950/5 border border-blue-500/20 rounded-2xl p-5 shadow-2xl cursor-pointer hover:border-blue-500/40 hover:bg-blue-500/15 transition-all select-none glass-card ${
-            category === 'Laboratorio' ? 'ring-2 ring-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.2)]' : ''
+            category === 'Laboratorio'
+              ? 'ring-2 ring-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.2)]'
+              : ''
           }`}
         >
           <div className="flex items-center gap-2 mb-2">
             <span className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_6px_rgba(59,130,246,0.5)]"></span>
-            <p className="text-xs font-bold text-blue-400 uppercase tracking-wider">Laboratorios</p>
+            <p className="text-xs font-bold text-blue-400 uppercase tracking-wider">
+              Laboratorios
+            </p>
           </div>
-          <p className="text-2xl font-black text-blue-400 leading-none">{formatMoney(labStats.total)}</p>
-          <p className="text-2xs text-slate-500 font-bold uppercase tracking-wider mt-1.5">{labStats.count} factura{labStats.count !== 1 ? 's' : ''}</p>
+          <p className="text-2xl font-black text-blue-400 leading-none">
+            {formatMoney(labStats.total)}
+          </p>
+          <p className="text-2xs text-slate-500 font-bold uppercase tracking-wider mt-1.5">
+            {labStats.count} factura{labStats.count !== 1 ? 's' : ''}
+          </p>
         </div>
 
         {/* Mayoristas */}
         <div
           onClick={() => setCategory('Mayorista')}
           className={`bg-gradient-to-br from-purple-500/10 to-purple-950/5 border border-purple-500/20 rounded-2xl p-5 shadow-2xl cursor-pointer hover:border-purple-500/40 hover:bg-purple-500/15 transition-all select-none glass-card ${
-            category === 'Mayorista' ? 'ring-2 ring-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.2)]' : ''
+            category === 'Mayorista'
+              ? 'ring-2 ring-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.2)]'
+              : ''
           }`}
         >
           <div className="flex items-center gap-2 mb-2">
             <span className="w-2 h-2 rounded-full bg-purple-500 shadow-[0_0_6px_rgba(168,85,247,0.5)]"></span>
-            <p className="text-xs font-bold text-purple-400 uppercase tracking-wider">{wholesalers.length > 1 ? 'Mayoristas' : 'Mayorista'}</p>
+            <p className="text-xs font-bold text-purple-400 uppercase tracking-wider">
+              {wholesalers.length > 1 ? 'Mayoristas' : 'Mayorista'}
+            </p>
           </div>
-          <p className="text-2xl font-black text-purple-400 leading-none">{formatMoney(mayorStats.total)}</p>
-          <p className="text-2xs text-slate-500 font-bold uppercase tracking-wider mt-1.5">{mayorStats.count} factura{mayorStats.count !== 1 ? 's' : ''}</p>
+          <p className="text-2xl font-black text-purple-400 leading-none">
+            {formatMoney(mayorStats.total)}
+          </p>
+          <p className="text-2xs text-slate-500 font-bold uppercase tracking-wider mt-1.5">
+            {mayorStats.count} factura{mayorStats.count !== 1 ? 's' : ''}
+          </p>
         </div>
 
         {/* Otros */}
         <div
           onClick={() => setCategory('Otro')}
           className={`bg-gradient-to-br from-slate-500/10 to-slate-950/5 border border-white/5 rounded-2xl p-5 shadow-2xl cursor-pointer hover:border-white/12 hover:bg-white/10 transition-all select-none glass-card ${
-            category === 'Otro' ? 'ring-2 ring-slate-400 shadow-[0_0_15px_rgba(148,163,184,0.2)]' : ''
+            category === 'Otro'
+              ? 'ring-2 ring-slate-400 shadow-[0_0_15px_rgba(148,163,184,0.2)]'
+              : ''
           }`}
         >
           <div className="flex items-center gap-2 mb-2">
             <span className="w-2 h-2 rounded-full bg-slate-400 shadow-[0_0_6px_rgba(156,163,175,0.5)]"></span>
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Otros</p>
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+              Otros
+            </p>
           </div>
-          <p className="text-2xl font-black text-slate-200 leading-none">{formatMoney(otroStats.total)}</p>
-          <p className="text-2xs text-slate-500 font-bold uppercase tracking-wider mt-1.5">{otroStats.count} factura{otroStats.count !== 1 ? 's' : ''}</p>
+          <p className="text-2xl font-black text-slate-200 leading-none">
+            {formatMoney(otroStats.total)}
+          </p>
+          <p className="text-2xs text-slate-500 font-bold uppercase tracking-wider mt-1.5">
+            {otroStats.count} factura{otroStats.count !== 1 ? 's' : ''}
+          </p>
         </div>
 
         {/* Fiscalidad */}
         <div
           onClick={() => setCategory('Fiscalidad')}
           className={`bg-gradient-to-br from-emerald-500/10 to-emerald-950/5 border border-emerald-500/20 rounded-2xl p-5 shadow-2xl cursor-pointer hover:border-emerald-500/40 hover:bg-emerald-500/15 transition-all select-none glass-card ${
-            category === 'Fiscalidad' ? 'ring-2 ring-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.2)]' : ''
+            category === 'Fiscalidad'
+              ? 'ring-2 ring-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.2)]'
+              : ''
           }`}
         >
           <div className="flex items-center gap-2 mb-2">
             <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.5)]"></span>
-            <p className="text-xs font-bold text-emerald-400 uppercase tracking-wider">Fiscalidad</p>
+            <p className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
+              Fiscalidad
+            </p>
           </div>
-          <p className="text-2xl font-black text-emerald-400 leading-none">{formatMoney(fiscalStats.total)}</p>
-          <p className="text-2xs text-slate-500 font-bold uppercase tracking-wider mt-1.5">{fiscalStats.count} pago{fiscalStats.count !== 1 ? 's' : ''}</p>
+          <p className="text-2xl font-black text-emerald-400 leading-none">
+            {formatMoney(fiscalStats.total)}
+          </p>
+          <p className="text-2xs text-slate-500 font-bold uppercase tracking-wider mt-1.5">
+            {fiscalStats.count} pago{fiscalStats.count !== 1 ? 's' : ''}
+          </p>
         </div>
 
         {/* Trabajadores */}
         <div
           onClick={() => setCategory('Trabajadores')}
           className={`bg-gradient-to-br from-orange-500/10 to-orange-950/5 border border-orange-500/20 rounded-2xl p-5 shadow-2xl cursor-pointer hover:border-orange-500/40 hover:bg-orange-500/15 transition-all select-none glass-card ${
-            category === 'Trabajadores' ? 'ring-2 ring-orange-500 shadow-[0_0_15px_rgba(249,115,22,0.2)]' : ''
+            category === 'Trabajadores'
+              ? 'ring-2 ring-orange-500 shadow-[0_0_15px_rgba(249,115,22,0.2)]'
+              : ''
           }`}
         >
           <div className="flex items-center gap-2 mb-2">
             <span className="w-2 h-2 rounded-full bg-orange-500 shadow-[0_0_6px_rgba(249,115,22,0.5)]"></span>
-            <p className="text-xs font-bold text-orange-400 uppercase tracking-wider">Trabajadores</p>
+            <p className="text-xs font-bold text-orange-400 uppercase tracking-wider">
+              Trabajadores
+            </p>
           </div>
-          <p className="text-2xl font-black text-orange-400 leading-none">{formatMoney(trabStats.total)}</p>
-          <p className="text-2xs text-slate-500 font-bold uppercase tracking-wider mt-1.5">{trabStats.count} entrada{trabStats.count !== 1 ? 's' : ''}</p>
+          <p className="text-2xl font-black text-orange-400 leading-none">
+            {formatMoney(trabStats.total)}
+          </p>
+          <p className="text-2xs text-slate-500 font-bold uppercase tracking-wider mt-1.5">
+            {trabStats.count} entrada{trabStats.count !== 1 ? 's' : ''}
+          </p>
         </div>
       </div>
 
@@ -733,20 +845,36 @@ export function AnalisisPage() {
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="bg-white/5 border border-white/5 p-4 rounded-xl">
-                <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Facturas Proveedores</p>
-                <p className="text-lg font-black text-white">{formatMoney(totalFacturasCons)}</p>
+                <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">
+                  Facturas Proveedores
+                </p>
+                <p className="text-lg font-black text-white">
+                  {formatMoney(totalFacturasCons)}
+                </p>
               </div>
               <div className="bg-white/5 border border-white/5 p-4 rounded-xl">
-                <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Impuestos y Tasas</p>
-                <p className="text-lg font-black text-emerald-400">{formatMoney(totalFiscalCons)}</p>
+                <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">
+                  Impuestos y Tasas
+                </p>
+                <p className="text-lg font-black text-emerald-400">
+                  {formatMoney(totalFiscalCons)}
+                </p>
               </div>
               <div className="bg-white/5 border border-white/5 p-4 rounded-xl">
-                <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Trabajadores y Nóminas</p>
-                <p className="text-lg font-black text-orange-400">{formatMoney(totalTrabajadoresCons)}</p>
+                <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">
+                  Trabajadores y Nóminas
+                </p>
+                <p className="text-lg font-black text-orange-400">
+                  {formatMoney(totalTrabajadoresCons)}
+                </p>
               </div>
               <div className="bg-gradient-to-r from-blue-500/20 to-indigo-500/20 border border-blue-500/40 p-4 rounded-xl">
-                <p className="text-xs text-blue-300 font-bold uppercase tracking-wider mb-1">Gastos Totales Rango</p>
-                <p className="text-lg font-black text-[#00f2fe]">{formatMoney(totalGastosConsolidado)}</p>
+                <p className="text-xs text-blue-300 font-bold uppercase tracking-wider mb-1">
+                  Gastos Totales Rango
+                </p>
+                <p className="text-lg font-black text-[#00f2fe]">
+                  {formatMoney(totalGastosConsolidado)}
+                </p>
               </div>
             </div>
           </div>
@@ -754,7 +882,15 @@ export function AnalisisPage() {
           {/* Gráficas Principales */}
           <div className="grid gap-6 lg:grid-cols-5">
             <div className="lg:col-span-3">
-              <ChartCard title={category === 'Fiscalidad' ? 'Gasto por Concepto' : category === 'Trabajadores' ? 'Desglose de Personal' : 'Gasto por Laboratorio'}>
+              <ChartCard
+                title={
+                  category === 'Fiscalidad'
+                    ? 'Gasto por Concepto'
+                    : category === 'Trabajadores'
+                      ? 'Desglose de Personal'
+                      : 'Gasto por Laboratorio'
+                }
+              >
                 <Bar
                   data={{
                     labels: chartsData.labsLabels,
@@ -788,7 +924,7 @@ export function AnalisisPage() {
                   }}
                   options={{
                     ...donutOptions,
-                    cutout: '65%'
+                    cutout: '65%',
                   }}
                 />
               </ChartCard>
@@ -817,21 +953,21 @@ export function AnalisisPage() {
                       labels: {
                         font: { size: 10 },
                         color: '#94a3b8',
-                      }
-                    }
+                      },
+                    },
                   },
                   scales: {
                     ...barOptions.scales,
                     y: {
                       ...barOptions.scales?.y,
                       stacked: category === 'Mayorista',
-                      ticks: { callback: eur }
+                      ticks: { callback: eur },
                     },
                     x: {
                       ...barOptions.scales?.x,
-                      stacked: category === 'Mayorista'
-                    }
-                  }
+                      stacked: category === 'Mayorista',
+                    },
+                  },
                 }}
               />
             </div>
@@ -842,21 +978,37 @@ export function AnalisisPage() {
             <div className="mt-10 space-y-6">
               <div className="flex items-center gap-3 mb-5">
                 <div className="w-2 h-6 bg-gradient-to-b from-emerald-400 to-emerald-600 rounded-full animate-pulse"></div>
-                <h2 className="text-xl font-extrabold text-slate-100 tracking-tight">Análisis de Abonos</h2>
+                <h2 className="text-xl font-extrabold text-slate-100 tracking-tight">
+                  Análisis de Abonos
+                </h2>
               </div>
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 <div className="bg-gradient-to-br from-emerald-500/10 to-emerald-950/5 border border-emerald-500/20 rounded-2xl p-5 shadow-2xl glass-card">
-                  <p className="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2">TOTAL ABONADO</p>
-                  <p className="text-2xl font-black text-emerald-500 leading-none">{formatMoney(totalAbonos)}</p>
+                  <p className="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2">
+                    TOTAL ABONADO
+                  </p>
+                  <p className="text-2xl font-black text-emerald-500 leading-none">
+                    {formatMoney(totalAbonos)}
+                  </p>
                 </div>
                 <div className="bg-gradient-to-br from-emerald-500/10 to-emerald-950/5 border border-emerald-500/20 rounded-2xl p-5 shadow-2xl glass-card">
-                  <p className="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2">Nº ABONOS</p>
-                  <p className="text-2xl font-black text-emerald-500 leading-none">{countAbonos}</p>
+                  <p className="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2">
+                    Nº ABONOS
+                  </p>
+                  <p className="text-2xl font-black text-emerald-500 leading-none">
+                    {countAbonos}
+                  </p>
                 </div>
                 <div className="bg-gradient-to-br from-blue-500/10 to-indigo-950/5 border border-blue-500/20 rounded-2xl p-5 shadow-2xl glass-card">
-                  <p className="text-xs font-bold text-blue-400 uppercase tracking-wider mb-2">BALANCE NETO</p>
-                  <p className={`text-2xl font-black leading-none ${balanceNeto >= 0 ? 'text-white' : 'text-emerald-400'}`}>{formatMoney(balanceNeto)}</p>
+                  <p className="text-xs font-bold text-blue-400 uppercase tracking-wider mb-2">
+                    BALANCE NETO
+                  </p>
+                  <p
+                    className={`text-2xl font-black leading-none ${balanceNeto >= 0 ? 'text-white' : 'text-emerald-400'}`}
+                  >
+                    {formatMoney(balanceNeto)}
+                  </p>
                 </div>
               </div>
 
@@ -930,39 +1082,52 @@ export function AnalisisPage() {
 
       {/* Informe imprimible (fuera de pantalla) para el export a PDF */}
       <div
-        ref={reportRef}
-        style={{ position: 'absolute', left: '-9999px', top: 0 }}
+        style={{
+          position: 'fixed',
+          left: 0,
+          top: 0,
+          width: 0,
+          height: 0,
+          overflow: 'hidden',
+          zIndex: -9999,
+          pointerEvents: 'none',
+        }}
         aria-hidden
       >
-        <AnalisisReport
-          period={period}
-          generatedAt={new Date().toLocaleString('es-ES')}
-          analysis={{
-            total: topKpis.total,
-            count: topKpis.count,
-            topLab: topKpis.top,
-            avg: topKpis.avg,
-            byLab: chartsData.byLab,
-            byMonth: chartsData.monthlyLabels.map((l, i) => {
-              const amount = category === 'Mayorista'
-                ? chartsData.monthlyDatasets.reduce((sum, ds) => sum + (ds.data[i] ?? 0), 0)
-                : (chartsData.monthlyDatasets[0]?.data[i] ?? 0)
-              return {
-                key: String(i),
-                label: l,
-                amount,
-              }
-            }),
-          }}
-          fiscalTotal={totalFiscalCons}
-          trabTotal={totalTrabajadoresCons}
-          granTotal={totalGastosConsolidado}
-        />
+        <div ref={reportRef}>
+          <AnalisisReport
+            period={period}
+            generatedAt={new Date().toLocaleString('es-ES')}
+            analysis={{
+              total: topKpis.total,
+              count: topKpis.count,
+              topLab: topKpis.top,
+              avg: topKpis.avg,
+              byLab: chartsData.byLab,
+              byMonth: chartsData.monthlyLabels.map((l, i) => {
+                const amount =
+                  category === 'Mayorista'
+                    ? chartsData.monthlyDatasets.reduce(
+                        (sum, ds) => sum + (ds.data[i] ?? 0),
+                        0,
+                      )
+                    : (chartsData.monthlyDatasets[0]?.data[i] ?? 0)
+                return {
+                  key: String(i),
+                  label: l,
+                  amount,
+                }
+              }),
+            }}
+            fiscalTotal={totalFiscalCons}
+            trabTotal={totalTrabajadoresCons}
+            granTotal={totalGastosConsolidado}
+          />
+        </div>
       </div>
     </div>
   )
 }
-
 
 function ChartCard({
   title,

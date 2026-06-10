@@ -30,8 +30,8 @@ export function AnalisisReport({
   return (
     <div
       style={{
-        width: '794px',
-        padding: '40px',
+        width: '715px',
+        padding: '32px',
         background: '#ffffff',
         color: '#0f172a',
         fontFamily: "'Outfit', 'Inter', sans-serif",

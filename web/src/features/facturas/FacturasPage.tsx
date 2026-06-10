@@ -1,13 +1,5 @@
 import { useMemo, useState, useEffect } from 'react'
-import {
-  AlertTriangle,
-  ChevronDown,
-  Download,
-  Pencil,
-  Plus,
-  Search,
-  Trash2,
-} from 'lucide-react'
+import { ChevronDown, Download, Pencil, Plus, Search, Trash2 } from 'lucide-react'
 import { useLocation } from 'react-router-dom'
 import { FacturaModal } from './FacturaModal'
 import { Calendar } from './Calendar'
@@ -16,8 +8,6 @@ import { useFacturas, useDeleteFactura } from '@/lib/queries/facturas'
 import { useYearStore } from '@/stores/yearStore'
 import { isWholesaler } from '@/lib/config/wholesalers'
 import { useWholesalersStore } from '@/stores/wholesalersStore'
-import { useBudgetsStore } from '@/stores/budgetsStore'
-import { computeBudgetAlerts } from './lib/budgets'
 import { formatMoney } from '@/lib/utils/money'
 import { formatDate } from '@/lib/utils/dates'
 import type { VencStatus } from '@/lib/utils/dates'
@@ -73,7 +63,7 @@ export function FacturasPage() {
   const [minImporte, setMinImporte] = useState('')
   const [maxImporte, setMaxImporte] = useState('')
   const [vencStatus, setVencStatus] = useState<'' | VencStatus>('')
-  
+
   // Estado de expansión: solo guardamos las desviaciones del usuario respecto al
   // valor por defecto (primer grupo abierto, resto cerrados).
   const [overrides, setOverrides] = useState<Record<string, boolean>>({})
@@ -100,7 +90,15 @@ export function FacturasPage() {
     () =>
       filterFacturas(
         facturas,
-        { year: String(year), search, category: '', vencStatus: '', month, minImporte, maxImporte },
+        {
+          year: String(year),
+          search,
+          category: '',
+          vencStatus: '',
+          month,
+          minImporte,
+          maxImporte,
+        },
         wholesalers,
       ),
     [facturas, year, search, wholesalers, month, minImporte, maxImporte],
@@ -121,28 +119,31 @@ export function FacturasPage() {
     () =>
       filterFacturas(
         facturas,
-        { year: String(year), search, category, vencStatus, month, minImporte, maxImporte },
+        {
+          year: String(year),
+          search,
+          category,
+          vencStatus,
+          month,
+          minImporte,
+          maxImporte,
+        },
         wholesalers,
       ),
-    [facturas, year, search, category, vencStatus, wholesalers, month, minImporte, maxImporte],
+    [
+      facturas,
+      year,
+      search,
+      category,
+      vencStatus,
+      wholesalers,
+      month,
+      minImporte,
+      maxImporte,
+    ],
   )
 
   const groups = useMemo(() => groupByMonth(visible), [visible])
-
-  // Alertas de presupuesto: gasto del AÑO activo por laboratorio vs límite
-  // configurado (independiente de los filtros de la pestaña, igual que el legacy).
-  const budgets = useBudgetsStore((s) => s.budgets)
-  const yearFacturas = useMemo(
-    () =>
-      facturas.filter(
-        (f) => (f.fecha ?? f.fecha_vencimiento ?? '').slice(0, 4) === String(year),
-      ),
-    [facturas, year],
-  )
-  const budgetAlerts = useMemo(
-    () => computeBudgetAlerts(yearFacturas, budgets),
-    [yearFacturas, budgets],
-  )
 
   const isOpen = (key: string, idx: number) =>
     key in overrides ? overrides[key] : idx === 0
@@ -183,7 +184,9 @@ export function FacturasPage() {
     <div className="mx-auto max-w-7xl px-6 py-8">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-white">Facturas de Laboratorios</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight text-white">
+            Facturas de Laboratorios
+          </h1>
           <p className="mt-1 text-sm text-slate-400">
             Registro centralizado por proveedor farmacéutico
           </p>
@@ -199,25 +202,6 @@ export function FacturasPage() {
           </button>
         </div>
       </div>
-
-      {/* Alertas de presupuesto */}
-      {budgetAlerts.length > 0 && (
-        <div className="mt-4 space-y-2">
-          {budgetAlerts.map((a) => (
-            <div
-              key={a.lab}
-              className="flex items-center gap-3 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3"
-            >
-              <AlertTriangle className="h-4 w-4 shrink-0 text-red-400" />
-              <p className="text-sm text-red-300">
-                <strong className="font-bold">{a.lab}</strong> ha superado su presupuesto:{' '}
-                <strong className="font-bold">{formatMoney(a.spent)}</strong> gastado de{' '}
-                {formatMoney(a.limit)} máximo
-              </p>
-            </div>
-          ))}
-        </div>
-      )}
 
       {/* Calendario (Posicionado ARRIBA de los filtros) */}
       <Calendar
@@ -275,7 +259,11 @@ export function FacturasPage() {
               className="w-full appearance-none rounded-xl border border-white/5 bg-slate-950/40 py-2.5 pl-4 pr-10 text-sm text-slate-200 focus:border-accent-blue/40 focus:outline-none"
             >
               {MESES.map((m) => (
-                <option key={m.value} value={m.value} className="bg-slate-950 text-slate-200">
+                <option
+                  key={m.value}
+                  value={m.value}
+                  className="bg-slate-950 text-slate-200"
+                >
                   {m.label}
                 </option>
               ))}
@@ -308,7 +296,9 @@ export function FacturasPage() {
         <div className="flex flex-wrap items-center gap-6 pt-3 border-t border-white/5">
           {/* Rango de Importe */}
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">IMPORTE:</span>
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+              IMPORTE:
+            </span>
             <input
               type="text"
               value={minImporte}
@@ -340,7 +330,9 @@ export function FacturasPage() {
 
           {/* Categorías */}
           <div className="flex flex-wrap items-center gap-3 flex-1 min-w-[280px]">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">CATEGORÍA:</span>
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+              CATEGORÍA:
+            </span>
             <div className="flex flex-wrap gap-2">
               {categories.map((c) => (
                 <button
