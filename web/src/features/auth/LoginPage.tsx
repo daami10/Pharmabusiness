@@ -257,37 +257,41 @@ export function LoginPage() {
 
       <div className="relative z-10 w-full max-w-sm flex flex-col items-center">
         {/* Modern logo above the card */}
-        <div className="flex items-center gap-2.5 mb-6">
-          <div className="relative flex items-center justify-center w-8 h-8">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="relative flex items-center justify-center w-9 h-9">
             <svg
               className="w-full h-full"
-              viewBox="0 0 32 32"
+              viewBox="0 0 100 100"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
             >
               <defs>
-                <linearGradient id="g-logo-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#00f2fe" />
-                  <stop offset="50%" stopColor="#3b82f6" />
-                  <stop offset="100%" stopColor="#9d4edd" />
+                <linearGradient id="logo-g-grad" x1="0%" y1="100%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#10b981" />
+                  <stop offset="100%" stopColor="#00f2fe" />
                 </linearGradient>
               </defs>
               <path
-                d="M25 16C25 20.9706 20.9706 25 16 25C11.0294 25 7 20.9706 7 16C7 11.0294 11.0294 7 16 7C19.5 7 22.5 9 24 12"
-                stroke="url(#g-logo-grad)"
-                strokeWidth="3.5"
+                d="M 76 30 A 33 33 0 1 0 76 70 L 76 50 H 65"
+                stroke="url(#logo-g-grad)"
+                strokeWidth="6.5"
                 strokeLinecap="round"
+                strokeLinejoin="round"
               />
               <path
-                d="M16 16H25"
-                stroke="url(#g-logo-grad)"
-                strokeWidth="3.5"
+                d="M 45 37 H 55 V 45 H 63 V 55 H 55 V 63 H 45 V 55 H 37 V 45 H 45 Z"
+                stroke="url(#logo-g-grad)"
+                strokeWidth="5.5"
                 strokeLinecap="round"
+                strokeLinejoin="round"
               />
             </svg>
           </div>
           <span className="text-2xl font-black tracking-tight text-white select-none">
-            GFarma
+            <span className="bg-gradient-to-r from-[#10b981] to-[#00f2fe] bg-clip-text text-transparent">
+              G
+            </span>
+            Farma
           </span>
         </div>
 

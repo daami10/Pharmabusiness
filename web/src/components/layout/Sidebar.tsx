@@ -37,37 +37,42 @@ export function Sidebar({
           <div className="flex items-center gap-3 shrink-0 select-none">
             <svg
               className="w-8 h-8"
-              viewBox="0 0 24 24"
+              viewBox="0 0 100 100"
               fill="none"
-              strokeWidth="2.5"
-              strokeLinejoin="round"
-              strokeLinecap="round"
+              xmlns="http://www.w3.org/2000/svg"
             >
               <defs>
                 <linearGradient
-                  id="cross-grad-sidebar"
+                  id="logo-g-grad-sidebar"
                   x1="0%"
                   y1="100%"
                   x2="100%"
                   y2="0%"
                 >
-                  <stop offset="0%" stopColor="#3b82f6" />
-                  <stop offset="50%" stopColor="#00f2fe" />
-                  <stop offset="100%" stopColor="#10b981" />
+                  <stop offset="0%" stopColor="#10b981" />
+                  <stop offset="100%" stopColor="#00f2fe" />
                 </linearGradient>
               </defs>
               <path
-                d="M9 3H15V6.5C15 7.3 15.7 8 16.5 8H20V14H16.5C15.7 14 15 14.7 15 15.5V19H9V15.5C9 14.7 8.3 14 7.5 14H4V8H7.5C8.3 8 9 7.3 9 6.5V3Z"
-                stroke="url(#cross-grad-sidebar)"
+                d="M 76 30 A 33 33 0 1 0 76 70 L 76 50 H 65"
+                stroke="url(#logo-g-grad-sidebar)"
+                strokeWidth="6.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               />
               <path
-                d="M7 11.5H9.5L10.8 8L12.8 15L14.2 11.5H17"
-                stroke="url(#cross-grad-sidebar)"
-                strokeWidth="2"
+                d="M 45 37 H 55 V 45 H 63 V 55 H 55 V 63 H 45 V 55 H 37 V 45 H 45 Z"
+                stroke="url(#logo-g-grad-sidebar)"
+                strokeWidth="5.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               />
             </svg>
-            <span className="text-2xl font-bold tracking-tight text-white">
-              <span className="text-[#00f2fe]">G</span>Farma
+            <span className="text-2xl font-black tracking-tight text-white select-none">
+              <span className="bg-gradient-to-r from-[#10b981] to-[#00f2fe] bg-clip-text text-transparent">
+                G
+              </span>
+              Farma
             </span>
           </div>
 
