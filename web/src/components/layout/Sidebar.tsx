@@ -14,7 +14,7 @@ export function Sidebar({
   onSettings: () => void
   onPrivacy: () => void
 }) {
-  const { signOut, subscriptionTier, updateSubscriptionTier } = useAuth()
+  const { signOut, subscriptionTier } = useAuth()
   const secondaryCls =
     'flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-400 transition-all hover:bg-white/5 hover:text-white'
 
@@ -103,35 +103,6 @@ export function Sidebar({
         </div>
 
         <div className="space-y-1.5">
-          {/* Toggler de Suscripción para pruebas */}
-          <div className="rounded-2xl border border-white/5 bg-slate-950/40 p-3 mb-2 text-center shadow-inner">
-            <div className="flex items-center justify-between text-[10px] mb-2 px-1">
-              <span className="font-bold text-slate-400 uppercase tracking-wider">
-                Plan
-              </span>
-              <span
-                className={`font-black uppercase tracking-wider px-2 py-0.5 rounded-md text-[9px] ${
-                  subscriptionTier === 'premium'
-                    ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20 shadow-[0_0_10px_rgba(245,158,11,0.15)]'
-                    : 'bg-slate-500/10 text-slate-300 border border-slate-500/20'
-                }`}
-              >
-                {subscriptionTier === 'premium' ? 'Premium' : 'Básico'}
-              </span>
-            </div>
-            <button
-              type="button"
-              onClick={() =>
-                void updateSubscriptionTier(
-                  subscriptionTier === 'premium' ? 'basic' : 'premium',
-                )
-              }
-              className="w-full rounded-xl bg-slate-900 hover:bg-slate-950 py-1.5 text-[9px] font-bold text-[#00f2fe] transition-colors border border-[#00f2fe]/20 cursor-pointer uppercase tracking-wider"
-            >
-              {subscriptionTier === 'premium' ? 'Bajar a Básico' : 'Subir a Premium'}
-            </button>
-          </div>
-
           <button type="button" onClick={onSettings} className={secondaryCls}>
             <Settings className="h-5 w-5" />
             Configuración
