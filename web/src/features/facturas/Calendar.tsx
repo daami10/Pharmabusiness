@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from 'react'
+import { useMemo, useState } from 'react'
 import { ChevronLeft, ChevronRight, Pencil, Trash2, X } from 'lucide-react'
 import { useFacturas, useSetPagada } from '@/lib/queries/facturas'
 import { useYearStore } from '@/stores/yearStore'
@@ -72,10 +72,6 @@ export function Calendar({
     setYear(globalYear)
     setSelectedDay(null)
   }
-
-  useEffect(() => {
-    setYear(globalYear)
-  }, [globalYear])
 
   const facturas = useMemo(() => data ?? [], [data])
   const stats = useMemo(() => vencStats(facturas), [facturas])

@@ -128,6 +128,7 @@ export function Chatbot() {
 
     if (suggestion) {
       // Add proactive suggestion if not already present in last message suggestions
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setMessages((prev) => {
         const last = prev[prev.length - 1]
         if (
@@ -159,6 +160,7 @@ export function Chatbot() {
     if (!textToSend.trim()) return
 
     const userMessage: Message = {
+      // eslint-disable-next-line react-hooks/purity
       id: `user-${Date.now()}`,
       sender: 'user',
       text: textToSend,

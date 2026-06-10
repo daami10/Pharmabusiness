@@ -103,7 +103,7 @@ export function LoginPage() {
         setInfo('Hemos enviado un enlace de recuperación a tu email.')
         setRecoveryEmail('')
       }
-    } catch (err) {
+    } catch {
       setRecoveryError('Error de red al procesar la solicitud.')
     } finally {
       setIsSubmittingRecovery(false)
@@ -130,7 +130,7 @@ export function LoginPage() {
           window.location.href = '/'
         }, 1500)
       }
-    } catch (err) {
+    } catch {
       setResetError('Error al guardar la nueva contraseña.')
     } finally {
       setIsSubmittingReset(false)
