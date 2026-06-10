@@ -27,8 +27,12 @@ describe('fiscalidad-view', () => {
       mk({ concepto: 'Cuota de Autónomos', fecha: '2026-12-01', importe: 999 }), // futuro → excluido
     ])
     expect(k.total).toBe(1000)
-    expect(k.autonomo).toBe(300)
-    expect(k.renta).toBe(700)
+    expect(k.byConcept).toContainEqual({ concepto: 'Cuota de Autónomos', total: 300 })
+    expect(k.byConcept).toContainEqual({ concepto: 'Impuesto de Sociedades', total: 500 })
+    expect(k.byConcept).toContainEqual({
+      concepto: 'Declaración de la Renta',
+      total: 200,
+    })
   })
 
   it('groupFiscalByMonth ordena desc y marca futuros', () => {

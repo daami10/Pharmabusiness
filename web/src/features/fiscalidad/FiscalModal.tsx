@@ -7,17 +7,8 @@ import { getRemainingMonths } from '@/lib/utils/dates'
 import { useCreateFiscales, useUpdateFiscal } from '@/lib/queries/fiscalidad'
 import type { Fiscal, FiscalInput } from '@/types/domain'
 
-const CONCEPTOS = [
-  'Cuota de Autónomos',
-  'IRPF',
-  'Declaración de la Renta',
-  'Impuesto de Sociedades',
-  'Tasas Municipales',
-  'Otros',
-]
-
 const schema = z.object({
-  concepto: z.string().min(1, 'Selecciona un concepto'),
+  concepto: z.string().min(1, 'Indica el concepto'),
   mes: z.string().min(1, 'Indica el mes'),
   importe: z
     .string()
@@ -32,7 +23,7 @@ type FormValues = z.infer<typeof schema>
 
 function emptyForm(): FormValues {
   return {
-    concepto: 'Cuota de Autónomos',
+    concepto: '',
     mes: new Date().toISOString().slice(0, 7),
     importe: '',
     notas: '',
@@ -122,13 +113,15 @@ export function FiscalModal({
           <label className="mb-1 block text-xs font-semibold text-slate-400">
             Concepto
           </label>
-          <select {...register('concepto')} className={inputCls}>
-            {CONCEPTOS.map((c) => (
-              <option key={c} value={c}>
-                {c === 'IRPF' ? 'Declaración de IRPF' : c}
-              </option>
-            ))}
-          </select>
+          <input
+            type="text"
+            {...register('concepto')}
+            placeholder="Ej. IVA, IRPF, Autónomos..."
+            className={inputCls}
+          />
+          {errors.concepto && (
+            <p className="mt-1 text-xs text-red-400">{errors.concepto.message}</p>
+          )}
         </div>
 
         <div className="grid grid-cols-2 gap-4">

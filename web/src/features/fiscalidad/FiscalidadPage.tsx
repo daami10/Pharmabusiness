@@ -8,6 +8,16 @@ import type { Fiscal } from '@/types/domain'
 import { fiscalKpis, groupFiscalByMonth } from './lib/fiscalidad-view'
 import { FiscalModal } from './FiscalModal'
 
+const KPI_COLORS = [
+  'text-purple-400',
+  'text-emerald-400',
+  'text-sky-400',
+  'text-orange-400',
+  'text-rose-400',
+  'text-amber-400',
+  'text-teal-400',
+]
+
 export function FiscalidadPage() {
   const { data, isLoading, isError, error } = useFiscalidad()
   const deleteFiscal = useDeleteFiscal()
@@ -97,21 +107,30 @@ export function FiscalidadPage() {
       </div>
 
       {/* KPIs */}
-      <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         <div className="rounded-2xl border border-white/5 bg-white/5 p-5">
           <p className="text-3xl font-black text-white">{formatMoney(kpis.total)}</p>
           <p className="mt-1 text-xs font-semibold text-slate-400">Total fiscal {year}</p>
         </div>
-        <div className="rounded-2xl border border-white/5 bg-white/5 p-5">
-          <p className="text-2xl font-bold text-purple-400">
-            {formatMoney(kpis.autonomo)}
-          </p>
-          <p className="mt-1 text-xs font-semibold text-slate-400">Cuota de Autónomos</p>
-        </div>
-        <div className="rounded-2xl border border-white/5 bg-white/5 p-5">
-          <p className="text-2xl font-bold text-emerald-400">{formatMoney(kpis.renta)}</p>
-          <p className="mt-1 text-xs font-semibold text-slate-400">Renta / Sociedades</p>
-        </div>
+        {kpis.byConcept.map((item, idx) => {
+          const colorClass = KPI_COLORS[idx % KPI_COLORS.length]
+          return (
+            <div
+              key={item.concepto}
+              className="rounded-2xl border border-white/5 bg-white/5 p-5"
+            >
+              <p className={`text-2xl font-bold ${colorClass}`}>
+                {formatMoney(item.total)}
+              </p>
+              <p
+                className="mt-1 text-xs font-semibold text-slate-400 truncate"
+                title={item.concepto}
+              >
+                {item.concepto}
+              </p>
+            </div>
+          )
+        })}
       </div>
 
       {isLoading && (
