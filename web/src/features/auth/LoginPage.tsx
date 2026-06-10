@@ -7,6 +7,10 @@ import {
   ArrowLeft,
   Calendar,
   Coins,
+  Eye,
+  EyeOff,
+  Lock,
+  Mail,
   ShieldCheck,
   Sparkles,
   TrendingUp,
@@ -32,6 +36,9 @@ export function LoginPage() {
   const [mode, setMode] = useState<LoginMode>('login')
   const [serverError, setServerError] = useState('')
   const [info, setInfo] = useState('')
+
+  // Show/Hide password toggle
+  const [showPassword, setShowPassword] = useState(false)
 
   // States for forgot password
   const [recoveryEmail, setRecoveryEmail] = useState('')
@@ -63,7 +70,7 @@ export function LoginPage() {
     }
   }, [])
 
-  const onSubmit = handleSubmit(async ({ email, password }) => {
+  const handleAuthSubmit = handleSubmit(async ({ email, password }) => {
     setServerError('')
     setInfo('')
     if (mode === 'register') {
@@ -134,7 +141,7 @@ export function LoginPage() {
   if (session && mode !== 'reset_password') return <Navigate to="/" replace />
 
   return (
-    <main className="grid min-h-screen grid-cols-1 lg:grid-cols-2">
+    <main className="grid min-h-screen grid-cols-1 lg:grid-cols-2 bg-[#090d16] overflow-hidden">
       {/* Columna Izquierda: Showcase de Funcionalidades */}
       <section className="relative hidden flex-col justify-between p-12 bg-radial-[at_top_left,#0d1a33_0%,#04080f_90%] border-r border-white/5 lg:flex">
         {/* Glow orbs background decoration */}
@@ -237,79 +244,88 @@ export function LoginPage() {
           <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[300px] h-[300px] rounded-full bg-blue-500/10 blur-[90px]" />
         </div>
 
-        <div className="relative z-10 w-full max-w-sm rounded-2xl border border-accent-blue/15 bg-slate-900/40 p-8 shadow-[0_20px_50px_rgba(0,0,0,0.5)] backdrop-blur-xl glass-card">
-          {/* Logo móvil */}
-          <h1 className="mb-6 text-center text-2xl font-black text-white tracking-tight lg:hidden">
-            <span className="text-accent-blue">G</span>Farma
-          </h1>
-
-          {/* Modo Login o Registro */}
+        {/* Card contenedor glassmorphic */}
+        <div className="relative z-10 w-full max-w-sm rounded-3xl border border-accent-blue/30 bg-[#090d16]/40 p-8 shadow-[0_0_50px_rgba(0,242,254,0.15)] backdrop-blur-xl glass-card">
+          {/* Modos: Login y Registro */}
           {(mode === 'login' || mode === 'register') && (
             <>
-              <div className="mb-6 flex rounded-xl bg-slate-950/40 p-1">
-                {(['login', 'register'] as const).map((m) => (
-                  <button
-                    key={m}
-                    type="button"
-                    onClick={() => {
-                      setMode(m)
-                      setServerError('')
-                      setInfo('')
-                    }}
-                    className={`flex-1 rounded-lg py-2 text-sm font-semibold transition-all cursor-pointer ${
-                      mode === m
-                        ? 'bg-white/10 text-white shadow'
-                        : 'text-slate-400 hover:text-white'
-                    }`}
-                  >
-                    {m === 'login' ? 'Iniciar sesión' : 'Crear cuenta'}
-                  </button>
-                ))}
+              <div className="text-center mb-6">
+                <h1 className="text-2xl font-black tracking-tight text-white lg:hidden">
+                  <span className="text-accent-blue">G</span>Farma
+                </h1>
+                <h2 className="text-xl font-black tracking-tight text-white mt-1">
+                  Bienvenido a{' '}
+                  <span className="bg-gradient-to-r from-accent-blue to-blue-400 bg-clip-text text-transparent">
+                    GFarma
+                  </span>
+                </h2>
+                <p className="mt-1 text-xs text-slate-400 leading-normal">
+                  {mode === 'login'
+                    ? 'Inicia sesión para gestionar inteligentemente'
+                    : 'Regístrate para empezar a gestionar tus gastos'}
+                </p>
               </div>
 
-              <form onSubmit={onSubmit} className="space-y-4" noValidate>
+              <form onSubmit={handleAuthSubmit} className="space-y-4" noValidate>
+                {/* Campo: Correo */}
                 <div>
-                  <input
-                    type="email"
-                    placeholder="Correo electrónico"
-                    autoComplete="email"
-                    {...register('email')}
-                    className="w-full rounded-xl border border-white/10 bg-slate-950/40 px-4 py-3 text-sm text-slate-100 placeholder-slate-500 focus:border-accent-blue/40 focus:outline-none transition-all"
-                  />
+                  <label className="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">
+                    Correo Electrónico
+                  </label>
+                  <div className="relative">
+                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+                    <input
+                      type="email"
+                      placeholder="ejemplo@correo.com"
+                      autoComplete="email"
+                      {...register('email')}
+                      className="w-full rounded-xl border border-white/10 bg-slate-950/60 pl-10 pr-4 py-3 text-xs text-slate-100 placeholder-slate-600 focus:border-accent-blue/60 focus:ring-1 focus:ring-accent-blue/30 focus:outline-none transition-all"
+                    />
+                  </div>
                   {errors.email && (
-                    <p className="mt-1.5 text-xs text-red-400">{errors.email.message}</p>
-                  )}
-                </div>
-                <div>
-                  <input
-                    type="password"
-                    placeholder="Contraseña"
-                    autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-                    {...register('password')}
-                    className="w-full rounded-xl border border-white/10 bg-slate-950/40 px-4 py-3 text-sm text-slate-100 placeholder-slate-500 focus:border-accent-blue/40 focus:outline-none transition-all"
-                  />
-                  {errors.password && (
-                    <p className="mt-1.5 text-xs text-red-400">
-                      {errors.password.message}
+                    <p className="mt-1.5 text-[10px] text-red-400">
+                      {errors.email.message}
                     </p>
                   )}
                 </div>
 
-                {mode === 'login' && (
-                  <div className="text-right">
+                {/* Campo: Contraseña */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">
+                    Contraseña
+                  </label>
+                  <div className="relative">
+                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="••••••••"
+                      autoComplete={
+                        mode === 'login' ? 'current-password' : 'new-password'
+                      }
+                      {...register('password')}
+                      className="w-full rounded-xl border border-white/10 bg-slate-950/60 pl-10 pr-10 py-3 text-xs text-slate-100 placeholder-slate-600 focus:border-accent-blue/60 focus:ring-1 focus:ring-accent-blue/30 focus:outline-none transition-all"
+                    />
                     <button
                       type="button"
-                      onClick={() => {
-                        setMode('forgot_password')
-                        setServerError('')
-                        setInfo('')
-                      }}
-                      className="text-xs font-semibold text-accent-blue hover:text-accent-blue/80 transition-colors cursor-pointer"
+                      onClick={() => setShowPassword((p) => !p)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 rounded p-1 text-slate-500 hover:text-slate-300 transition-colors cursor-pointer"
+                      aria-label={
+                        showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'
+                      }
                     >
-                      ¿Olvidaste tu contraseña?
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
                     </button>
                   </div>
-                )}
+                  {errors.password && (
+                    <p className="mt-1.5 text-[10px] text-red-400">
+                      {errors.password.message}
+                    </p>
+                  )}
+                </div>
 
                 {serverError && (
                   <p className="rounded-xl border border-red-500/20 bg-red-950/40 px-4 py-3 text-xs text-red-400 leading-normal">
@@ -322,18 +338,102 @@ export function LoginPage() {
                   </p>
                 )}
 
+                {/* Botón enviar */}
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 py-3.5 text-sm font-semibold text-white shadow-lg transition-all hover:from-blue-400 hover:to-indigo-500 disabled:opacity-60 cursor-pointer"
+                  className="w-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 py-3.5 text-xs font-black text-white shadow-[0_0_25px_rgba(59,130,246,0.4)] transition-all hover:scale-[1.01] hover:from-blue-400 hover:to-indigo-500 disabled:opacity-60 cursor-pointer uppercase tracking-wider"
                 >
                   {isSubmitting
                     ? 'Cargando…'
                     : mode === 'login'
-                      ? 'Iniciar sesión'
-                      : 'Crear cuenta'}
+                      ? 'Iniciar Sesión'
+                      : 'Registrarse'}
                 </button>
               </form>
+
+              {/* Enlaces de pie de tarjeta */}
+              <div className="mt-5 space-y-2.5 text-center">
+                {mode === 'login' ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMode('forgot_password')
+                        setServerError('')
+                        setInfo('')
+                      }}
+                      className="text-[11px] font-semibold text-[#00f2fe] hover:text-[#00f2fe]/80 transition-colors cursor-pointer"
+                    >
+                      ¿Olvidaste tu contraseña?
+                    </button>
+                    <p className="text-[11px] text-slate-400">
+                      ¿No tienes cuenta?{' '}
+                      <button
+                        type="button"
+                        onClick={() => setMode('register')}
+                        className="font-bold text-[#00f2fe] hover:underline cursor-pointer"
+                      >
+                        Regístrate
+                      </button>
+                    </p>
+                  </>
+                ) : (
+                  <p className="text-[11px] text-slate-400">
+                    ¿Ya tienes cuenta?{' '}
+                    <button
+                      type="button"
+                      onClick={() => setMode('login')}
+                      className="font-bold text-[#00f2fe] hover:underline cursor-pointer"
+                    >
+                      Inicia sesión
+                    </button>
+                  </p>
+                )}
+              </div>
+
+              {/* Separador e Inicio de sesión social ficticio */}
+              <div className="border-t border-white/5 my-5 pt-4 flex flex-col items-center">
+                <div className="flex items-center gap-4">
+                  {/* Google Icon SVG */}
+                  <svg
+                    className="h-5 w-5 cursor-pointer opacity-70 hover:opacity-100 transition-opacity"
+                    viewBox="0 0 24 24"
+                    aria-label="Iniciar con Google"
+                  >
+                    <path
+                      fill="#4285F4"
+                      d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v3.92h6.69c-.29 1.5-1.14 2.78-2.4 3.63l3.07 2.38c1.8-1.66 2.84-4.11 2.84-7.06z"
+                    />
+                    <path
+                      fill="#34A853"
+                      d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.07-2.38c-.9.6-2.06.96-3.23.96-2.48 0-4.58-1.67-5.33-3.92H1.03v2.44C3.01 22.12 7.21 24 12 24z"
+                    />
+                    <path
+                      fill="#FBBC05"
+                      d="M6.67 15.75c-.2-.6-.31-1.24-.31-1.9 0-.66.11-1.3.31-1.9V9.51H1.03C.37 10.86 0 12.39 0 14s.37 3.14 1.03 4.49l3.07-2.38c-.2-.6-.43-1.42-.43-2.36z"
+                    />
+                    <path
+                      fill="#EA4335"
+                      d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.44-3.44C17.93 1.19 15.22 0 12 0 7.21 0 3.01 1.88 1.03 4.69l3.07 2.38c.75-2.25 2.85-3.92 5.33-3.92z"
+                    />
+                  </svg>
+
+                  <span className="h-4 w-[1px] bg-white/10" />
+
+                  {/* Microsoft Icon SVG */}
+                  <svg
+                    className="h-4.5 w-4.5 cursor-pointer opacity-70 hover:opacity-100 transition-opacity"
+                    viewBox="0 0 23 23"
+                    aria-label="Iniciar con Microsoft"
+                  >
+                    <path fill="#F25022" d="M0 0h11v11H0z" />
+                    <path fill="#7FBA00" d="M12 0h11v11H12z" />
+                    <path fill="#01A6F0" d="M0 12h11v11H0z" />
+                    <path fill="#FFB900" d="M12 12h11v11H12z" />
+                  </svg>
+                </div>
+              </div>
             </>
           )}
 
@@ -350,27 +450,32 @@ export function LoginPage() {
                 className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-white mb-5 transition-colors cursor-pointer"
               >
                 <ArrowLeft className="h-4 w-4" />
-                Volver al inicio
+                Volver
               </button>
 
               <h2 className="text-lg font-extrabold text-white">Recuperar contraseña</h2>
               <p className="mt-1.5 text-xs text-slate-400 leading-normal">
-                Escribe tu dirección de correo electrónico y te enviaremos un enlace de
-                recuperación.
+                Introduce tu correo electrónico y te enviaremos un enlace de recuperación.
               </p>
 
               <form onSubmit={handleSendRecovery} className="mt-6 space-y-4">
                 <div>
-                  <input
-                    type="email"
-                    placeholder="Correo electrónico"
-                    value={recoveryEmail}
-                    onChange={(e) => setRecoveryEmail(e.target.value)}
-                    className="w-full rounded-xl border border-white/10 bg-slate-950/40 px-4 py-3 text-sm text-slate-100 placeholder-slate-500 focus:border-accent-blue/40 focus:outline-none transition-all"
-                    required
-                  />
+                  <label className="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">
+                    Correo Electrónico
+                  </label>
+                  <div className="relative">
+                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+                    <input
+                      type="email"
+                      placeholder="ejemplo@correo.com"
+                      value={recoveryEmail}
+                      onChange={(e) => setRecoveryEmail(e.target.value)}
+                      className="w-full rounded-xl border border-white/10 bg-slate-950/60 pl-10 pr-4 py-3 text-xs text-slate-100 placeholder-slate-600 focus:border-accent-blue/60 focus:ring-1 focus:ring-accent-blue/30 focus:outline-none transition-all"
+                      required
+                    />
+                  </div>
                   {recoveryError && (
-                    <p className="mt-1.5 text-xs text-red-400">{recoveryError}</p>
+                    <p className="mt-1.5 text-[10px] text-red-400">{recoveryError}</p>
                   )}
                 </div>
 
@@ -383,11 +488,9 @@ export function LoginPage() {
                 <button
                   type="submit"
                   disabled={isSubmittingRecovery}
-                  className="w-full rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 py-3.5 text-sm font-semibold text-white shadow-lg transition-all hover:from-blue-400 hover:to-indigo-500 disabled:opacity-60 cursor-pointer"
+                  className="w-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 py-3.5 text-xs font-black text-white shadow-[0_0_25px_rgba(59,130,246,0.4)] transition-all hover:scale-[1.01] hover:from-blue-400 hover:to-indigo-500 disabled:opacity-60 cursor-pointer uppercase tracking-wider"
                 >
-                  {isSubmittingRecovery
-                    ? 'Enviando enlace…'
-                    : 'Enviar enlace de recuperación'}
+                  {isSubmittingRecovery ? 'Enviando enlace…' : 'Enviar enlace'}
                 </button>
               </form>
             </>
@@ -398,22 +501,28 @@ export function LoginPage() {
             <>
               <h2 className="text-lg font-extrabold text-white">Nueva contraseña</h2>
               <p className="mt-1.5 text-xs text-slate-400 leading-normal">
-                Establece la nueva contraseña para el acceso a tu cuenta. Debe tener al
-                menos 6 caracteres.
+                Establece la nueva contraseña para acceder a tu cuenta (mínimo 6
+                caracteres).
               </p>
 
               <form onSubmit={handleResetPassword} className="mt-6 space-y-4">
                 <div>
-                  <input
-                    type="password"
-                    placeholder="Nueva contraseña"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    className="w-full rounded-xl border border-white/10 bg-slate-950/40 px-4 py-3 text-sm text-slate-100 placeholder-slate-500 focus:border-accent-blue/40 focus:outline-none transition-all"
-                    required
-                  />
+                  <label className="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">
+                    Nueva Contraseña
+                  </label>
+                  <div className="relative">
+                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+                    <input
+                      type="password"
+                      placeholder="••••••••"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      className="w-full rounded-xl border border-white/10 bg-slate-950/60 pl-10 pr-4 py-3 text-xs text-slate-100 placeholder-slate-600 focus:border-accent-blue/60 focus:ring-1 focus:ring-accent-blue/30 focus:outline-none transition-all"
+                      required
+                    />
+                  </div>
                   {resetError && (
-                    <p className="mt-1.5 text-xs text-red-400">{resetError}</p>
+                    <p className="mt-1.5 text-[10px] text-red-400">{resetError}</p>
                   )}
                 </div>
 
@@ -426,7 +535,7 @@ export function LoginPage() {
                 <button
                   type="submit"
                   disabled={isSubmittingReset}
-                  className="w-full rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 py-3.5 text-sm font-semibold text-white shadow-lg transition-all hover:from-blue-400 hover:to-indigo-500 disabled:opacity-60 cursor-pointer"
+                  className="w-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 py-3.5 text-xs font-black text-white shadow-[0_0_25px_rgba(59,130,246,0.4)] transition-all hover:scale-[1.01] hover:from-blue-400 hover:to-indigo-500 disabled:opacity-60 cursor-pointer uppercase tracking-wider"
                 >
                   {isSubmittingReset
                     ? 'Guardando contraseña…'
