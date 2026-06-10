@@ -77,3 +77,16 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   cursor: pointer;
 }
 
+/* Asegurar cursor de mano en todos los elementos interactivos y clases cursor-pointer */
+button,
+select,
+a,
+input[type="button"],
+input[type="submit"],
+input[type="checkbox"],
+input[type="radio"],
+.cursor-pointer,
+[role="button"] {
+  cursor: pointer !important;
+}
+

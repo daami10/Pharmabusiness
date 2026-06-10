@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { ChevronLeft, ChevronRight, Pencil, Trash2, X } from 'lucide-react'
 import { useFacturas, useSetPagada } from '@/lib/queries/facturas'
 import { useYearStore } from '@/stores/yearStore'
@@ -18,16 +18,19 @@ const DOT: Record<VencStatus, string> = {
   paid: 'bg-emerald-500',
 }
 const STAT_CARDS: { status: VencStatus; label: string; color: string }[] = [
-  { status: 'overdue', label: 'Vencidas', color: 'text-red-500' },
-  { status: 'neardue', label: 'Próximas', color: 'text-orange-500' },
-  { status: 'pending', label: 'Pendientes', color: 'text-accent-blue' },
-  { status: 'paid', label: 'Pagadas', color: 'text-emerald-500' },
+  { status: 'overdue', label: 'VENCIDAS', color: 'text-red-500' },
+  { status: 'neardue', label: 'PRÓXIMAS (7 DÍAS)', color: 'text-orange-500' },
+  { status: 'pending', label: 'PENDIENTES', color: 'text-accent-blue' },
+  { status: 'paid', label: 'PAGADAS', color: 'text-emerald-500' },
 ]
 
 const CARD_CLASSES: Record<VencStatus, string> = {
-  overdue: 'bg-gradient-to-br from-red-500/15 via-red-500/5 to-transparent border-red-500/20 hover:border-red-500/40 shadow-[0_0_20px_rgba(239,68,68,0.08)]',
-  neardue: 'bg-gradient-to-br from-orange-500/15 via-orange-500/5 to-transparent border-orange-500/20 hover:border-orange-500/40 shadow-[0_0_20px_rgba(249,115,22,0.08)]',
-  pending: 'bg-gradient-to-br from-blue-500/15 via-blue-500/5 to-transparent border-blue-500/20 hover:border-blue-500/40 shadow-[0_0_20px_rgba(59,130,246,0.08)]',
+  overdue:
+    'bg-gradient-to-br from-red-500/15 via-red-500/5 to-transparent border-red-500/20 hover:border-red-500/40 shadow-[0_0_20px_rgba(239,68,68,0.08)]',
+  neardue:
+    'bg-gradient-to-br from-orange-500/15 via-orange-500/5 to-transparent border-orange-500/20 hover:border-orange-500/40 shadow-[0_0_20px_rgba(249,115,22,0.08)]',
+  pending:
+    'bg-gradient-to-br from-blue-500/15 via-blue-500/5 to-transparent border-blue-500/20 hover:border-blue-500/40 shadow-[0_0_20px_rgba(59,130,246,0.08)]',
   paid: 'bg-gradient-to-br from-emerald-500/15 via-emerald-500/5 to-transparent border-emerald-500/20 hover:border-emerald-500/40 shadow-[0_0_20px_rgba(16,185,129,0.08)]',
 }
 
@@ -69,6 +72,10 @@ export function Calendar({
     setYear(globalYear)
     setSelectedDay(null)
   }
+
+  useEffect(() => {
+    setYear(globalYear)
+  }, [globalYear])
 
   const facturas = useMemo(() => data ?? [], [data])
   const stats = useMemo(() => vencStats(facturas), [facturas])
@@ -221,7 +228,10 @@ export function Calendar({
                         {presentStatuses(recs)
                           .slice(0, 3)
                           .map((s) => (
-                            <span key={s} className={`h-1.5 w-1.5 rounded-full ${DOT[s]}`} />
+                            <span
+                              key={s}
+                              className={`h-1.5 w-1.5 rounded-full ${DOT[s]}`}
+                            />
                           ))}
                       </div>
                       {recs.length > 1 && (
@@ -286,10 +296,14 @@ export function Calendar({
             {listItems.map((f) => {
               const isPaid = getEffectiveVencStatus(f) === 'paid'
               const vs = getEffectiveVencStatus(f) as VencStatus
+              const dateId = f.fecha_vencimiento
+                ? f.fecha_vencimiento.replace(/-/g, '')
+                : ''
               return (
                 <div
                   key={f.id}
-                  className={`flex items-center justify-between gap-2 rounded-xl border border-white/5 bg-slate-950/30 p-3 border-l-4 ${
+                  id={`cal-item-${dateId}`}
+                  className={`flex items-center justify-between gap-2 rounded-xl border border-white/5 bg-slate-950/30 p-3 border-l-4 transition-all duration-300 scroll-mt-2 ${
                     vs === 'overdue'
                       ? 'border-l-red-500'
                       : vs === 'neardue'
@@ -301,7 +315,9 @@ export function Calendar({
                 >
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center">
-                      <span className={`h-2 w-2 rounded-full shrink-0 ${DOT[vs]} mr-1.5`} />
+                      <span
+                        className={`h-2 w-2 rounded-full shrink-0 ${DOT[vs]} mr-1.5`}
+                      />
                       <p className="truncate text-sm font-bold text-white">
                         {f.laboratorio || '—'}
                       </p>

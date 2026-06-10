@@ -4,25 +4,26 @@ import type { MonthSection } from '@/components/MonthGroupAccordion'
 
 export interface FiscalKpis {
   total: number
-  autonomo: number
-  renta: number
+  byConcept: { concepto: string; total: number }[]
 }
 
 /** KPIs fiscales (excluyen periodos futuros, igual que el legacy). */
 export function fiscalKpis(items: Fiscal[]): FiscalKpis {
-  const k: FiscalKpis = { total: 0, autonomo: 0, renta: 0 }
+  let total = 0
+  const conceptMap = new Map<string, number>()
+
   for (const f of items) {
     if (isFuturePeriod(f.fecha)) continue
-    k.total += f.importe
-    if (f.concepto === 'Cuota de Autónomos') k.autonomo += f.importe
-    else if (
-      f.concepto === 'Declaración de la Renta' ||
-      f.concepto === 'Impuesto de Sociedades' ||
-      f.concepto === 'IRPF'
-    )
-      k.renta += f.importe
+    total += f.importe
+    const current = conceptMap.get(f.concepto) ?? 0
+    conceptMap.set(f.concepto, current + f.importe)
   }
-  return k
+
+  const byConcept = [...conceptMap.entries()]
+    .map(([concepto, sum]) => ({ concepto, total: sum }))
+    .sort((a, b) => b.total - a.total)
+
+  return { total, byConcept }
 }
 
 export function groupFiscalByMonth(items: Fiscal[]): MonthSection<Fiscal>[] {
