@@ -382,7 +382,7 @@ export function LoginPage() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 py-3.5 text-xs font-black text-white shadow-[0_0_25px_rgba(59,130,246,0.4)] transition-all hover:scale-[1.01] hover:from-blue-400 hover:to-indigo-500 disabled:opacity-60 cursor-pointer uppercase tracking-wider"
+                  className="w-full rounded-full bg-gradient-to-r from-blue-500 to-[#00f2fe] py-3.5 text-xs font-black text-slate-950 shadow-[0_0_25px_rgba(0,242,254,0.35)] transition-all hover:scale-[1.01] hover:from-blue-400 hover:to-[#00f2fe]/90 disabled:opacity-60 cursor-pointer uppercase tracking-wider"
                 >
                   {isSubmitting
                     ? 'Cargando…'
@@ -485,7 +485,7 @@ export function LoginPage() {
                 <button
                   type="submit"
                   disabled={isSubmittingRecovery}
-                  className="w-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 py-3.5 text-xs font-black text-white shadow-[0_0_25px_rgba(59,130,246,0.4)] transition-all hover:scale-[1.01] hover:from-blue-400 hover:to-indigo-500 disabled:opacity-60 cursor-pointer uppercase tracking-wider"
+                  className="w-full rounded-full bg-gradient-to-r from-blue-500 to-[#00f2fe] py-3.5 text-xs font-black text-slate-950 shadow-[0_0_25px_rgba(0,242,254,0.35)] transition-all hover:scale-[1.01] hover:from-blue-400 hover:to-[#00f2fe]/90 disabled:opacity-60 cursor-pointer uppercase tracking-wider"
                 >
                   {isSubmittingRecovery ? 'Enviando enlace…' : 'Enviar enlace'}
                 </button>
@@ -532,7 +532,7 @@ export function LoginPage() {
                 <button
                   type="submit"
                   disabled={isSubmittingReset}
-                  className="w-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 py-3.5 text-xs font-black text-white shadow-[0_0_25px_rgba(59,130,246,0.4)] transition-all hover:scale-[1.01] hover:from-blue-400 hover:to-indigo-500 disabled:opacity-60 cursor-pointer uppercase tracking-wider"
+                  className="w-full rounded-full bg-gradient-to-r from-blue-500 to-[#00f2fe] py-3.5 text-xs font-black text-slate-950 shadow-[0_0_25px_rgba(0,242,254,0.35)] transition-all hover:scale-[1.01] hover:from-blue-400 hover:to-[#00f2fe]/90 disabled:opacity-60 cursor-pointer uppercase tracking-wider"
                 >
                   {isSubmittingReset
                     ? 'Guardando contraseña…'
