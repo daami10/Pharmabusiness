@@ -14,6 +14,7 @@ import { formatMoney } from '@/lib/utils/money'
 import { monthLabel } from '@/lib/utils/dates'
 import { isWholesaler } from '@/lib/config/wholesalers'
 import { RankingModal } from './RankingModal'
+import { stackedByWholesaler } from './lib/analisis-view'
 
 const eur = (v: string | number) => `${Number(v).toLocaleString('es-ES')} €`
 
@@ -21,6 +22,17 @@ const barOptions: ChartOptions<'bar'> = {
   responsive: true,
   plugins: { legend: { display: false } },
   scales: { y: { ticks: { callback: eur } } },
+}
+
+const barOptionsStacked: ChartOptions<'bar'> = {
+  responsive: true,
+  plugins: {
+    legend: { display: true, position: 'top', labels: { boxWidth: 12, font: { size: 10 } } },
+  },
+  scales: {
+    x: { stacked: true },
+    y: { stacked: true, ticks: { callback: eur } },
+  },
 }
 
 const donutOptions: ChartOptions<'doughnut'> = {
@@ -400,6 +412,12 @@ export function AnalisisPage() {
     }
   }, [category, facturasOnly, fiscalStats, trabStats, wholesalers])
 
+  // Evolución mensual apilada por mayorista (solo categoría "Mayorista").
+  const stackedData = useMemo(
+    () => (category === 'Mayorista' ? stackedByWholesaler(facturasOnly, wholesalers) : null),
+    [category, facturasOnly, wholesalers],
+  )
+
   // Abonos calculations
   const totalAbonos = useMemo(() => {
     return abonosOnly.reduce((sum, a) => sum + a.importe, 0)
@@ -777,8 +795,11 @@ export function AnalisisPage() {
             </div>
           </div>
 
-          {/* Evolución Mensual */}
-          <ChartCard title="Evolución Mensual" wide>
+          {/* Evolución Mensual (apilada por mayorista en la categoría "Mayorista") */}
+          <ChartCard
+            title={stackedData ? 'Evolución Mensual por Mayorista' : 'Evolución Mensual'}
+            wide
+          >
             <div className="h-[240px]">
               <Bar
                 data={{
@@ -786,7 +807,7 @@ export function AnalisisPage() {
                   datasets: chartsData.monthlyDatasets,
                 }}
                 options={{
-                  ...barOptions,
+                  ...(stackedData ? barOptionsStacked : barOptions),
                   maintainAspectRatio: false,
                   plugins: {
                     ...barOptions.plugins,

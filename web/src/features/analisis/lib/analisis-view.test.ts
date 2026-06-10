@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { analyzeFacturas, filterByDateRange } from './analisis-view'
+import { analyzeFacturas, filterByDateRange, stackedByWholesaler } from './analisis-view'
 import type { Factura } from '@/types/domain'
 
 const mk = (over: Partial<Factura>): Factura => ({
@@ -50,6 +50,35 @@ describe('analyzeFacturas', () => {
     const r = analyzeFacturas(data, 'Laboratorio', WHOLESALERS)
     expect(r.byMonth.map((m) => m.key)).toEqual(['2026-02', '2026-03'])
     expect(r.byMonth[1].amount).toBe(350)
+  })
+})
+
+describe('stackedByWholesaler', () => {
+  const wholesalers = ['FedeFarma', 'Cofares']
+  const data = [
+    mk({ tipo: 'FedeFarma', importe: 100, fecha: '2026-02-05' }),
+    mk({ tipo: 'Cofares', importe: 200, fecha: '2026-02-10' }),
+    mk({ tipo: 'FedeFarma', importe: 50, fecha: '2026-03-01' }),
+    mk({ tipo: 'Laboratorio', importe: 999, fecha: '2026-02-01' }), // no mayorista → ignorado
+    mk({ tipo: 'FedeFarma', importe: 999, fecha: null }), // sin fecha → ignorado
+  ]
+
+  it('desglosa cada mayorista por mes en el eje común', () => {
+    const r = stackedByWholesaler(data, wholesalers)
+    expect(r.months.map((m) => m.key)).toEqual(['2026-02', '2026-03'])
+    expect(r.series).toEqual([
+      { wholesaler: 'FedeFarma', data: [100, 50] },
+      { wholesaler: 'Cofares', data: [200, 0] },
+    ])
+  })
+
+  it('sin mayoristas con datos devuelve series vacías de datos', () => {
+    const r = stackedByWholesaler([mk({ tipo: 'Laboratorio' })], wholesalers)
+    expect(r.months).toEqual([])
+    expect(r.series).toEqual([
+      { wholesaler: 'FedeFarma', data: [] },
+      { wholesaler: 'Cofares', data: [] },
+    ])
   })
 })
 

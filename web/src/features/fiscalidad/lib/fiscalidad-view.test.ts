@@ -35,6 +35,19 @@ describe('fiscalidad-view', () => {
     })
   })
 
+  it('fiscalKpis incluye IRPF en el KPI de renta (paridad legacy)', () => {
+    const k = fiscalKpis([
+      mk({ concepto: 'Declaración de la Renta', fecha: '2026-05-01', importe: 200 }),
+      mk({ concepto: 'IRPF', fecha: '2026-04-01', importe: 150 }),
+    ])
+    expect(k.total).toBe(350)
+    expect(k.byConcept).toContainEqual({
+      concepto: 'Declaración de la Renta',
+      total: 200,
+    })
+    expect(k.byConcept).toContainEqual({ concepto: 'IRPF', total: 150 })
+  })
+
   it('groupFiscalByMonth ordena desc y marca futuros', () => {
     const groups = groupFiscalByMonth([
       mk({ fecha: '2026-03-01' }),

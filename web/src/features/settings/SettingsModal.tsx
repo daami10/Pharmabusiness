@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Dialog } from '@/components/ui/Dialog'
 import { WholesalersEditor } from '@/components/WholesalersEditor'
+import { BudgetsEditor } from '@/components/BudgetsEditor'
 import { useWholesalersStore } from '@/stores/wholesalersStore'
 
 export function SettingsModal({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -28,6 +29,17 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
       </p>
       <WholesalersEditor value={draft} onChange={setDraft} />
       {error && <p className="mt-3 text-xs text-red-400">{error}</p>}
+
+      <div className="mt-6 border-t border-white/10 pt-5">
+        <h3 className="text-sm font-semibold text-slate-200">
+          Alertas de presupuesto por laboratorio
+        </h3>
+        <p className="mt-1 mb-3 text-xs text-slate-400">
+          Define un gasto máximo anual por laboratorio. Si lo superas, verás un aviso en
+          Facturas. Los cambios se guardan al instante.
+        </p>
+        <BudgetsEditor />
+      </div>
       <div className="mt-6 flex gap-3">
         <button
           type="button"

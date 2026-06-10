@@ -1,6 +1,7 @@
 import { useMemo, useState, useEffect } from 'react'
-import { ChevronLeft, ChevronRight, Pencil, Trash2 } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Pencil, Trash2, X } from 'lucide-react'
 import { useFacturas, useSetPagada } from '@/lib/queries/facturas'
+import { useYearStore } from '@/stores/yearStore'
 import { formatMoney } from '@/lib/utils/money'
 import { formatDate, monthLabel } from '@/lib/utils/dates'
 import type { VencStatus } from '@/lib/utils/dates'
@@ -8,7 +9,6 @@ import { getEffectiveVencStatus } from './lib/facturas-view'
 import { buildCalendarGrid, getMonthVencimientos, vencStats } from './lib/calendar'
 import { VencListModal } from './VencListModal'
 import type { Factura } from '@/types/domain'
-import { useYearStore } from '@/stores/yearStore'
 
 const STATUS_ORDER: VencStatus[] = ['overdue', 'neardue', 'pending', 'paid']
 const DOT: Record<VencStatus, string> = {
@@ -25,18 +25,22 @@ const STAT_CARDS: { status: VencStatus; label: string; color: string }[] = [
 ]
 
 const CARD_CLASSES: Record<VencStatus, string> = {
-  overdue: 'bg-gradient-to-br from-red-500/15 via-red-500/5 to-transparent border-red-500/20 hover:border-red-500/40 shadow-[0_0_20px_rgba(239,68,68,0.08)]',
-  neardue: 'bg-gradient-to-br from-orange-500/15 via-orange-500/5 to-transparent border-orange-500/20 hover:border-orange-500/40 shadow-[0_0_20px_rgba(249,115,22,0.08)]',
-  pending: 'bg-gradient-to-br from-blue-500/15 via-blue-500/5 to-transparent border-blue-500/20 hover:border-blue-500/40 shadow-[0_0_20px_rgba(59,130,246,0.08)]',
+  overdue:
+    'bg-gradient-to-br from-red-500/15 via-red-500/5 to-transparent border-red-500/20 hover:border-red-500/40 shadow-[0_0_20px_rgba(239,68,68,0.08)]',
+  neardue:
+    'bg-gradient-to-br from-orange-500/15 via-orange-500/5 to-transparent border-orange-500/20 hover:border-orange-500/40 shadow-[0_0_20px_rgba(249,115,22,0.08)]',
+  pending:
+    'bg-gradient-to-br from-blue-500/15 via-blue-500/5 to-transparent border-blue-500/20 hover:border-blue-500/40 shadow-[0_0_20px_rgba(59,130,246,0.08)]',
   paid: 'bg-gradient-to-br from-emerald-500/15 via-emerald-500/5 to-transparent border-emerald-500/20 hover:border-emerald-500/40 shadow-[0_0_20px_rgba(16,185,129,0.08)]',
 }
 
 const WEEKDAYS = ['L', 'M', 'X', 'J', 'V', 'S', 'D']
 type ListFilter = 'total' | 'pending' | 'overdue' | 'paid'
 
-function worstStatus(facturas: Factura[]): VencStatus {
+/** Estados de vencimiento presentes en un día, ordenados por severidad. */
+function presentStatuses(facturas: Factura[]): VencStatus[] {
   const present = new Set(facturas.map((f) => getEffectiveVencStatus(f)))
-  return STATUS_ORDER.find((s) => present.has(s)) ?? 'paid'
+  return STATUS_ORDER.filter((s) => present.has(s))
 }
 
 export function Calendar({
@@ -57,6 +61,17 @@ export function Calendar({
   const [month0, setMonth0] = useState(now.getMonth())
   const [modalStatus, setModalStatus] = useState<VencStatus | null>(null)
   const [listFilter, setListFilter] = useState<ListFilter>('pending')
+  const [selectedDay, setSelectedDay] = useState<string | null>(null)
+
+  // El calendario sigue al selector de año global (paridad con setYearFilter del
+  // legacy): al cambiar el año arriba, salta a ese año en el mismo mes. Patrón de
+  // ajuste de estado al cambiar una prop durante el render (sin efecto).
+  const [prevGlobalYear, setPrevGlobalYear] = useState(globalYear)
+  if (globalYear !== prevGlobalYear) {
+    setPrevGlobalYear(globalYear)
+    setYear(globalYear)
+    setSelectedDay(null)
+  }
 
   useEffect(() => {
     setYear(globalYear)
@@ -81,30 +96,27 @@ export function Calendar({
     return map
   }, [monthVenc])
 
-  const listItems = monthVenc
-    .filter((f) => {
-      if (listFilter === 'total') return true
-      const s = getEffectiveVencStatus(f)
-      return listFilter === 'pending'
-        ? s === 'pending' || s === 'neardue'
-        : s === listFilter
-    })
+  // Si hay un día seleccionado, la lista muestra solo los vencimientos de ese
+  // día; si no, aplica el filtro de estado activo.
+  const listItems = (
+    selectedDay
+      ? (byDay.get(selectedDay) ?? [])
+      : monthVenc.filter((f) => {
+          if (listFilter === 'total') return true
+          const s = getEffectiveVencStatus(f)
+          return listFilter === 'pending'
+            ? s === 'pending' || s === 'neardue'
+            : s === listFilter
+        })
+  )
+    .slice()
     .sort((a, b) => (a.fecha_vencimiento ?? '').localeCompare(b.fecha_vencimiento ?? ''))
 
   const listTotal = listItems.reduce((sum, f) => sum + f.importe, 0)
   const todayStr = new Date().toISOString().slice(0, 10)
 
-  function scrollToDay(dateStr: string) {
-    const id = `cal-item-${dateStr.replace(/-/g, '')}`
-    const el = document.getElementById(id)
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-      el.classList.add('ring-2', 'ring-blue-400')
-      setTimeout(() => el.classList.remove('ring-2', 'ring-blue-400'), 1500)
-    }
-  }
-
   function prevMonth() {
+    setSelectedDay(null)
     if (month0 === 0) {
       setMonth0(11)
       setYear((y) => y - 1)
@@ -113,6 +125,7 @@ export function Calendar({
     }
   }
   function nextMonth() {
+    setSelectedDay(null)
     if (month0 === 11) {
       setMonth0(0)
       setYear((y) => y + 1)
@@ -181,14 +194,28 @@ export function Calendar({
               if (cell.day === null) return <div key={`e${i}`} />
               const recs = byDay.get(cell.dateStr!) ?? []
               const isToday = cell.dateStr === todayStr
-              const hasRecs = recs.length > 0
+              const isSelected = cell.dateStr === selectedDay
+              const clickable = recs.length > 0
               return (
                 <div
                   key={cell.dateStr}
-                  onClick={() => hasRecs && cell.dateStr && scrollToDay(cell.dateStr)}
-                  className={`flex aspect-square flex-col items-center justify-start rounded-lg pt-1 transition-all select-none ${
-                    isToday ? 'ring-2 ring-accent-blue' : ''
-                  } ${hasRecs ? 'cursor-pointer hover:bg-white/5' : ''}`}
+                  onClick={
+                    clickable
+                      ? () =>
+                          setSelectedDay((cur) =>
+                            cur === cell.dateStr ? null : cell.dateStr!,
+                          )
+                      : undefined
+                  }
+                  className={`flex aspect-square select-none flex-col items-center justify-start rounded-lg pt-1 transition-colors ${
+                    clickable ? 'cursor-pointer hover:bg-white/10' : ''
+                  } ${
+                    isSelected
+                      ? 'ring-2 ring-accent-blue bg-accent-blue/10'
+                      : isToday
+                        ? 'ring-2 ring-accent-blue'
+                        : ''
+                  }`}
                 >
                   <span
                     className={`text-xs ${isToday ? 'font-black text-accent-blue' : 'text-slate-300'}`}
@@ -196,9 +223,23 @@ export function Calendar({
                     {cell.day}
                   </span>
                   {recs.length > 0 && (
-                    <span
-                      className={`mt-0.5 h-1.5 w-1.5 rounded-full ${DOT[worstStatus(recs)]}`}
-                    />
+                    <>
+                      <div className="mt-0.5 flex justify-center gap-0.5">
+                        {presentStatuses(recs)
+                          .slice(0, 3)
+                          .map((s) => (
+                            <span
+                              key={s}
+                              className={`h-1.5 w-1.5 rounded-full ${DOT[s]}`}
+                            />
+                          ))}
+                      </div>
+                      {recs.length > 1 && (
+                        <span className="text-[9px] leading-none text-slate-500">
+                          {recs.length}
+                        </span>
+                      )}
+                    </>
                   )}
                 </div>
               )
@@ -208,38 +249,56 @@ export function Calendar({
 
         {/* Lista lateral */}
         <div className="flex flex-col rounded-2xl border border-white/5 bg-slate-900/40 p-4 glass-card">
-          <div className="mb-3 flex flex-wrap gap-1.5">
-            {(['total', 'pending', 'overdue', 'paid'] as ListFilter[]).map((f) => (
+          {selectedDay ? (
+            <div className="mb-3 flex items-center justify-between rounded-lg border border-accent-blue/30 bg-accent-blue/10 px-3 py-1.5">
+              <span className="text-xs font-bold text-accent-blue">
+                Vencimientos del {formatDate(selectedDay)}
+              </span>
               <button
-                key={f}
                 type="button"
-                onClick={() => setListFilter(f)}
-                className={`rounded-lg px-2.5 py-1 text-xs font-bold transition-all ${
-                  listFilter === f
-                    ? 'bg-slate-200 text-slate-900 shadow-md'
-                    : 'bg-white/5 text-slate-400 hover:text-white'
-                }`}
+                onClick={() => setSelectedDay(null)}
+                className="rounded-md p-0.5 text-accent-blue hover:bg-white/10"
+                aria-label="Quitar filtro de día"
               >
-                {f === 'total'
-                  ? 'Todas'
-                  : f === 'pending'
-                    ? 'Pendientes'
-                    : f === 'overdue'
-                      ? 'Vencidas'
-                      : 'Pagadas'}
+                <X className="h-3.5 w-3.5" />
               </button>
-            ))}
-          </div>
+            </div>
+          ) : (
+            <div className="mb-3 flex flex-wrap gap-1.5">
+              {(['total', 'pending', 'overdue', 'paid'] as ListFilter[]).map((f) => (
+                <button
+                  key={f}
+                  type="button"
+                  onClick={() => setListFilter(f)}
+                  className={`rounded-lg px-2.5 py-1 text-xs font-bold transition-all ${
+                    listFilter === f
+                      ? 'bg-slate-200 text-slate-900 shadow-md'
+                      : 'bg-white/5 text-slate-400 hover:text-white'
+                  }`}
+                >
+                  {f === 'total'
+                    ? 'Todas'
+                    : f === 'pending'
+                      ? 'Pendientes'
+                      : f === 'overdue'
+                        ? 'Vencidas'
+                        : 'Pagadas'}
+                </button>
+              ))}
+            </div>
+          )}
           <div className="max-h-[360px] flex-1 space-y-2 overflow-y-auto pr-1">
             {!listItems.length && (
               <p className="py-8 text-center text-sm text-slate-500">
-                Sin vencimientos este mes.
+                {selectedDay ? 'Sin vencimientos ese día.' : 'Sin vencimientos este mes.'}
               </p>
             )}
             {listItems.map((f) => {
               const isPaid = getEffectiveVencStatus(f) === 'paid'
               const vs = getEffectiveVencStatus(f) as VencStatus
-              const dateId = f.fecha_vencimiento ? f.fecha_vencimiento.replace(/-/g, '') : ''
+              const dateId = f.fecha_vencimiento
+                ? f.fecha_vencimiento.replace(/-/g, '')
+                : ''
               return (
                 <div
                   key={f.id}
@@ -256,7 +315,9 @@ export function Calendar({
                 >
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center">
-                      <span className={`h-2 w-2 rounded-full shrink-0 ${DOT[vs]} mr-1.5`} />
+                      <span
+                        className={`h-2 w-2 rounded-full shrink-0 ${DOT[vs]} mr-1.5`}
+                      />
                       <p className="truncate text-sm font-bold text-white">
                         {f.laboratorio || '—'}
                       </p>
