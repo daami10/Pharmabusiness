@@ -8,6 +8,7 @@ import { AnalisisPage } from '@/features/analisis/AnalisisPage'
 import { AbonosPage } from '@/features/abonos/AbonosPage'
 import { FiscalidadPage } from '@/features/fiscalidad/FiscalidadPage'
 import { TrabajadoresPage } from '@/features/trabajadores/TrabajadoresPage'
+import { PremiumGate } from '@/components/ui/PremiumGate'
 
 export default function App() {
   return (
@@ -17,10 +18,31 @@ export default function App() {
         <Route element={<AppShell />}>
           <Route index element={<InicioPage />} />
           <Route path="facturas" element={<FacturasPage />} />
-          <Route path="analisis" element={<AnalisisPage />} />
+          <Route
+            path="analisis"
+            element={
+              <PremiumGate>
+                <AnalisisPage />
+              </PremiumGate>
+            }
+          />
           <Route path="abonos" element={<AbonosPage />} />
-          <Route path="fiscalidad" element={<FiscalidadPage />} />
-          <Route path="trabajadores" element={<TrabajadoresPage />} />
+          <Route
+            path="fiscalidad"
+            element={
+              <PremiumGate>
+                <FiscalidadPage />
+              </PremiumGate>
+            }
+          />
+          <Route
+            path="trabajadores"
+            element={
+              <PremiumGate>
+                <TrabajadoresPage />
+              </PremiumGate>
+            }
+          />
         </Route>
       </Route>
     </Routes>
