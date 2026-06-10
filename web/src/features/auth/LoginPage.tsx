@@ -137,25 +137,6 @@ export function LoginPage() {
     }
   }
 
-  // OAuth (Google / Microsoft) Sign-In
-  const handleOAuthSignIn = async (provider: 'google' | 'azure') => {
-    setServerError('')
-    setInfo('')
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider,
-        options: {
-          redirectTo: window.location.origin,
-        },
-      })
-      if (error) {
-        setServerError(error.message)
-      }
-    } catch (err) {
-      setServerError('Error al conectar con el proveedor de autenticación.')
-    }
-  }
-
   if (session && mode !== 'reset_password') return <Navigate to="/" replace />
 
   return (
@@ -445,61 +426,6 @@ export function LoginPage() {
                     </button>
                   </p>
                 )}
-              </div>
-
-              {/* Separador e Inicio de sesión social */}
-              <div className="border-t border-white/5 my-5 pt-4 flex flex-col items-center">
-                <div className="flex items-center gap-4">
-                  {/* Google Icon Button */}
-                  <button
-                    type="button"
-                    onClick={() => handleOAuthSignIn('google')}
-                    className="p-1 rounded-lg hover:bg-white/5 transition-colors cursor-pointer group"
-                    aria-label="Iniciar sesión con Google"
-                  >
-                    <svg
-                      className="h-5 w-5 opacity-70 group-hover:opacity-100 group-hover:scale-105 transition-all"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        fill="#4285F4"
-                        d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v3.92h6.69c-.29 1.5-1.14 2.78-2.4 3.63l3.07 2.38c1.8-1.66 2.84-4.11 2.84-7.06z"
-                      />
-                      <path
-                        fill="#34A853"
-                        d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.07-2.38c-.9.6-2.06.96-3.23.96-2.48 0-4.58-1.67-5.33-3.92H1.03v2.44C3.01 22.12 7.21 24 12 24z"
-                      />
-                      <path
-                        fill="#FBBC05"
-                        d="M6.67 15.75c-.2-.6-.31-1.24-.31-1.9 0-.66.11-1.3.31-1.9V9.51H1.03C.37 10.86 0 12.39 0 14s.37 3.14 1.03 4.49l3.07-2.38c-.2-.6-.43-1.42-.43-2.36z"
-                      />
-                      <path
-                        fill="#EA4335"
-                        d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.44-3.44C17.93 1.19 15.22 0 12 0 7.21 0 3.01 1.88 1.03 4.69l3.07 2.38c.75-2.25 2.85-3.92 5.33-3.92z"
-                      />
-                    </svg>
-                  </button>
-
-                  <span className="h-4 w-[1px] bg-white/10" />
-
-                  {/* Microsoft Icon Button */}
-                  <button
-                    type="button"
-                    onClick={() => handleOAuthSignIn('azure')}
-                    className="p-1 rounded-lg hover:bg-white/5 transition-colors cursor-pointer group"
-                    aria-label="Iniciar sesión con Microsoft"
-                  >
-                    <svg
-                      className="h-4.5 w-4.5 opacity-70 group-hover:opacity-100 group-hover:scale-105 transition-all"
-                      viewBox="0 0 23 23"
-                    >
-                      <path fill="#F25022" d="M0 0h11v11H0z" />
-                      <path fill="#7FBA00" d="M12 0h11v11H12z" />
-                      <path fill="#01A6F0" d="M0 12h11v11H0z" />
-                      <path fill="#FFB900" d="M12 12h11v11H12z" />
-                    </svg>
-                  </button>
-                </div>
               </div>
             </>
           )}
