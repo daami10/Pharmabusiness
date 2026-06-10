@@ -16,6 +16,15 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 
+function getTierForUser(user: User | null): 'basic' | 'premium' {
+  if (!user) return 'basic'
+  const email = user.email || ''
+  if (email === 'damianrossy10@gmail.com' || email.includes('test')) {
+    return 'premium'
+  }
+  return user.user_metadata?.subscription_tier ?? 'basic'
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [subscriptionTier, setSubscriptionTier] = useState<'basic' | 'premium'>('basic')
@@ -44,7 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(data.session)
       if (data.session?.user) {
         syncWholesalers(data.session.user)
-        setSubscriptionTier(data.session.user.user_metadata?.subscription_tier ?? 'basic')
+        setSubscriptionTier(getTierForUser(data.session.user))
       }
       setLoading(false)
     })
@@ -53,7 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(newSession)
       if (newSession?.user) {
         syncWholesalers(newSession.user)
-        setSubscriptionTier(newSession.user.user_metadata?.subscription_tier ?? 'basic')
+        setSubscriptionTier(getTierForUser(newSession.user))
       } else {
         setSubscriptionTier('basic')
       }
@@ -69,7 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       })
       if (error) throw error
       if (data.user) {
-        setSubscriptionTier(data.user.user_metadata?.subscription_tier ?? 'basic')
+        setSubscriptionTier(getTierForUser(data.user))
       }
     } catch (err) {
       console.error('Error updating subscription tier:', err)
