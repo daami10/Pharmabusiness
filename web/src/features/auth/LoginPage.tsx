@@ -3,7 +3,17 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Navigate } from 'react-router-dom'
-import { ArrowLeft, Eye, EyeOff, Lock, Mail } from 'lucide-react'
+import {
+  ArrowLeft,
+  Calendar,
+  Coins,
+  Eye,
+  EyeOff,
+  Lock,
+  Mail,
+  Sparkles,
+  TrendingUp,
+} from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from './AuthProvider'
 
@@ -127,6 +137,25 @@ export function LoginPage() {
     }
   }
 
+  // OAuth (Google / Microsoft) Sign-In
+  const handleOAuthSignIn = async (provider: 'google' | 'azure') => {
+    setServerError('')
+    setInfo('')
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: window.location.origin,
+        },
+      })
+      if (error) {
+        setServerError(error.message)
+      }
+    } catch (err) {
+      setServerError('Error al conectar con el proveedor de autenticación.')
+    }
+  }
+
   if (session && mode !== 'reset_password') return <Navigate to="/" replace />
 
   return (
@@ -171,6 +200,79 @@ export function LoginPage() {
           />
         </svg>
       </div>
+
+      {/* Floating lateral showcase on the left (visible on large screens, does not shift the centered login card) */}
+      <section className="absolute left-8 xl:left-20 top-1/2 -translate-y-1/2 max-w-[280px] xl:max-w-sm hidden lg:flex flex-col gap-6 text-left z-10 select-none">
+        <h2 className="text-2xl xl:text-3xl font-black text-white leading-tight">
+          La contabilidad y vencimientos de tu farmacia,{' '}
+          <span className="bg-gradient-to-r from-[#00f2fe] via-blue-400 to-indigo-400 bg-clip-text text-transparent">
+            bajo control total
+          </span>
+          .
+        </h2>
+
+        <div className="space-y-4">
+          <div className="flex items-start gap-3">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-blue-500/20 bg-blue-500/10 text-[#00f2fe] shadow-[0_0_15px_rgba(0,242,254,0.1)]">
+              <Sparkles className="h-4 w-4" />
+            </div>
+            <div>
+              <h3 className="text-xs font-bold text-slate-100">
+                Escáner OCR Inteligente
+              </h3>
+              <p className="mt-0.5 text-[10px] text-slate-400 leading-relaxed">
+                Sube tus facturas PDF o imágenes y deja que la IA extraiga los importes,
+                proveedores y fechas de vencimiento de forma automatizada.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-3">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-purple-500/20 bg-purple-500/10 text-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.1)]">
+              <Calendar className="h-4 w-4" />
+            </div>
+            <div>
+              <h3 className="text-xs font-bold text-slate-100">
+                Calendario de Vencimientos
+              </h3>
+              <p className="mt-0.5 text-[10px] text-slate-400 leading-relaxed">
+                Visualiza tus próximos pagos mensuales con un código de colores intuitivo
+                y gestiona facturas pagadas o pendientes a golpe de clic.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-3">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.1)]">
+              <TrendingUp className="h-4 w-4" />
+            </div>
+            <div>
+              <h3 className="text-xs font-bold text-slate-100">
+                Gráficos y Reportes PDF
+              </h3>
+              <p className="mt-0.5 text-[10px] text-slate-400 leading-relaxed">
+                Analiza desgloses por mayoristas y laboratorios con gráficos apilados y
+                descarga informes A4 en PDF listos para imprimir.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-3">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-orange-500/20 bg-orange-500/10 text-orange-400 shadow-[0_0_15px_rgba(249,115,22,0.1)]">
+              <Coins className="h-4 w-4" />
+            </div>
+            <div>
+              <h3 className="text-xs font-bold text-slate-100">
+                Fiscalidad Flexible y Personal
+              </h3>
+              <p className="mt-0.5 text-[10px] text-slate-400 leading-relaxed">
+                Configura conceptos de impuestos libres, personaliza tus gastos y
+                supervisa las nóminas y seguros sociales de tus trabajadores.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <div className="relative z-10 w-full max-w-sm flex flex-col items-center">
         {/* Modern logo above the card */}
@@ -217,11 +319,6 @@ export function LoginPage() {
                 <h2 className="text-xl font-bold tracking-tight text-white">
                   Bienvenido a GFarma
                 </h2>
-                <p className="mt-1 text-xs text-slate-400 leading-normal">
-                  {mode === 'login'
-                    ? 'Inicia sesión para gestionar inteligentemente'
-                    : 'Regístrate para empezar a gestionar tus gastos'}
-                </p>
               </div>
 
               <form onSubmit={handleAuthSubmit} className="space-y-4" noValidate>
@@ -350,46 +447,58 @@ export function LoginPage() {
                 )}
               </div>
 
-              {/* Separador e Inicio de sesión social ficticio */}
+              {/* Separador e Inicio de sesión social */}
               <div className="border-t border-white/5 my-5 pt-4 flex flex-col items-center">
                 <div className="flex items-center gap-4">
-                  {/* Google Icon SVG */}
-                  <svg
-                    className="h-5 w-5 cursor-pointer opacity-70 hover:opacity-100 transition-opacity"
-                    viewBox="0 0 24 24"
-                    aria-label="Iniciar con Google"
+                  {/* Google Icon Button */}
+                  <button
+                    type="button"
+                    onClick={() => handleOAuthSignIn('google')}
+                    className="p-1 rounded-lg hover:bg-white/5 transition-colors cursor-pointer group"
+                    aria-label="Iniciar sesión con Google"
                   >
-                    <path
-                      fill="#4285F4"
-                      d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v3.92h6.69c-.29 1.5-1.14 2.78-2.4 3.63l3.07 2.38c1.8-1.66 2.84-4.11 2.84-7.06z"
-                    />
-                    <path
-                      fill="#34A853"
-                      d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.07-2.38c-.9.6-2.06.96-3.23.96-2.48 0-4.58-1.67-5.33-3.92H1.03v2.44C3.01 22.12 7.21 24 12 24z"
-                    />
-                    <path
-                      fill="#FBBC05"
-                      d="M6.67 15.75c-.2-.6-.31-1.24-.31-1.9 0-.66.11-1.3.31-1.9V9.51H1.03C.37 10.86 0 12.39 0 14s.37 3.14 1.03 4.49l3.07-2.38c-.2-.6-.43-1.42-.43-2.36z"
-                    />
-                    <path
-                      fill="#EA4335"
-                      d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.44-3.44C17.93 1.19 15.22 0 12 0 7.21 0 3.01 1.88 1.03 4.69l3.07 2.38c.75-2.25 2.85-3.92 5.33-3.92z"
-                    />
-                  </svg>
+                    <svg
+                      className="h-5 w-5 opacity-70 group-hover:opacity-100 group-hover:scale-105 transition-all"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        fill="#4285F4"
+                        d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v3.92h6.69c-.29 1.5-1.14 2.78-2.4 3.63l3.07 2.38c1.8-1.66 2.84-4.11 2.84-7.06z"
+                      />
+                      <path
+                        fill="#34A853"
+                        d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.07-2.38c-.9.6-2.06.96-3.23.96-2.48 0-4.58-1.67-5.33-3.92H1.03v2.44C3.01 22.12 7.21 24 12 24z"
+                      />
+                      <path
+                        fill="#FBBC05"
+                        d="M6.67 15.75c-.2-.6-.31-1.24-.31-1.9 0-.66.11-1.3.31-1.9V9.51H1.03C.37 10.86 0 12.39 0 14s.37 3.14 1.03 4.49l3.07-2.38c-.2-.6-.43-1.42-.43-2.36z"
+                      />
+                      <path
+                        fill="#EA4335"
+                        d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.44-3.44C17.93 1.19 15.22 0 12 0 7.21 0 3.01 1.88 1.03 4.69l3.07 2.38c.75-2.25 2.85-3.92 5.33-3.92z"
+                      />
+                    </svg>
+                  </button>
 
                   <span className="h-4 w-[1px] bg-white/10" />
 
-                  {/* Microsoft Icon SVG */}
-                  <svg
-                    className="h-4.5 w-4.5 cursor-pointer opacity-70 hover:opacity-100 transition-opacity"
-                    viewBox="0 0 23 23"
-                    aria-label="Iniciar con Microsoft"
+                  {/* Microsoft Icon Button */}
+                  <button
+                    type="button"
+                    onClick={() => handleOAuthSignIn('azure')}
+                    className="p-1 rounded-lg hover:bg-white/5 transition-colors cursor-pointer group"
+                    aria-label="Iniciar sesión con Microsoft"
                   >
-                    <path fill="#F25022" d="M0 0h11v11H0z" />
-                    <path fill="#7FBA00" d="M12 0h11v11H12z" />
-                    <path fill="#01A6F0" d="M0 12h11v11H0z" />
-                    <path fill="#FFB900" d="M12 12h11v11H12z" />
-                  </svg>
+                    <svg
+                      className="h-4.5 w-4.5 opacity-70 group-hover:opacity-100 group-hover:scale-105 transition-all"
+                      viewBox="0 0 23 23"
+                    >
+                      <path fill="#F25022" d="M0 0h11v11H0z" />
+                      <path fill="#7FBA00" d="M12 0h11v11H12z" />
+                      <path fill="#01A6F0" d="M0 12h11v11H0z" />
+                      <path fill="#FFB900" d="M12 12h11v11H12z" />
+                    </svg>
+                  </button>
                 </div>
               </div>
             </>
