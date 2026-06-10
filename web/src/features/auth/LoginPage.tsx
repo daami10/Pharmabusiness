@@ -185,7 +185,7 @@ export function LoginPage() {
       {/* Floating lateral showcase on the left (visible on large screens, does not shift the centered login card) */}
       <section className="absolute left-8 xl:left-20 top-1/2 -translate-y-1/2 max-w-[280px] xl:max-w-sm hidden lg:flex flex-col gap-6 text-left z-10 select-none">
         <h2 className="text-2xl xl:text-3xl font-black text-white leading-tight">
-          La contabilidad y vencimientos de tu farmacia,{' '}
+          La contabilidad de tu farmacia,{' '}
           <span className="bg-gradient-to-r from-[#00f2fe] via-blue-400 to-indigo-400 bg-clip-text text-transparent">
             bajo control total
           </span>
