@@ -652,7 +652,11 @@ export function AnalisisPage() {
         </div>
         <div className="glass-card rounded-2xl p-5 shadow-2xl border border-white/5">
           <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-            Nº Facturas
+            {category === 'Fiscalidad'
+              ? 'Nº Pagos'
+              : category === 'Trabajadores'
+                ? 'Nº Entradas'
+                : 'Nº Facturas'}
           </p>
           <p className="text-2xl font-black text-white leading-none">{topKpis.count}</p>
         </div>
@@ -675,7 +679,11 @@ export function AnalisisPage() {
           }`}
         >
           <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-            Top Proveedor
+            {category === 'Fiscalidad'
+              ? 'Mayor Impuesto'
+              : category === 'Trabajadores'
+                ? 'Mayor Gasto'
+                : 'Top Proveedor'}
           </p>
           <p className="text-2xl font-black text-white leading-none truncate">
             {topKpis.top}
@@ -683,7 +691,11 @@ export function AnalisisPage() {
         </div>
         <div className="glass-card rounded-2xl p-5 shadow-2xl border border-white/5">
           <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-            Promedio / Factura
+            {category === 'Fiscalidad'
+              ? 'Promedio / Pago'
+              : category === 'Trabajadores'
+                ? 'Promedio / Entrada'
+                : 'Promedio / Factura'}
           </p>
           <p className="text-2xl font-black text-white leading-none">
             {formatMoney(topKpis.avg)}

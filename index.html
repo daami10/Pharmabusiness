@@ -665,9 +665,9 @@
 
   <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
     <div onclick="showAnalisisFacturasModal()" class="glass-card rounded-2xl p-5 shadow-2xl glass-card-hover select-none cursor-pointer transition-all duration-300 hover:scale-[1.02]"><p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Total Invertido</p><p id="kpi-total" class="text-2xl font-black text-white leading-none">—</p></div>
-    <div onclick="showAnalisisFacturasModal()" class="glass-card rounded-2xl p-5 shadow-2xl glass-card-hover select-none cursor-pointer transition-all duration-300 hover:scale-[1.02]"><p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Nº Facturas</p><p id="kpi-count" class="text-2xl font-black text-white leading-none">—</p></div>
-    <div id="kpi-top-card" onclick="showRankingModal()" class="glass-card rounded-2xl p-5 shadow-2xl glass-card-hover select-none cursor-pointer transition-all duration-300 hover:scale-[1.02]"><p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Top Proveedor</p><p id="kpi-top" class="text-2xl font-black text-white leading-none truncate">—</p></div>
-    <div class="glass-card rounded-2xl p-5 shadow-2xl glass-card-hover"><p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Promedio / Factura</p><p id="kpi-avg" class="text-2xl font-black text-white leading-none">—</p></div>
+    <div onclick="showAnalisisFacturasModal()" class="glass-card rounded-2xl p-5 shadow-2xl glass-card-hover select-none cursor-pointer transition-all duration-300 hover:scale-[1.02]"><p id="kpi-count-label" class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Nº Facturas</p><p id="kpi-count" class="text-2xl font-black text-white leading-none">—</p></div>
+    <div id="kpi-top-card" onclick="showRankingModal()" class="glass-card rounded-2xl p-5 shadow-2xl glass-card-hover select-none cursor-pointer transition-all duration-300 hover:scale-[1.02]"><p id="kpi-top-label" class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Top Proveedor</p><p id="kpi-top" class="text-2xl font-black text-white leading-none truncate">—</p></div>
+    <div class="glass-card rounded-2xl p-5 shadow-2xl glass-card-hover"><p id="kpi-avg-label" class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Promedio / Factura</p><p id="kpi-avg" class="text-2xl font-black text-white leading-none">—</p></div>
   </div>
   <!-- KPIs por categoría -->
   <div class="flex items-center gap-3 mb-4 flex-wrap">
@@ -3311,6 +3311,9 @@ function renderAnalisisCharts(records) {
     const genPalette2 = n => { const base=['#2563EB','#059669','#7C3AED','#EA580C','#0891B2','#DC2626','#CA8A04','#0F766E','#9333EA','#BE185D']; return Array.from({length:n},(_,i)=>i<base.length?base[i]:`hsl(${(i*137.5)%360},65%,50%)`); };
     document.getElementById('kpi-total').textContent = fmt(totalFiscal);
     document.getElementById('kpi-count').textContent = countFiscal;
+    document.getElementById('kpi-count-label').textContent = 'Nº Pagos';
+    document.getElementById('kpi-top-label').textContent = 'Mayor Impuesto';
+    document.getElementById('kpi-avg-label').textContent = 'Promedio / Pago';
     const conceptTotals = {};
     paidFisFilt.forEach(f => { conceptTotals[f.concepto] = (conceptTotals[f.concepto]||0) + Number(f.importe); });
     const topConcept = Object.entries(conceptTotals).sort((a,b)=>b[1]-a[1])[0]?.[0] || '—';
@@ -3335,6 +3338,9 @@ function renderAnalisisCharts(records) {
     const genPalette2 = n => { const base=['#2563EB','#059669','#7C3AED','#EA580C','#0891B2','#DC2626','#CA8A04','#0F766E','#9333EA','#BE185D']; return Array.from({length:n},(_,i)=>i<base.length?base[i]:`hsl(${(i*137.5)%360},65%,50%)`); };
     document.getElementById('kpi-total').textContent = fmt(totalTrab);
     document.getElementById('kpi-count').textContent = countTrab;
+    document.getElementById('kpi-count-label').textContent = 'Nº Entradas';
+    document.getElementById('kpi-top-label').textContent = 'Mayor Gasto';
+    document.getElementById('kpi-avg-label').textContent = 'Promedio / Entrada';
     document.getElementById('kpi-top').textContent = segFilt.reduce((s,r)=>s+Number(r.importe),0) >= nomFilt.reduce((s,r)=>s+Number(r.importe),0) ? 'Seg. Sociales' : 'Nóminas';
     document.getElementById('kpi-avg').textContent = fmt(countTrab ? totalTrab/countTrab : 0);
     const breakdown = {'Seg. Sociales': segFilt.reduce((s,r)=>s+Number(r.importe),0)};
@@ -3359,8 +3365,11 @@ function renderAnalisisCharts(records) {
   const sorted = Object.entries(byLab).sort((a,b)=>b[1]-a[1]);
   document.getElementById('kpi-total').textContent = fmt(total);
   document.getElementById('kpi-count').textContent = facturasChart.length;
+  document.getElementById('kpi-count-label').textContent = 'Nº Facturas';
+  document.getElementById('kpi-top-label').textContent = 'Top Proveedor';
   document.getElementById('kpi-top').textContent = sorted[0]?.[0]||'—';
   document.getElementById('kpi-avg').textContent = fmt(avg);
+  document.getElementById('kpi-avg-label').textContent = 'Promedio / Factura';
   updateTopCardClickable();
 
   const allLabs = sorted;
