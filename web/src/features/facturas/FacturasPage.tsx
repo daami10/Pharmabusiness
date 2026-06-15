@@ -150,18 +150,16 @@ export function FacturasPage() {
 
   const groups = useMemo(() => groupByMonth(visible), [visible])
 
-  const hasCurrentMonth = useMemo(() => {
-    return groups.some((g) => g.key === currentMonthKey)
-  }, [groups, currentMonthKey])
+  const showCurrentMonth = location.state?.fromHome
 
-  const isOpen = (key: string, idx: number) => {
+  const isOpen = (key: string) => {
     if (key in overrides) return overrides[key]
-    if (hasCurrentMonth) return key === currentMonthKey
-    return idx === 0
+    if (showCurrentMonth) return key === currentMonthKey
+    return false
   }
 
-  function toggle(key: string, idx: number) {
-    setOverrides((prev) => ({ ...prev, [key]: !isOpen(key, idx) }))
+  function toggle(key: string) {
+    setOverrides((prev) => ({ ...prev, [key]: !isOpen(key) }))
   }
 
   function onDelete(f: Factura) {
@@ -385,15 +383,15 @@ export function FacturasPage() {
         <div className="mt-6 overflow-hidden rounded-2xl border border-white/5 glass-card">
           <table className="w-full text-left">
             <tbody className="divide-y divide-white/5">
-              {groups.map((g, idx) => (
+              {groups.map((g) => (
                 <FragmentGroup
                   key={g.key}
                   groupKey={g.key}
                   label={g.label}
                   count={g.items.length}
                   total={g.total}
-                  open={isOpen(g.key, idx)}
-                  onToggle={() => toggle(g.key, idx)}
+                  open={isOpen(g.key)}
+                  onToggle={() => toggle(g.key)}
                   items={g.items}
                   wholesalers={wholesalers}
                   onEdit={openEdit}

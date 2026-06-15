@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { Pencil, Plus, Trash2 } from 'lucide-react'
 import { useFiscalidad, useDeleteFiscal } from '@/lib/queries/fiscalidad'
 import { useYearStore } from '@/stores/yearStore'
+import { useLocation } from 'react-router-dom'
 import { formatMoney } from '@/lib/utils/money'
 import { MonthGroupAccordion } from '@/components/MonthGroupAccordion'
 import type { Fiscal } from '@/types/domain'
@@ -21,6 +22,8 @@ const KPI_COLORS = [
 export function FiscalidadPage() {
   const { data, isLoading, isError, error } = useFiscalidad()
   const deleteFiscal = useDeleteFiscal()
+  const location = useLocation()
+  const showCurrentMonth = location.state?.fromHome
   const year = useYearStore((s) => s.year)
 
   const [modalOpen, setModalOpen] = useState(false)
@@ -166,7 +169,7 @@ export function FiscalidadPage() {
             groups={groups}
             colSpan={4}
             renderRow={renderRow}
-            defaultExpandedKey={currentMonthKey}
+            defaultExpandedKey={showCurrentMonth ? currentMonthKey : undefined}
           />
         </div>
       )}

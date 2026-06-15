@@ -7,6 +7,7 @@ import {
   useDeleteSeguro,
 } from '@/lib/queries/trabajadores'
 import { useYearStore } from '@/stores/yearStore'
+import { useLocation } from 'react-router-dom'
 import { formatMoney } from '@/lib/utils/money'
 import { buildMonthSections } from '@/lib/utils/monthGroups'
 import { MonthGroupAccordion } from '@/components/MonthGroupAccordion'
@@ -30,6 +31,8 @@ function badge(isFuture: boolean, future: string, past: string) {
 const actionsCls = 'rounded-xl p-1.5 text-slate-400 transition-all hover:bg-white/5'
 
 export function TrabajadoresPage() {
+  const location = useLocation()
+  const showCurrentMonth = location.state?.fromHome
   const year = useYearStore((s) => s.year)
   const nominas = useNominas()
   const seguros = useSeguros()
@@ -194,7 +197,7 @@ export function TrabajadoresPage() {
               groups={nominaGroups}
               colSpan={5}
               renderRow={renderNomina}
-              defaultExpandedKey={currentMonthKey}
+              defaultExpandedKey={showCurrentMonth ? currentMonthKey : undefined}
             />
             <div className="mt-3 flex items-center justify-between rounded-2xl border border-white/5 bg-white/5 px-6 py-3">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
@@ -234,7 +237,7 @@ export function TrabajadoresPage() {
               groups={seguroGroups}
               colSpan={4}
               renderRow={renderSeguro}
-              defaultExpandedKey={currentMonthKey}
+              defaultExpandedKey={showCurrentMonth ? currentMonthKey : undefined}
             />
             <div className="mt-3 flex items-center justify-between rounded-2xl border border-white/5 bg-white/5 px-6 py-3">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-500">

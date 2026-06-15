@@ -30,26 +30,24 @@ export function MonthGroupAccordion<T>({
   defaultExpandedKey?: string
 }) {
   const [overrides, setOverrides] = useState<Record<string, boolean>>({})
-  const hasDefaultKey = defaultExpandedKey && groups.some((g) => g.key === defaultExpandedKey)
-
-  const isOpen = (key: string, idx: number) => {
+  const isOpen = (key: string) => {
     if (key in overrides) return overrides[key]
-    if (hasDefaultKey) return key === defaultExpandedKey
-    return idx === 0
+    if (defaultExpandedKey) return key === defaultExpandedKey
+    return false
   }
-  const toggle = (key: string, idx: number) =>
-    setOverrides((prev) => ({ ...prev, [key]: !isOpen(key, idx) }))
+  const toggle = (key: string) =>
+    setOverrides((prev) => ({ ...prev, [key]: !isOpen(key) }))
 
   return (
     <div className="overflow-hidden rounded-2xl border border-white/5">
       <table className="w-full text-left">
-        {groups.map((g, idx) => {
-          const open = isOpen(g.key, idx)
+        {groups.map((g) => {
+          const open = isOpen(g.key)
           return (
             <tbody key={g.key} className="divide-y divide-white/5">
               <tr
                 className="cursor-pointer select-none bg-white/5 transition-colors hover:bg-white/10"
-                onClick={() => toggle(g.key, idx)}
+                onClick={() => toggle(g.key)}
               >
                 <td colSpan={colSpan} className="px-6 py-3.5">
                   <div className="flex items-center justify-between">

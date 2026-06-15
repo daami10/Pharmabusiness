@@ -226,7 +226,7 @@ export function InicioPage() {
           <button
             key={c.to}
             type="button"
-            onClick={() => navigate(c.to)}
+            onClick={() => navigate(c.to, { state: { fromHome: true } })}
             className={`glass-card rounded-2xl p-5 transition-all duration-300 text-left group ${c.hoverCls}`}
           >
             <div className="flex items-center justify-between mb-4">
