@@ -59,9 +59,11 @@ export function PremiumGate({ children }: { children: ReactNode }) {
           <button
             type="button"
             onClick={() => void updateSubscriptionTier('premium')}
-            className="w-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 py-3.5 text-xs font-black text-white shadow-[0_0_20px_rgba(59,130,246,0.3)] transition-all hover:scale-[1.01] hover:from-blue-400 hover:to-indigo-500 cursor-pointer uppercase tracking-wider"
+            className="group relative w-full overflow-hidden rounded-full bg-gradient-to-r from-[#bf953f] via-[#fcf6ba] to-[#b38728] py-4 text-xs font-black text-[#3c2a05] shadow-[0_0_25px_rgba(212,175,55,0.35)] transition-all hover:scale-[1.02] hover:shadow-[0_0_40px_rgba(212,175,55,0.6)] cursor-pointer uppercase tracking-widest flex items-center justify-center gap-2 border border-[#fcf6ba]/30"
           >
-            Mejorar a Plan Premium
+            <span className="gold-btn-shimmer" />
+            <Sparkles className="h-4 w-4 text-[#3c2a05] shrink-0 animate-pulse" />
+            <span>Mejorar a Plan Premium</span>
           </button>
 
           <p className="mt-3 text-[10px] text-slate-500 leading-normal">

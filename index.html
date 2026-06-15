@@ -150,6 +150,20 @@
       filter: invert(1) brightness(1.5);
       cursor: pointer;
     }
+    /* Efecto Shimmer Dorado Premium */
+    @keyframes gold-shimmer {
+      0% { transform: translateX(-200%) skewX(-12deg); }
+      100% { transform: translateX(250%) skewX(-12deg); }
+    }
+    .gold-btn-shimmer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 50%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+      animation: gold-shimmer 3s infinite linear;
+    }
   </style>
 </head>
 <body class="bg-slate-950 text-[#f1f5f9] antialiased min-h-screen relative overflow-x-hidden">
