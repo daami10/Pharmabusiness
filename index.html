@@ -42,16 +42,76 @@
       background: linear-gradient(135deg, rgba(13, 27, 50, 0.7) 0%, rgba(8, 14, 25, 0.8) 100%);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(0, 242, 254, 0.15);
-      box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5), 0 0 15px rgba(0, 242, 254, 0.04);
-    }
-    .glass-card-hover {
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5);
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .glass-card-hover:hover {
-      border-color: rgba(0, 242, 254, 0.35);
       transform: translateY(-2px);
-      box-shadow: 0 16px 48px 0 rgba(0, 0, 0, 0.65), 0 0 25px rgba(0, 242, 254, 0.08);
+    }
+    /* Cajones con brillo de neón sutil */
+    .glow-blue {
+      border-color: rgba(59, 130, 246, 0.15) !important;
+      box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5), 0 0 15px 0 rgba(59, 130, 246, 0.06) !important;
+    }
+    .glow-blue-hover:hover {
+      border-color: rgba(59, 130, 246, 0.35) !important;
+      box-shadow: 0 16px 48px 0 rgba(0, 0, 0, 0.65), 0 0 25px 0 rgba(59, 130, 246, 0.15) !important;
+      transform: translateY(-2px);
+    }
+    .glow-emerald {
+      border-color: rgba(16, 185, 129, 0.15) !important;
+      box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5), 0 0 15px 0 rgba(16, 185, 129, 0.06) !important;
+    }
+    .glow-emerald-hover:hover {
+      border-color: rgba(16, 185, 129, 0.35) !important;
+      box-shadow: 0 16px 48px 0 rgba(0, 0, 0, 0.65), 0 0 25px 0 rgba(16, 185, 129, 0.15) !important;
+      transform: translateY(-2px);
+    }
+    .glow-purple {
+      border-color: rgba(168, 85, 247, 0.15) !important;
+      box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5), 0 0 15px 0 rgba(168, 85, 247, 0.06) !important;
+    }
+    .glow-purple-hover:hover {
+      border-color: rgba(168, 85, 247, 0.35) !important;
+      box-shadow: 0 16px 48px 0 rgba(0, 0, 0, 0.65), 0 0 25px 0 rgba(168, 85, 247, 0.15) !important;
+      transform: translateY(-2px);
+    }
+    .glow-teal {
+      border-color: rgba(20, 184, 166, 0.15) !important;
+      box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5), 0 0 15px 0 rgba(20, 184, 166, 0.06) !important;
+    }
+    .glow-teal-hover:hover {
+      border-color: rgba(20, 184, 166, 0.35) !important;
+      box-shadow: 0 16px 48px 0 rgba(0, 0, 0, 0.65), 0 0 25px 0 rgba(20, 184, 166, 0.15) !important;
+      transform: translateY(-2px);
+    }
+    .glow-orange {
+      border-color: rgba(249, 115, 22, 0.15) !important;
+      box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5), 0 0 15px 0 rgba(249, 115, 22, 0.06) !important;
+    }
+    .glow-orange-hover:hover {
+      border-color: rgba(249, 115, 22, 0.35) !important;
+      box-shadow: 0 16px 48px 0 rgba(0, 0, 0, 0.65), 0 0 25px 0 rgba(249, 115, 22, 0.15) !important;
+      transform: translateY(-2px);
+    }
+    .glow-red {
+      border-color: rgba(239, 68, 68, 0.15) !important;
+      box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5), 0 0 15px 0 rgba(239, 68, 68, 0.06) !important;
+    }
+    .glow-red-hover:hover {
+      border-color: rgba(239, 68, 68, 0.35) !important;
+      box-shadow: 0 16px 48px 0 rgba(0, 0, 0, 0.65), 0 0 25px 0 rgba(239, 68, 68, 0.15) !important;
+      transform: translateY(-2px);
+    }
+    .glow-white {
+      border-color: rgba(255, 255, 255, 0.08) !important;
+      box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5), 0 0 15px 0 rgba(255, 255, 255, 0.02) !important;
+    }
+    .glow-white-hover:hover {
+      border-color: rgba(255, 255, 255, 0.2) !important;
+      box-shadow: 0 16px 48px 0 rgba(0, 0, 0, 0.65), 0 0 25px 0 rgba(255, 255, 255, 0.05) !important;
+      transform: translateY(-2px);
     }
     .tab-active {
       color: #00f2fe !important;
@@ -258,7 +318,7 @@
   <!-- KPI SUMMARY CARDS -->
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
     <!-- Facturas Card -->
-    <div onclick="switchTab('facturas')" class="glass-card rounded-2xl p-5 border border-white/5 hover:border-blue-500/30 hover:bg-blue-500/5 transition-all duration-300 cursor-pointer shadow-xl group">
+    <div onclick="switchTab('facturas')" class="glass-card rounded-2xl p-5 glow-blue glow-blue-hover transition-all duration-300 cursor-pointer group">
       <div class="flex items-center justify-between mb-4">
         <span class="p-2.5 bg-blue-500/10 rounded-xl text-blue-400 group-hover:bg-blue-500/20 transition-all">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
@@ -270,7 +330,7 @@
     </div>
 
     <!-- Abonos Card -->
-    <div onclick="switchTab('abonos')" class="glass-card rounded-2xl p-5 border border-white/5 hover:border-emerald-500/30 hover:bg-emerald-500/5 transition-all duration-300 cursor-pointer shadow-xl group">
+    <div onclick="switchTab('abonos')" class="glass-card rounded-2xl p-5 glow-emerald glow-emerald-hover transition-all duration-300 cursor-pointer group">
       <div class="flex items-center justify-between mb-4">
         <span class="p-2.5 bg-emerald-500/10 rounded-xl text-emerald-400 group-hover:bg-emerald-500/20 transition-all">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -282,7 +342,7 @@
     </div>
 
     <!-- Fiscalidad Card -->
-    <div onclick="switchTab('fiscalidad')" class="glass-card rounded-2xl p-5 border border-white/5 hover:border-purple-500/30 hover:bg-purple-500/5 transition-all duration-300 cursor-pointer shadow-xl group">
+    <div onclick="switchTab('fiscalidad')" class="glass-card rounded-2xl p-5 glow-purple glow-purple-hover transition-all duration-300 cursor-pointer group">
       <div class="flex items-center justify-between mb-4">
         <span class="p-2.5 bg-purple-500/10 rounded-xl text-purple-400 group-hover:bg-purple-500/20 transition-all">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
@@ -294,7 +354,7 @@
     </div>
 
     <!-- Trabajadores Card -->
-    <div onclick="switchTab('trabajadores')" class="glass-card rounded-2xl p-5 border border-white/5 hover:border-teal-500/30 hover:bg-teal-500/5 transition-all duration-300 cursor-pointer shadow-xl group">
+    <div onclick="switchTab('trabajadores')" class="glass-card rounded-2xl p-5 glow-teal glow-teal-hover transition-all duration-300 cursor-pointer group">
       <div class="flex items-center justify-between mb-4">
         <span class="p-2.5 bg-teal-500/10 rounded-xl text-teal-400 group-hover:bg-teal-500/20 transition-all">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
@@ -404,21 +464,21 @@
     </div>
     <!-- KPI stats -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-      <div class="bg-gradient-to-br from-red-500/10 to-red-900/5 border border-red-500/20 rounded-2xl p-4.5 shadow-xl cursor-pointer hover:border-red-500/40 hover:bg-red-500/15 transition-all duration-300 select-none glass-card" onclick="showVencListModal('overdue')">
+      <div onclick="showVencListModal('overdue')" class="glass-card rounded-2xl p-4.5 glow-red glow-red-hover cursor-pointer transition-all duration-300 select-none">
         <p class="text-xs font-bold text-red-400 uppercase tracking-wider mb-1">Vencidas</p>
-        <p id="cal-stat-overdue" class="text-3xl font-black text-red-500 leading-none">0</p>
+        <p id="cal-stat-overdue" class="text-3xl font-black text-red-400 leading-none">0</p>
       </div>
-      <div class="bg-gradient-to-br from-orange-500/10 to-orange-900/5 border border-orange-500/20 rounded-2xl p-4.5 shadow-xl cursor-pointer hover:border-orange-500/40 hover:bg-orange-500/15 transition-all duration-300 select-none glass-card" onclick="showVencListModal('neardue')">
+      <div onclick="showVencListModal('neardue')" class="glass-card rounded-2xl p-4.5 glow-orange glow-orange-hover cursor-pointer transition-all duration-300 select-none">
         <p class="text-xs font-bold text-orange-400 uppercase tracking-wider mb-1">Próximas (7 días)</p>
-        <p id="cal-stat-neardue" class="text-3xl font-black text-orange-500 leading-none">0</p>
+        <p id="cal-stat-neardue" class="text-3xl font-black text-orange-400 leading-none">0</p>
       </div>
-      <div class="bg-gradient-to-br from-blue-500/10 to-indigo-900/5 border border-blue-500/20 rounded-2xl p-4.5 shadow-xl cursor-pointer hover:border-blue-500/40 hover:bg-blue-500/15 transition-all duration-300 select-none glass-card" onclick="showVencListModal('pending')">
+      <div onclick="showVencListModal('pending')" class="glass-card rounded-2xl p-4.5 glow-blue glow-blue-hover cursor-pointer transition-all duration-300 select-none">
         <p class="text-xs font-bold text-blue-400 uppercase tracking-wider mb-1">Pendientes</p>
-        <p id="cal-stat-pending" class="text-3xl font-black text-[#00f2fe] leading-none">0</p>
+        <p id="cal-stat-pending" class="text-3xl font-black text-blue-400 leading-none">0</p>
       </div>
-      <div class="bg-gradient-to-br from-emerald-500/10 to-emerald-900/5 border border-emerald-500/20 rounded-2xl p-4.5 shadow-xl cursor-pointer hover:border-emerald-500/40 hover:bg-emerald-500/15 transition-all duration-300 select-none glass-card" onclick="showVencListModal('paid')">
+      <div onclick="showVencListModal('paid')" class="glass-card rounded-2xl p-4.5 glow-emerald glow-emerald-hover cursor-pointer transition-all duration-300 select-none">
         <p class="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-1">Pagadas</p>
-        <p id="cal-stat-paid" class="text-3xl font-black text-emerald-500 leading-none">0</p>
+        <p id="cal-stat-paid" class="text-3xl font-black text-emerald-400 leading-none">0</p>
       </div>
     </div>
     <!-- Calendar + list -->
@@ -606,7 +666,7 @@
     <button id="analisis-btn-Trabajadores" onclick="setAnalisisTipo('Trabajadores')" class="analisis-tipo-btn px-4 py-1.5 rounded-xl text-xs font-bold transition-all bg-white/5 border border-white/5 text-slate-300 hover:bg-white/10">Trabajadores</button>
   </div>
   <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
-    <div id="analisis-card-Laboratorio" onclick="setAnalisisTipo('Laboratorio')" class="bg-gradient-to-br from-blue-500/10 to-blue-950/5 border border-blue-500/20 rounded-2xl p-5 shadow-2xl cursor-pointer hover:border-blue-500/40 hover:bg-blue-500/15 transition-all select-none glass-card">
+    <div id="analisis-card-Laboratorio" onclick="setAnalisisTipo('Laboratorio')" class="glass-card rounded-2xl p-5 cursor-pointer glow-blue glow-blue-hover transition-all select-none">
       <div class="flex items-center gap-2 mb-2">
         <span class="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_6px_rgba(59,130,246,0.5)]"></span>
         <p class="text-xs font-bold text-blue-400 uppercase tracking-wider">Laboratorios</p>
@@ -614,7 +674,7 @@
       <p id="kpi-lab-total" class="text-2xl font-black text-blue-400 leading-none">—</p>
       <p id="kpi-lab-count" class="text-2xs text-slate-500 font-bold uppercase tracking-wider mt-1.5">— facturas</p>
     </div>
-    <div id="analisis-card-FedeFarma" onclick="setAnalisisTipo('FedeFarma')" class="bg-gradient-to-br from-purple-500/10 to-purple-950/5 border border-purple-500/20 rounded-2xl p-5 shadow-2xl cursor-pointer hover:border-purple-500/40 hover:bg-purple-500/15 transition-all select-none glass-card">
+    <div id="analisis-card-FedeFarma" onclick="setAnalisisTipo('FedeFarma')" class="glass-card rounded-2xl p-5 cursor-pointer glow-purple glow-purple-hover transition-all select-none">
       <div class="flex items-center gap-2 mb-2">
         <span class="w-2 h-2 rounded-full bg-purple-500 shadow-[0_0_6px_rgba(168,85,247,0.5)]"></span>
         <p class="text-xs font-bold text-purple-400 uppercase tracking-wider">Mayorista</p>
@@ -622,7 +682,7 @@
       <p id="kpi-fede-total" class="text-2xl font-black text-purple-400 leading-none">—</p>
       <p id="kpi-fede-count" class="text-2xs text-slate-500 font-bold uppercase tracking-wider mt-1.5">— facturas</p>
     </div>
-    <div id="analisis-card-Otro" onclick="setAnalisisTipo('Otro')" class="bg-gradient-to-br from-slate-500/10 to-slate-950/5 border border-white/5 rounded-2xl p-5 shadow-2xl cursor-pointer hover:border-white/12 hover:bg-white/10 transition-all select-none glass-card">
+    <div id="analisis-card-Otro" onclick="setAnalisisTipo('Otro')" class="glass-card rounded-2xl p-5 cursor-pointer glow-white glow-white-hover transition-all select-none">
       <div class="flex items-center gap-2 mb-2">
         <span class="w-2 h-2 rounded-full bg-slate-400 shadow-[0_0_6px_rgba(156,163,175,0.5)]"></span>
         <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Otros</p>
@@ -630,7 +690,7 @@
       <p id="kpi-otro-total" class="text-2xl font-black text-slate-200 leading-none">—</p>
       <p id="kpi-otro-count" class="text-2xs text-slate-500 font-bold uppercase tracking-wider mt-1.5">— facturas</p>
     </div>
-    <div id="analisis-card-Fiscalidad" onclick="setAnalisisTipo('Fiscalidad')" class="bg-gradient-to-br from-emerald-500/10 to-emerald-950/5 border border-emerald-500/20 rounded-2xl p-5 shadow-2xl cursor-pointer hover:border-emerald-500/40 hover:bg-emerald-500/15 transition-all select-none glass-card">
+    <div id="analisis-card-Fiscalidad" onclick="setAnalisisTipo('Fiscalidad')" class="glass-card rounded-2xl p-5 cursor-pointer glow-emerald glow-emerald-hover transition-all select-none">
       <div class="flex items-center gap-2 mb-2">
         <span class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.5)]"></span>
         <p class="text-xs font-bold text-emerald-400 uppercase tracking-wider">Fiscalidad</p>
@@ -638,7 +698,7 @@
       <p id="kpi-fiscalidad-total" class="text-2xl font-black text-emerald-400 leading-none">—</p>
       <p id="kpi-fiscalidad-count" class="text-2xs text-slate-500 font-bold uppercase tracking-wider mt-1.5">— pagos</p>
     </div>
-    <div id="analisis-card-Trabajadores" onclick="setAnalisisTipo('Trabajadores')" class="bg-gradient-to-br from-orange-500/10 to-orange-950/5 border border-orange-500/20 rounded-2xl p-5 shadow-2xl cursor-pointer hover:border-orange-500/40 hover:bg-orange-500/15 transition-all select-none glass-card">
+    <div id="analisis-card-Trabajadores" onclick="setAnalisisTipo('Trabajadores')" class="glass-card rounded-2xl p-5 cursor-pointer glow-orange glow-orange-hover transition-all select-none">
       <div class="flex items-center gap-2 mb-2">
         <span class="w-2 h-2 rounded-full bg-orange-500 shadow-[0_0_6px_rgba(249,115,22,0.5)]"></span>
         <p class="text-xs font-bold text-orange-400 uppercase tracking-wider">Trabajadores</p>
@@ -650,27 +710,27 @@
   <div id="analisis-empty" class="hidden glass-card rounded-2xl border border-white/5 py-16 text-center text-slate-400 text-sm shadow-2xl">Agrega facturas o abonos primero para ver el análisis.</div>
   <div id="analisis-charts">
     <!-- Consolidated summary card -->
-    <div id="analisis-consolidado-card" class="mb-6 bg-gradient-to-br from-blue-500/10 to-[#00f2fe]/5 border border-blue-500/20 rounded-2xl p-6 shadow-2xl glass-card">
+    <div id="analisis-consolidado-card" class="mb-6 glass-card rounded-2xl p-6 glow-blue">
       <h3 class="text-base font-extrabold text-white mb-4 flex items-center gap-2">
         <svg class="w-5 h-5 text-[#00f2fe]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
         Resumen de Gastos Consolidado del Rango
       </h3>
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div class="bg-white/5 border border-white/5 p-4 rounded-xl">
+        <div class="glass-card p-4 rounded-xl glow-white">
           <p class="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Facturas Proveedores</p>
           <p id="cons-facturas-total" class="text-lg font-black text-white">0,00 €</p>
         </div>
-        <div class="bg-white/5 border border-white/5 p-4 rounded-xl">
+        <div class="glass-card p-4 rounded-xl glow-emerald">
           <p class="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Impuestos y Tasas</p>
           <p id="cons-fiscalidad-total" class="text-lg font-black text-emerald-400">0,00 €</p>
         </div>
-        <div class="bg-white/5 border border-white/5 p-4 rounded-xl">
+        <div class="glass-card p-4 rounded-xl glow-orange">
           <p class="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Trabajadores y Nóminas</p>
           <p id="cons-trabajadores-total" class="text-lg font-black text-orange-400">0,00 €</p>
         </div>
-        <div class="bg-gradient-to-r from-blue-500/20 to-indigo-500/20 border border-blue-500/40 p-4 rounded-xl">
+        <div class="glass-card p-4 rounded-xl glow-blue">
           <p class="text-xs text-blue-300 font-bold uppercase tracking-wider mb-1">Gastos Totales Rango</p>
-          <p id="cons-gastos-total" class="text-lg font-black text-[#00f2fe]">0,00 €</p>
+          <p id="cons-gastos-total" class="text-lg font-black text-blue-400">0,00 €</p>
         </div>
       </div>
     </div>
@@ -697,17 +757,17 @@
       <h2 class="text-xl font-extrabold text-slate-100 tracking-tight">Análisis de Abonos</h2>
     </div>
     <div class="grid grid-cols-3 gap-4 mb-6">
-      <div class="bg-gradient-to-br from-emerald-500/10 to-emerald-950/5 border border-emerald-500/20 rounded-2xl p-5 shadow-2xl glass-card">
+      <div class="glass-card rounded-2xl p-5 glow-emerald">
         <p class="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2">Total Abonado</p>
-        <p id="kpi-abono-total" class="text-2xl font-black text-emerald-500 leading-none">—</p>
+        <p id="kpi-abono-total" class="text-2xl font-black text-emerald-400 leading-none">—</p>
       </div>
-      <div class="bg-gradient-to-br from-emerald-500/10 to-emerald-950/5 border border-emerald-500/20 rounded-2xl p-5 shadow-2xl glass-card">
+      <div class="glass-card rounded-2xl p-5 glow-emerald">
         <p class="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2">Nº Abonos</p>
-        <p id="kpi-abono-count" class="text-2xl font-black text-emerald-500 leading-none">—</p>
+        <p id="kpi-abono-count" class="text-2xl font-black text-emerald-400 leading-none">—</p>
       </div>
-      <div class="bg-gradient-to-br from-blue-500/10 to-indigo-950/5 border border-blue-500/20 rounded-2xl p-5 shadow-2xl glass-card">
+      <div class="glass-card rounded-2xl p-5 glow-blue">
         <p class="text-xs font-bold text-blue-400 uppercase tracking-wider mb-2">Balance Neto</p>
-        <p id="kpi-balance-neto" class="text-2xl font-black text-[#00f2fe] leading-none">—</p>
+        <p id="kpi-balance-neto" class="text-2xl font-black text-blue-400 leading-none">—</p>
       </div>
     </div>
     <div class="grid lg:grid-cols-2 gap-6 mb-6">
@@ -742,17 +802,17 @@
 
   <!-- Detailed breakdown bar -->
   <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-    <div class="bg-gradient-to-br from-blue-500/10 to-indigo-900/5 border border-blue-500/20 rounded-2xl p-4.5 shadow-xl glass-card">
-      <p class="text-xs font-bold text-blue-400 uppercase tracking-wider mb-1">Total Impuestos</p>
+    <div class="glass-card rounded-2xl p-4.5 glow-white">
+      <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Total Impuestos</p>
       <p id="kpi-fiscal-total" class="text-3xl font-black text-white leading-none">0,00 €</p>
     </div>
-    <div class="bg-gradient-to-br from-purple-500/10 to-purple-900/5 border border-purple-500/20 rounded-2xl p-4.5 shadow-xl glass-card">
+    <div class="glass-card rounded-2xl p-4.5 glow-purple">
       <p class="text-xs font-bold text-purple-400 uppercase tracking-wider mb-1">Cuotas Autónomo</p>
-      <p id="kpi-fiscal-autonomo" class="text-2xl font-bold text-purple-500 leading-none">0,00 €</p>
+      <p id="kpi-fiscal-autonomo" class="text-2xl font-bold text-purple-400 leading-none">0,00 €</p>
     </div>
-    <div class="bg-gradient-to-br from-emerald-500/10 to-emerald-900/5 border border-emerald-500/20 rounded-2xl p-4.5 shadow-xl glass-card">
+    <div class="glass-card rounded-2xl p-4.5 glow-emerald">
       <p class="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-1">Renta / Sociedades</p>
-      <p id="kpi-fiscal-renta" class="text-2xl font-bold text-emerald-500 leading-none">0,00 €</p>
+      <p id="kpi-fiscal-renta" class="text-2xl font-bold text-emerald-400 leading-none">0,00 €</p>
     </div>
   </div>
 

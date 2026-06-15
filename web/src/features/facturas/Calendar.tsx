@@ -25,13 +25,10 @@ const STAT_CARDS: { status: VencStatus; label: string; color: string }[] = [
 ]
 
 const CARD_CLASSES: Record<VencStatus, string> = {
-  overdue:
-    'bg-gradient-to-br from-red-500/15 via-red-500/5 to-transparent border-red-500/20 hover:border-red-500/40 shadow-[0_0_20px_rgba(239,68,68,0.08)]',
-  neardue:
-    'bg-gradient-to-br from-orange-500/15 via-orange-500/5 to-transparent border-orange-500/20 hover:border-orange-500/40 shadow-[0_0_20px_rgba(249,115,22,0.08)]',
-  pending:
-    'bg-gradient-to-br from-blue-500/15 via-blue-500/5 to-transparent border-blue-500/20 hover:border-blue-500/40 shadow-[0_0_20px_rgba(59,130,246,0.08)]',
-  paid: 'bg-gradient-to-br from-emerald-500/15 via-emerald-500/5 to-transparent border-emerald-500/20 hover:border-emerald-500/40 shadow-[0_0_20px_rgba(16,185,129,0.08)]',
+  overdue: 'glow-red glow-red-hover',
+  neardue: 'glow-orange glow-orange-hover',
+  pending: 'glow-blue glow-blue-hover',
+  paid: 'glow-emerald glow-emerald-hover',
 }
 
 const WEEKDAYS = ['L', 'M', 'X', 'J', 'V', 'S', 'D']
@@ -208,7 +205,7 @@ export function Calendar({
                   } ${
                     isSelected
                       ? 'ring-2 ring-accent-blue bg-accent-blue/10'
-                      : isToday
+                      : (isToday && !selectedDay)
                         ? 'ring-2 ring-accent-blue'
                         : ''
                   }`}

@@ -50,7 +50,7 @@ export function InicioPage() {
       label: 'Facturas',
       amount: kpis.facturas.total,
       desc: `${kpis.facturas.count} factura${kpis.facturas.count !== 1 ? 's' : ''} este mes`,
-      hoverCls: 'hover:border-blue-500/30 hover:bg-blue-500/5',
+      hoverCls: 'glow-blue glow-blue-hover',
     },
     {
       to: '/abonos',
@@ -60,7 +60,7 @@ export function InicioPage() {
       label: 'Abonos',
       amount: kpis.abonos.total,
       desc: `${kpis.abonos.count} abono${kpis.abonos.count !== 1 ? 's' : ''} recibido${kpis.abonos.count !== 1 ? 's' : ''}`,
-      hoverCls: 'hover:border-emerald-500/30 hover:bg-emerald-500/5',
+      hoverCls: 'glow-emerald glow-emerald-hover',
     },
     {
       to: '/fiscalidad',
@@ -70,7 +70,7 @@ export function InicioPage() {
       label: 'Fiscalidad',
       amount: kpis.fiscal.total,
       desc: `${kpis.fiscal.count} impuesto${kpis.fiscal.count !== 1 ? 's' : ''} / tasa${kpis.fiscal.count !== 1 ? 's' : ''}`,
-      hoverCls: 'hover:border-purple-500/30 hover:bg-purple-500/5',
+      hoverCls: 'glow-purple glow-purple-hover',
     },
     {
       to: '/trabajadores',
@@ -80,7 +80,7 @@ export function InicioPage() {
       label: 'Personal',
       amount: kpis.trabajadores.total,
       desc: `${kpis.trabajadores.nominas} nómina${kpis.trabajadores.nominas !== 1 ? 's' : ''} y ${kpis.trabajadores.seguros} seguro${kpis.trabajadores.seguros !== 1 ? 's' : ''}`,
-      hoverCls: 'hover:border-teal-500/30 hover:bg-teal-500/5',
+      hoverCls: 'glow-teal glow-teal-hover',
     },
   ]
 
@@ -227,7 +227,7 @@ export function InicioPage() {
             key={c.to}
             type="button"
             onClick={() => navigate(c.to)}
-            className={`glass-card rounded-2xl p-5 border border-white/5 transition-all duration-300 text-left shadow-xl group ${c.hoverCls}`}
+            className={`glass-card rounded-2xl p-5 transition-all duration-300 text-left group ${c.hoverCls}`}
           >
             <div className="flex items-center justify-between mb-4">
               <span className={`p-2.5 rounded-xl ${c.bgIcon} ${c.color} transition-all`}>
@@ -336,8 +336,11 @@ export function InicioPage() {
                 onClick={() => triggerFastAction('add-seguro')}
                 className="w-full flex items-center justify-between p-3.5 bg-white/3 hover:bg-white/8 rounded-xl border border-white/5 transition-all text-left text-sm font-semibold text-slate-200 hover:text-white group"
               >
-                <Landmark className="h-4.5 w-4.5 text-orange-400" />
-                Registrar Seguro Social
+                <span className="flex items-center gap-2.5">
+                  <Landmark className="h-4.5 w-4.5 text-orange-400" />
+                  Registrar Seguro Social
+                </span>
+                <ChevronRight className="h-4 w-4 text-slate-500 group-hover:text-white transition-colors" />
               </button>
               
               <button
@@ -345,8 +348,11 @@ export function InicioPage() {
                 onClick={() => triggerFastAction('add-fiscal')}
                 className="w-full flex items-center justify-between p-3.5 bg-white/3 hover:bg-white/8 rounded-xl border border-white/5 transition-all text-left text-sm font-semibold text-slate-200 hover:text-white group"
               >
-                <Landmark className="h-4.5 w-4.5 text-purple-400" />
-                Añadir Impuesto / Tasa
+                <span className="flex items-center gap-2.5">
+                  <Landmark className="h-4.5 w-4.5 text-purple-400" />
+                  Añadir Impuesto / Tasa
+                </span>
+                <ChevronRight className="h-4 w-4 text-slate-500 group-hover:text-white transition-colors" />
               </button>
             </div>
           </div>

@@ -106,18 +106,27 @@ export function FiscalidadPage() {
         </button>
       </div>
 
-      {/* KPIs */}
       <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-        <div className="rounded-2xl border border-white/5 bg-white/5 p-5">
+        <div className="glass-card rounded-2xl p-5 glow-white">
           <p className="text-3xl font-black text-white">{formatMoney(kpis.total)}</p>
           <p className="mt-1 text-xs font-semibold text-slate-400">Total fiscal {year}</p>
         </div>
         {kpis.byConcept.map((item, idx) => {
           const colorClass = KPI_COLORS[idx % KPI_COLORS.length]
+          const GLOW_CLASSES = [
+            'glow-purple',
+            'glow-emerald',
+            'glow-blue',
+            'glow-orange',
+            'glow-red',
+            'glow-orange',
+            'glow-teal',
+          ]
+          const glowClass = GLOW_CLASSES[idx % GLOW_CLASSES.length]
           return (
             <div
               key={item.concepto}
-              className="rounded-2xl border border-white/5 bg-white/5 p-5"
+              className={`glass-card rounded-2xl p-5 ${glowClass}`}
             >
               <p className={`text-2xl font-bold ${colorClass}`}>
                 {formatMoney(item.total)}
