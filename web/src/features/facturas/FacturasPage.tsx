@@ -71,6 +71,11 @@ export function FacturasPage() {
   const [editing, setEditing] = useState<Factura | null>(null)
   const [initialFile, setInitialFile] = useState<File | null>(null)
 
+  const currentMonthKey = useMemo(() => {
+    const now = new Date()
+    return `${year}-${String(now.getMonth() + 1).padStart(2, '0')}`
+  }, [year])
+
   useEffect(() => {
     if (location.state?.openCreate) {
       setTimeout(() => {
@@ -145,8 +150,15 @@ export function FacturasPage() {
 
   const groups = useMemo(() => groupByMonth(visible), [visible])
 
-  const isOpen = (key: string, idx: number) =>
-    key in overrides ? overrides[key] : idx === 0
+  const hasCurrentMonth = useMemo(() => {
+    return groups.some((g) => g.key === currentMonthKey)
+  }, [groups, currentMonthKey])
+
+  const isOpen = (key: string, idx: number) => {
+    if (key in overrides) return overrides[key]
+    if (hasCurrentMonth) return key === currentMonthKey
+    return idx === 0
+  }
 
   function toggle(key: string, idx: number) {
     setOverrides((prev) => ({ ...prev, [key]: !isOpen(key, idx) }))

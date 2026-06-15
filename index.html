@@ -2703,9 +2703,13 @@ function renderTable(records) {
   const maxVal = document.getElementById('filter-importe-max')?.value || '';
   const hasFilter = !!(s || m || minVal || maxVal);
 
+  const now = new Date();
+  const currentMonthKey = `${activeYear}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const hasCurrentMonth = sortedKeys.includes(currentMonthKey);
+
   document.getElementById('facturas-tbody').innerHTML = sortedKeys.map((key, groupIdx) => {
     const groupRecords = groups[key];
-    const isOpen = groupIdx === 0 || hasFilter;
+    const isOpen = hasFilter || (hasCurrentMonth ? key === currentMonthKey : groupIdx === 0);
     const [yr, mo] = key.split('-');
     const mesLabel = mo && mo !== '00' ? MESES[parseInt(mo,10)-1] + ' ' + yr : 'Sin fecha';
     const gFacturas = groupRecords.filter(r=>r.fields.Tipo!=='Abono');
@@ -3973,10 +3977,13 @@ function renderSeguros() {
   const sortedKeys = Object.keys(groups).sort((a,b) => b.localeCompare(a));
   const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
   
+  const now = new Date();
+  const currentMonthKey = `${activeYear}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  
   const tbody = document.getElementById('seguros-tbody');
   tbody.innerHTML = sortedKeys.map((key, groupIdx) => {
     const groupRecords = groups[key];
-    const isOpen = false;
+    const isOpen = key === currentMonthKey;
     const [yr, mo] = key.split('-');
     const mesLabel = mo && mo !== '00' ? MESES[parseInt(mo,10)-1] + ' ' + yr : 'Sin fecha';
     const gTotal = groupRecords.reduce((s, r) => s + Number(r.importe), 0);
@@ -4046,10 +4053,13 @@ function renderNominas() {
   const sortedKeys = Object.keys(groups).sort((a,b) => b.localeCompare(a));
   const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
   
+  const now = new Date();
+  const currentMonthKey = `${activeYear}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  
   const tbody = document.getElementById('nominas-tbody');
   tbody.innerHTML = sortedKeys.map((key, groupIdx) => {
     const groupRecords = groups[key];
-    const isOpen = false;
+    const isOpen = key === currentMonthKey;
     const [yr, mo] = key.split('-');
     const mesLabel = mo && mo !== '00' ? MESES[parseInt(mo,10)-1] + ' ' + yr : 'Sin fecha';
     const gTotal = groupRecords.reduce((s, r) => s + Number(r.importe), 0);
@@ -4427,10 +4437,14 @@ function renderFiscalidad() {
   const sortedKeys = Object.keys(groups).sort((a,b) => b.localeCompare(a));
   const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 
+  const now = new Date();
+  const currentMonthKey = `${activeYear}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const hasCurrentMonth = sortedKeys.includes(currentMonthKey);
+
   const tbody = document.getElementById('fiscal-tbody');
   tbody.innerHTML = sortedKeys.map((key, groupIdx) => {
     const groupRecords = groups[key];
-    const isOpen = groupIdx === 0;
+    const isOpen = hasCurrentMonth ? key === currentMonthKey : groupIdx === 0;
     const [yr, mo] = key.split('-');
     const mesLabel = mo && mo !== '00' ? MESES[parseInt(mo,10)-1] + ' ' + yr : 'Sin fecha';
     const gTotal = groupRecords.reduce((s, r) => s + Number(r.importe), 0);

@@ -35,6 +35,10 @@ export function TrabajadoresPage() {
   const seguros = useSeguros()
   const deleteNomina = useDeleteNomina()
   const deleteSeguro = useDeleteSeguro()
+  const currentMonthKey = useMemo(() => {
+    const now = new Date()
+    return `${year}-${String(now.getMonth() + 1).padStart(2, '0')}`
+  }, [year])
 
   const [nominaModal, setNominaModal] = useState(false)
   const [editNomina, setEditNomina] = useState<Nomina | null>(null)
@@ -190,6 +194,7 @@ export function TrabajadoresPage() {
               groups={nominaGroups}
               colSpan={5}
               renderRow={renderNomina}
+              defaultExpandedKey={currentMonthKey}
             />
             <div className="mt-3 flex items-center justify-between rounded-2xl border border-white/5 bg-white/5 px-6 py-3">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
@@ -229,6 +234,7 @@ export function TrabajadoresPage() {
               groups={seguroGroups}
               colSpan={4}
               renderRow={renderSeguro}
+              defaultExpandedKey={currentMonthKey}
             />
             <div className="mt-3 flex items-center justify-between rounded-2xl border border-white/5 bg-white/5 px-6 py-3">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-500">

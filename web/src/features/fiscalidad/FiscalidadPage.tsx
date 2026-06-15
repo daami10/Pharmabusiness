@@ -32,6 +32,10 @@ export function FiscalidadPage() {
   )
   const kpis = useMemo(() => fiscalKpis(items), [items])
   const groups = useMemo(() => groupFiscalByMonth(items), [items])
+  const currentMonthKey = useMemo(() => {
+    const now = new Date()
+    return `${year}-${String(now.getMonth() + 1).padStart(2, '0')}`
+  }, [year])
 
   function onDelete(f: Fiscal) {
     if (!confirm(`¿Eliminar "${f.concepto}"?`)) return
@@ -158,7 +162,12 @@ export function FiscalidadPage() {
 
       {!isLoading && !isError && groups.length > 0 && (
         <div className="mt-6">
-          <MonthGroupAccordion groups={groups} colSpan={4} renderRow={renderRow} />
+          <MonthGroupAccordion
+            groups={groups}
+            colSpan={4}
+            renderRow={renderRow}
+            defaultExpandedKey={currentMonthKey}
+          />
         </div>
       )}
 

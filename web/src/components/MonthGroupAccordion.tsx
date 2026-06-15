@@ -22,14 +22,21 @@ export function MonthGroupAccordion<T>({
   groups,
   colSpan,
   renderRow,
+  defaultExpandedKey,
 }: {
   groups: MonthSection<T>[]
   colSpan: number
   renderRow: (item: T, isFuture: boolean) => ReactNode
+  defaultExpandedKey?: string
 }) {
   const [overrides, setOverrides] = useState<Record<string, boolean>>({})
-  const isOpen = (key: string, idx: number) =>
-    key in overrides ? overrides[key] : idx === 0
+  const hasDefaultKey = defaultExpandedKey && groups.some((g) => g.key === defaultExpandedKey)
+
+  const isOpen = (key: string, idx: number) => {
+    if (key in overrides) return overrides[key]
+    if (hasDefaultKey) return key === defaultExpandedKey
+    return idx === 0
+  }
   const toggle = (key: string, idx: number) =>
     setOverrides((prev) => ({ ...prev, [key]: !isOpen(key, idx) }))
 
