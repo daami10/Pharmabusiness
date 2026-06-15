@@ -717,9 +717,9 @@ export function AnalisisPage() {
         {/* Laboratorios */}
         <div
           onClick={() => setCategory('Laboratorio')}
-          className={`bg-gradient-to-br from-blue-500/10 to-blue-950/5 border border-blue-500/20 rounded-2xl p-5 shadow-2xl cursor-pointer hover:border-blue-500/40 hover:bg-blue-500/15 transition-all select-none glass-card ${
+          className={`cursor-pointer transition-all select-none glass-card glow-blue glow-blue-hover rounded-2xl p-5 ${
             category === 'Laboratorio'
-              ? 'ring-2 ring-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.2)]'
+              ? 'ring-2 ring-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.3)]'
               : ''
           }`}
         >
@@ -740,9 +740,9 @@ export function AnalisisPage() {
         {/* Mayoristas */}
         <div
           onClick={() => setCategory('Mayorista')}
-          className={`bg-gradient-to-br from-purple-500/10 to-purple-950/5 border border-purple-500/20 rounded-2xl p-5 shadow-2xl cursor-pointer hover:border-purple-500/40 hover:bg-purple-500/15 transition-all select-none glass-card ${
+          className={`cursor-pointer transition-all select-none glass-card glow-purple glow-purple-hover rounded-2xl p-5 ${
             category === 'Mayorista'
-              ? 'ring-2 ring-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.2)]'
+              ? 'ring-2 ring-purple-500 shadow-[0_0_20px_rgba(168,85,247,0.3)]'
               : ''
           }`}
         >
@@ -763,9 +763,9 @@ export function AnalisisPage() {
         {/* Otros */}
         <div
           onClick={() => setCategory('Otro')}
-          className={`bg-gradient-to-br from-slate-500/10 to-slate-950/5 border border-white/5 rounded-2xl p-5 shadow-2xl cursor-pointer hover:border-white/12 hover:bg-white/10 transition-all select-none glass-card ${
+          className={`cursor-pointer transition-all select-none glass-card glow-white glow-white-hover rounded-2xl p-5 ${
             category === 'Otro'
-              ? 'ring-2 ring-slate-400 shadow-[0_0_15px_rgba(148,163,184,0.2)]'
+              ? 'ring-2 ring-slate-400 shadow-[0_0_20px_rgba(255,255,255,0.15)]'
               : ''
           }`}
         >
@@ -786,9 +786,9 @@ export function AnalisisPage() {
         {/* Fiscalidad */}
         <div
           onClick={() => setCategory('Fiscalidad')}
-          className={`bg-gradient-to-br from-emerald-500/10 to-emerald-950/5 border border-emerald-500/20 rounded-2xl p-5 shadow-2xl cursor-pointer hover:border-emerald-500/40 hover:bg-emerald-500/15 transition-all select-none glass-card ${
+          className={`cursor-pointer transition-all select-none glass-card glow-emerald glow-emerald-hover rounded-2xl p-5 ${
             category === 'Fiscalidad'
-              ? 'ring-2 ring-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.2)]'
+              ? 'ring-2 ring-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.3)]'
               : ''
           }`}
         >
@@ -809,9 +809,9 @@ export function AnalisisPage() {
         {/* Trabajadores */}
         <div
           onClick={() => setCategory('Trabajadores')}
-          className={`bg-gradient-to-br from-orange-500/10 to-orange-950/5 border border-orange-500/20 rounded-2xl p-5 shadow-2xl cursor-pointer hover:border-orange-500/40 hover:bg-orange-500/15 transition-all select-none glass-card ${
+          className={`cursor-pointer transition-all select-none glass-card glow-orange glow-orange-hover rounded-2xl p-5 ${
             category === 'Trabajadores'
-              ? 'ring-2 ring-orange-500 shadow-[0_0_15px_rgba(249,115,22,0.2)]'
+              ? 'ring-2 ring-orange-500 shadow-[0_0_20px_rgba(249,115,22,0.3)]'
               : ''
           }`}
         >
@@ -838,13 +838,13 @@ export function AnalisisPage() {
       ) : (
         <div className="mt-6 space-y-6">
           {/* Resumen consolidado */}
-          <div className="bg-gradient-to-br from-blue-500/10 to-[#00f2fe]/5 border border-blue-500/20 rounded-2xl p-6 shadow-2xl glass-card">
+          <div className="glass-card rounded-2xl p-6 glow-blue">
             <h3 className="text-base font-extrabold text-white mb-4 flex items-center gap-2">
               <Landmark className="w-5 h-5 text-[#00f2fe]" />
               Resumen de Gastos Consolidado del Rango
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="bg-white/5 border border-white/5 p-4 rounded-xl">
+              <div className="glass-card p-4 rounded-xl glow-white">
                 <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">
                   Facturas Proveedores
                 </p>
@@ -852,7 +852,7 @@ export function AnalisisPage() {
                   {formatMoney(totalFacturasCons)}
                 </p>
               </div>
-              <div className="bg-white/5 border border-white/5 p-4 rounded-xl">
+              <div className="glass-card p-4 rounded-xl glow-emerald">
                 <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">
                   Impuestos y Tasas
                 </p>
@@ -860,7 +860,7 @@ export function AnalisisPage() {
                   {formatMoney(totalFiscalCons)}
                 </p>
               </div>
-              <div className="bg-white/5 border border-white/5 p-4 rounded-xl">
+              <div className="glass-card p-4 rounded-xl glow-orange">
                 <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">
                   Trabajadores y Nóminas
                 </p>
@@ -868,7 +868,7 @@ export function AnalisisPage() {
                   {formatMoney(totalTrabajadoresCons)}
                 </p>
               </div>
-              <div className="bg-gradient-to-r from-blue-500/20 to-indigo-500/20 border border-blue-500/40 p-4 rounded-xl">
+              <div className="glass-card p-4 rounded-xl glow-blue">
                 <p className="text-xs text-blue-300 font-bold uppercase tracking-wider mb-1">
                   Gastos Totales Rango
                 </p>
