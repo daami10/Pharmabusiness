@@ -208,7 +208,7 @@ export function Calendar({
                   } ${
                     isSelected
                       ? 'ring-2 ring-accent-blue bg-accent-blue/10'
-                      : isToday
+                      : (isToday && !selectedDay)
                         ? 'ring-2 ring-accent-blue'
                         : ''
                   }`}
