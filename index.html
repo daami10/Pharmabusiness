@@ -3520,7 +3520,15 @@ function renderAnalisisCharts(records) {
 }
 
 function mkChart(id,type,data,options) {
+  let el = document.getElementById(id);
+  if (!el) return;
+  
   if(charts[id]) charts[id].destroy();
+  
+  // Clone and replace the canvas DOM element to completely clear rendering and event contexts.
+  // This prevents Chart.js from bleeding animation colors/dataset caches from previous tab views.
+  const clone = el.cloneNode(true);
+  el.parentNode.replaceChild(clone, el);
   
   // Custom dark theme settings for charts
   Chart.defaults.color = 'rgba(255,255,255,0.45)';
@@ -3557,7 +3565,7 @@ function mkChart(id,type,data,options) {
     if (options.scales.x) mergedOptions.scales.x = { ...defaultOptions.scales.x, ...options.scales.x };
   }
 
-  charts[id] = new Chart(document.getElementById(id), { type, data, options: mergedOptions });
+  charts[id] = new Chart(clone, { type, data, options: mergedOptions });
 }
 
 // ─── Abonos ───────────────────────────────────────────────────────────────────

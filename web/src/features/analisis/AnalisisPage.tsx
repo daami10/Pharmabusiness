@@ -904,6 +904,7 @@ export function AnalisisPage() {
                 }
               >
                 <Bar
+                  key={`labs-${category}`}
                   data={{
                     labels: chartsData.labsLabels,
                     datasets: [
@@ -922,6 +923,7 @@ export function AnalisisPage() {
             <div className="lg:col-span-2">
               <ChartCard title="Distribución del Gasto">
                 <Doughnut
+                  key={`donut-${category}`}
                   data={{
                     labels: chartsData.labsLabels.slice(0, 10),
                     datasets: [
@@ -950,6 +952,7 @@ export function AnalisisPage() {
           >
             <div className="h-[240px]">
               <Bar
+                key={`monthly-${category}-${stackedData}`}
                 data={{
                   labels: chartsData.monthlyLabels,
                   datasets: chartsData.monthlyDatasets,
@@ -1027,6 +1030,7 @@ export function AnalisisPage() {
               <div className="grid gap-6 lg:grid-cols-2">
                 <ChartCard title="Total Abonado por Laboratorio">
                   <Bar
+                    key="abonos-labs"
                     data={{
                       labels: byLabAbono.map((l) => l.lab),
                       datasets: [
@@ -1044,6 +1048,7 @@ export function AnalisisPage() {
 
                 <ChartCard title="Evolución Mensual de Abonos">
                   <Bar
+                    key="abonos-monthly"
                     data={{
                       labels: byMonthAbono.map((m) => m.label),
                       datasets: [
@@ -1063,6 +1068,7 @@ export function AnalisisPage() {
               <ChartCard title="Balance Neto por Laboratorio (Facturas − Abonos)" wide>
                 <div className="h-[240px]">
                   <Bar
+                    key="balance-labs"
                     data={{
                       labels: balances.map((b) => b.lab),
                       datasets: [
