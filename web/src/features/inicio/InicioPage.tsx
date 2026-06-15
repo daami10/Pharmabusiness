@@ -336,8 +336,11 @@ export function InicioPage() {
                 onClick={() => triggerFastAction('add-seguro')}
                 className="w-full flex items-center justify-between p-3.5 bg-white/3 hover:bg-white/8 rounded-xl border border-white/5 transition-all text-left text-sm font-semibold text-slate-200 hover:text-white group"
               >
-                <Landmark className="h-4.5 w-4.5 text-orange-400" />
-                Registrar Seguro Social
+                <span className="flex items-center gap-2.5">
+                  <Landmark className="h-4.5 w-4.5 text-orange-400" />
+                  Registrar Seguro Social
+                </span>
+                <ChevronRight className="h-4 w-4 text-slate-500 group-hover:text-white transition-colors" />
               </button>
               
               <button
@@ -345,8 +348,11 @@ export function InicioPage() {
                 onClick={() => triggerFastAction('add-fiscal')}
                 className="w-full flex items-center justify-between p-3.5 bg-white/3 hover:bg-white/8 rounded-xl border border-white/5 transition-all text-left text-sm font-semibold text-slate-200 hover:text-white group"
               >
-                <Landmark className="h-4.5 w-4.5 text-purple-400" />
-                Añadir Impuesto / Tasa
+                <span className="flex items-center gap-2.5">
+                  <Landmark className="h-4.5 w-4.5 text-purple-400" />
+                  Añadir Impuesto / Tasa
+                </span>
+                <ChevronRight className="h-4 w-4 text-slate-500 group-hover:text-white transition-colors" />
               </button>
             </div>
           </div>
