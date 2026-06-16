@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import type { Factura, FacturaInput } from '@/types/domain'
+import { useAuth } from '@/features/auth/AuthProvider'
 
 const FACTURAS_KEY = ['facturas'] as const
 
@@ -21,15 +22,17 @@ export function useFacturas() {
 
 export function useCreateFactura() {
   const qc = useQueryClient()
+  const { activeOrgId } = useAuth()
   return useMutation({
     mutationFn: async (input: FacturaInput) => {
       const {
         data: { user },
       } = await supabase.auth.getUser()
       if (!user) throw new Error('No hay sesión activa.')
+      if (!activeOrgId) throw new Error('No hay organización activa.')
       const { error } = await supabase
         .from('facturas')
-        .insert([{ ...input, user_id: user.id }])
+        .insert([{ ...input, user_id: user.id, org_id: activeOrgId }])
       if (error) throw new Error(error.message)
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: FACTURAS_KEY }),

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Dialog } from '@/components/ui/Dialog'
 import { WholesalersEditor } from '@/components/WholesalersEditor'
 import { useWholesalersStore } from '@/stores/wholesalersStore'
+import { useAuth } from '@/features/auth/AuthProvider'
 
 export function OnboardingModal({
   open,
@@ -11,6 +12,7 @@ export function OnboardingModal({
   onClose: () => void
 }) {
   const setWholesalers = useWholesalersStore((s) => s.setWholesalers)
+  const { activeOrgId } = useAuth()
   const [draft, setDraft] = useState<string[]>(['FedeFarma'])
   const [error, setError] = useState('')
 
@@ -19,7 +21,7 @@ export function OnboardingModal({
       setError('Selecciona al menos un mayorista.')
       return
     }
-    setWholesalers(draft)
+    setWholesalers(draft, activeOrgId)
     onClose()
   }
 

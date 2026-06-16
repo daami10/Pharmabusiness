@@ -4,7 +4,7 @@ import { getWholesalers, KEY } from '@/lib/config/wholesalers'
 
 interface WholesalersState {
   wholesalers: string[]
-  setWholesalers: (list: string[]) => Promise<void>
+  setWholesalers: (list: string[], orgId?: string | null) => Promise<void>
   initWholesalers: (list: string[]) => void
 }
 
@@ -15,13 +15,19 @@ export const useWholesalersStore = create<WholesalersState>((set) => ({
     localStorage.setItem(KEY, JSON.stringify(list))
     set({ wholesalers: list })
   },
-  setWholesalers: async (list) => {
+  setWholesalers: async (list, orgId) => {
     localStorage.setItem(KEY, JSON.stringify(list))
     set({ wholesalers: list })
-    try {
-      await supabase.auth.updateUser({ data: { wholesalers: list } })
-    } catch (err) {
-      console.error('Error syncing wholesalers to Supabase:', err)
+    if (orgId) {
+      try {
+        const { error } = await supabase
+          .from('organizations')
+          .update({ wholesalers: list })
+          .eq('id', orgId)
+        if (error) throw error
+      } catch (err) {
+        console.error('Error syncing wholesalers to Supabase:', err)
+      }
     }
   },
 }))

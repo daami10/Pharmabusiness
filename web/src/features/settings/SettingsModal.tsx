@@ -7,7 +7,7 @@ import { useAuth } from '@/features/auth/AuthProvider'
 export function SettingsModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const wholesalers = useWholesalersStore((s) => s.wholesalers)
   const setWholesalers = useWholesalersStore((s) => s.setWholesalers)
-  const { subscriptionTier } = useAuth()
+  const { subscriptionTier, activeOrgId } = useAuth()
 
   // El modal se remonta al abrir (key en AppShell), así que el estado inicial
   // refleja siempre los mayoristas actuales sin necesidad de un efecto.
@@ -19,7 +19,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
       setError('Selecciona al menos un mayorista.')
       return
     }
-    setWholesalers(draft)
+    setWholesalers(draft, activeOrgId)
     onClose()
   }
 

@@ -39,8 +39,14 @@ export function filterFacturas(
   wholesalers: string[],
 ): Factura[] {
   const s = filters.search.toLowerCase().trim()
-  const min = filters.minImporte && filters.minImporte !== '' ? parseFloat(filters.minImporte.replace(',', '.')) : null
-  const max = filters.maxImporte && filters.maxImporte !== '' ? parseFloat(filters.maxImporte.replace(',', '.')) : null
+  const min =
+    filters.minImporte && filters.minImporte !== ''
+      ? parseFloat(filters.minImporte.replace(',', '.'))
+      : null
+  const max =
+    filters.maxImporte && filters.maxImporte !== ''
+      ? parseFloat(filters.maxImporte.replace(',', '.'))
+      : null
   return facturas.filter((f) => {
     const dateVal = f.fecha ?? f.fecha_vencimiento ?? ''
     if (dateVal.slice(0, 4) !== filters.year) return false
@@ -55,7 +61,7 @@ export function filterFacturas(
     if (!matchesCategory(f, filters.category, wholesalers)) return false
     if (filters.vencStatus && getEffectiveVencStatus(f) !== filters.vencStatus)
       return false
-    
+
     const imp = f.importe ?? 0
     if (min !== null && imp < min) return false
     if (max !== null && imp > max) return false

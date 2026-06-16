@@ -22,7 +22,11 @@ body {
 
 /* Glassmorphism y utilidades legacy */
 .glass-card {
-  background: linear-gradient(135deg, rgba(13, 27, 50, 0.7) 0%, rgba(8, 14, 25, 0.8) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(13, 27, 50, 0.7) 0%,
+    rgba(8, 14, 25, 0.8) 100%
+  );
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.06);
@@ -37,77 +41,109 @@ body {
 /* Cajones con brillo de neón sutil */
 .glow-blue {
   border-color: rgba(59, 130, 246, 0.3) !important;
-  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5), 0 0 15px 0 rgba(59, 130, 246, 0.15) !important;
+  box-shadow:
+    0 12px 40px 0 rgba(0, 0, 0, 0.5),
+    0 0 15px 0 rgba(59, 130, 246, 0.15) !important;
 }
 .glow-blue-hover:hover {
   border-color: rgba(59, 130, 246, 0.55) !important;
-  box-shadow: 0 16px 48px 0 rgba(0, 0, 0, 0.65), 0 0 25px 0 rgba(59, 130, 246, 0.35) !important;
+  box-shadow:
+    0 16px 48px 0 rgba(0, 0, 0, 0.65),
+    0 0 25px 0 rgba(59, 130, 246, 0.35) !important;
   transform: translateY(-2px);
 }
 
 .glow-emerald {
   border-color: rgba(16, 185, 129, 0.3) !important;
-  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5), 0 0 15px 0 rgba(16, 185, 129, 0.15) !important;
+  box-shadow:
+    0 12px 40px 0 rgba(0, 0, 0, 0.5),
+    0 0 15px 0 rgba(16, 185, 129, 0.15) !important;
 }
 .glow-emerald-hover:hover {
   border-color: rgba(16, 185, 129, 0.55) !important;
-  box-shadow: 0 16px 48px 0 rgba(0, 0, 0, 0.65), 0 0 25px 0 rgba(16, 185, 129, 0.35) !important;
+  box-shadow:
+    0 16px 48px 0 rgba(0, 0, 0, 0.65),
+    0 0 25px 0 rgba(16, 185, 129, 0.35) !important;
   transform: translateY(-2px);
 }
 
 .glow-purple {
   border-color: rgba(168, 85, 247, 0.3) !important;
-  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5), 0 0 15px 0 rgba(168, 85, 247, 0.15) !important;
+  box-shadow:
+    0 12px 40px 0 rgba(0, 0, 0, 0.5),
+    0 0 15px 0 rgba(168, 85, 247, 0.15) !important;
 }
 .glow-purple-hover:hover {
   border-color: rgba(168, 85, 247, 0.55) !important;
-  box-shadow: 0 16px 48px 0 rgba(0, 0, 0, 0.65), 0 0 25px 0 rgba(168, 85, 247, 0.35) !important;
+  box-shadow:
+    0 16px 48px 0 rgba(0, 0, 0, 0.65),
+    0 0 25px 0 rgba(168, 85, 247, 0.35) !important;
   transform: translateY(-2px);
 }
 
 .glow-teal {
   border-color: rgba(20, 184, 166, 0.3) !important;
-  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5), 0 0 15px 0 rgba(20, 184, 166, 0.15) !important;
+  box-shadow:
+    0 12px 40px 0 rgba(0, 0, 0, 0.5),
+    0 0 15px 0 rgba(20, 184, 166, 0.15) !important;
 }
 .glow-teal-hover:hover {
   border-color: rgba(20, 184, 166, 0.55) !important;
-  box-shadow: 0 16px 48px 0 rgba(0, 0, 0, 0.65), 0 0 25px 0 rgba(20, 184, 166, 0.35) !important;
+  box-shadow:
+    0 16px 48px 0 rgba(0, 0, 0, 0.65),
+    0 0 25px 0 rgba(20, 184, 166, 0.35) !important;
   transform: translateY(-2px);
 }
 
 .glow-orange {
   border-color: rgba(249, 115, 22, 0.3) !important;
-  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5), 0 0 15px 0 rgba(249, 115, 22, 0.15) !important;
+  box-shadow:
+    0 12px 40px 0 rgba(0, 0, 0, 0.5),
+    0 0 15px 0 rgba(249, 115, 22, 0.15) !important;
 }
 .glow-orange-hover:hover {
   border-color: rgba(249, 115, 22, 0.55) !important;
-  box-shadow: 0 16px 48px 0 rgba(0, 0, 0, 0.65), 0 0 25px 0 rgba(249, 115, 22, 0.35) !important;
+  box-shadow:
+    0 16px 48px 0 rgba(0, 0, 0, 0.65),
+    0 0 25px 0 rgba(249, 115, 22, 0.35) !important;
   transform: translateY(-2px);
 }
 
 .glow-red {
   border-color: rgba(239, 68, 68, 0.3) !important;
-  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5), 0 0 15px 0 rgba(239, 68, 68, 0.15) !important;
+  box-shadow:
+    0 12px 40px 0 rgba(0, 0, 0, 0.5),
+    0 0 15px 0 rgba(239, 68, 68, 0.15) !important;
 }
 .glow-red-hover:hover {
   border-color: rgba(239, 68, 68, 0.55) !important;
-  box-shadow: 0 16px 48px 0 rgba(0, 0, 0, 0.65), 0 0 25px 0 rgba(239, 68, 68, 0.35) !important;
+  box-shadow:
+    0 16px 48px 0 rgba(0, 0, 0, 0.65),
+    0 0 25px 0 rgba(239, 68, 68, 0.35) !important;
   transform: translateY(-2px);
 }
 
 .glow-white {
   border-color: rgba(255, 255, 255, 0.2) !important;
-  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5), 0 0 15px 0 rgba(255, 255, 255, 0.08) !important;
+  box-shadow:
+    0 12px 40px 0 rgba(0, 0, 0, 0.5),
+    0 0 15px 0 rgba(255, 255, 255, 0.08) !important;
 }
 .glow-white-hover:hover {
   border-color: rgba(255, 255, 255, 0.45) !important;
-  box-shadow: 0 16px 48px 0 rgba(0, 0, 0, 0.65), 0 0 25px 0 rgba(255, 255, 255, 0.2) !important;
+  box-shadow:
+    0 16px 48px 0 rgba(0, 0, 0, 0.65),
+    0 0 25px 0 rgba(255, 255, 255, 0.2) !important;
   transform: translateY(-2px);
 }
 
 .tab-active {
   color: #00f2fe !important;
-  background: linear-gradient(90deg, rgba(0, 242, 254, 0.08) 0%, rgba(0, 242, 254, 0) 100%) !important;
+  background: linear-gradient(
+    90deg,
+    rgba(0, 242, 254, 0.08) 0%,
+    rgba(0, 242, 254, 0) 100%
+  ) !important;
   border-left: 3px solid #00f2fe !important;
   border-radius: 0 12px 12px 0;
 }
@@ -117,8 +153,14 @@ body {
 }
 
 @keyframes fi {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Scrollbars elegantes */
@@ -138,7 +180,7 @@ body {
 }
 
 /* Estilo para los selectores de fecha nativos */
-input[type="date"]::-webkit-calendar-picker-indicator {
+input[type='date']::-webkit-calendar-picker-indicator {
   filter: invert(1) brightness(1.5);
   cursor: pointer;
 }
@@ -147,19 +189,23 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 button,
 select,
 a,
-input[type="button"],
-input[type="submit"],
-input[type="checkbox"],
-input[type="radio"],
+input[type='button'],
+input[type='submit'],
+input[type='checkbox'],
+input[type='radio'],
 .cursor-pointer,
-[role="button"] {
+[role='button'] {
   cursor: pointer !important;
 }
 
 /* Efecto Shimmer Dorado Premium */
 @keyframes gold-shimmer {
-  0% { transform: translateX(-200%) skewX(-12deg); }
-  100% { transform: translateX(250%) skewX(-12deg); }
+  0% {
+    transform: translateX(-200%) skewX(-12deg);
+  }
+  100% {
+    transform: translateX(250%) skewX(-12deg);
+  }
 }
 .gold-btn-shimmer {
   position: absolute;
@@ -170,4 +216,3 @@ input[type="radio"],
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
   animation: gold-shimmer 3s infinite linear;
 }
-
