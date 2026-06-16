@@ -9,6 +9,7 @@ import { AbonosPage } from '@/features/abonos/AbonosPage'
 import { FiscalidadPage } from '@/features/fiscalidad/FiscalidadPage'
 import { TrabajadoresPage } from '@/features/trabajadores/TrabajadoresPage'
 import { PremiumGate } from '@/components/ui/PremiumGate'
+import { RoleGate } from '@/components/ui/RoleGate'
 
 export default function App() {
   return (
@@ -22,7 +23,9 @@ export default function App() {
             path="analisis"
             element={
               <PremiumGate>
-                <AnalisisPage />
+                <RoleGate>
+                  <AnalisisPage />
+                </RoleGate>
               </PremiumGate>
             }
           />
@@ -31,7 +34,9 @@ export default function App() {
             path="fiscalidad"
             element={
               <PremiumGate>
-                <FiscalidadPage />
+                <RoleGate>
+                  <FiscalidadPage />
+                </RoleGate>
               </PremiumGate>
             }
           />
@@ -39,7 +44,9 @@ export default function App() {
             path="trabajadores"
             element={
               <PremiumGate>
-                <TrabajadoresPage />
+                <RoleGate>
+                  <TrabajadoresPage />
+                </RoleGate>
               </PremiumGate>
             }
           />

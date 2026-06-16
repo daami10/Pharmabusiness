@@ -14,7 +14,7 @@ export function Sidebar({
   onSettings: () => void
   onPrivacy: () => void
 }) {
-  const { signOut, subscriptionTier } = useAuth()
+  const { signOut, subscriptionTier, userRole } = useAuth()
   const secondaryCls =
     'flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-400 transition-all hover:bg-white/5 hover:text-white'
 
@@ -77,33 +77,36 @@ export function Sidebar({
           </div>
 
           <nav className="space-y-2.5">
-            {NAV_ITEMS.map(({ to, label, icon: Icon, end, requiredTier }) => {
-              const isLocked =
-                requiredTier === 'premium' && subscriptionTier !== 'premium'
-              return (
-                <NavLink
-                  key={to}
-                  to={to}
-                  end={end}
-                  onClick={onClose}
-                  className={({ isActive }) =>
-                    `flex items-center justify-between px-4 py-3.5 text-sm font-semibold transition-all border border-transparent ${
-                      isActive
-                        ? 'tab-active'
-                        : 'text-slate-400 hover:text-white hover:bg-white/5'
-                    }`
-                  }
-                >
-                  <div className="flex items-center gap-3.5">
-                    <Icon className="h-5 w-5" />
-                    {label}
-                  </div>
-                  {isLocked && (
-                    <Lock className="h-3.5 w-3.5 text-[#00f2fe]/80 shrink-0" />
-                  )}
-                </NavLink>
-              )
-            })}
+            {NAV_ITEMS.map(
+              ({ to, label, icon: Icon, end, requiredTier, requiredRole }) => {
+                const isLocked =
+                  (requiredTier === 'premium' && subscriptionTier !== 'premium') ||
+                  (requiredRole === 'titular' && userRole !== 'titular')
+                return (
+                  <NavLink
+                    key={to}
+                    to={to}
+                    end={end}
+                    onClick={onClose}
+                    className={({ isActive }) =>
+                      `flex items-center justify-between px-4 py-3.5 text-sm font-semibold transition-all border border-transparent ${
+                        isActive
+                          ? 'tab-active'
+                          : 'text-slate-400 hover:text-white hover:bg-white/5'
+                      }`
+                    }
+                  >
+                    <div className="flex items-center gap-3.5">
+                      <Icon className="h-5 w-5" />
+                      {label}
+                    </div>
+                    {isLocked && (
+                      <Lock className="h-3.5 w-3.5 text-[#00f2fe]/80 shrink-0" />
+                    )}
+                  </NavLink>
+                )
+              },
+            )}
           </nav>
         </div>
 
