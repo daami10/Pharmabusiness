@@ -1,9 +1,46 @@
+import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { Lock, Sparkles, TrendingUp, Users } from 'lucide-react'
 import { useAuth } from '@/features/auth/AuthProvider'
 
 export function PremiumGate({ children }: { children: ReactNode }) {
-  const { subscriptionTier } = useAuth()
+  const { subscriptionTier, session } = useAuth()
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  async function handleUpgrade() {
+    setLoading(true)
+    setError('')
+    try {
+      const token = session?.access_token
+      if (!token) throw new Error('No se encontró sesión de usuario.')
+
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ plan: 'premium' }),
+      })
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        throw new Error(data.error || 'Error al iniciar la pasarela de pago.')
+      }
+
+      const data = await res.json()
+      if (data.url) {
+        window.location.href = data.url
+      } else {
+        throw new Error('No se recibió la URL de redirección.')
+      }
+    } catch (err) {
+      console.error(err)
+      setError(err instanceof Error ? err.message : 'Error al conectar con Stripe.')
+      setLoading(false)
+    }
+  }
 
   if (subscriptionTier === 'premium') {
     return <>{children}</>
@@ -59,17 +96,18 @@ export function PremiumGate({ children }: { children: ReactNode }) {
           {/* Primary upgrade CTA button */}
           <button
             type="button"
-            disabled
-            className="group relative w-full overflow-hidden rounded-full bg-gradient-to-r from-[#bf953f] via-[#fcf6ba] to-[#b38728] py-4 text-xs font-black text-[#3c2a05]/70 shadow-[0_0_25px_rgba(212,175,55,0.2)] cursor-not-allowed uppercase tracking-widest flex items-center justify-center gap-2 border border-[#fcf6ba]/20 opacity-90"
+            disabled={loading}
+            onClick={handleUpgrade}
+            className="group relative w-full overflow-hidden rounded-full bg-gradient-to-r from-[#bf953f] via-[#fcf6ba] to-[#b38728] py-4 text-xs font-black text-[#3c2a05]/95 shadow-[0_0_25px_rgba(212,175,55,0.25)] hover:shadow-[0_0_35px_rgba(252,246,186,0.35)] hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer uppercase tracking-widest flex items-center justify-center gap-2 border border-[#fcf6ba]/30 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <span className="gold-btn-shimmer" />
-            <Sparkles className="h-4 w-4 text-[#3c2a05]/70 shrink-0" />
-            <span>Mejorar a Plan Premium (Próximamente)</span>
+            <Sparkles className="h-4 w-4 text-[#3c2a05]/80 shrink-0" />
+            <span>{loading ? 'Cargando pasarela...' : 'Mejorar a Plan Premium'}</span>
           </button>
 
-          <p className="mt-3 text-[10px] text-slate-500 leading-normal">
-            * Las suscripciones de pago mediante Stripe estarán disponibles próximamente.
-          </p>
+          {error && (
+            <p className="mt-3 text-[11px] text-red-400 font-semibold">{error}</p>
+          )}
         </div>
       </div>
     </div>

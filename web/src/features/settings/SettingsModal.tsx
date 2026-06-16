@@ -7,7 +7,9 @@ import { useAuth } from '@/features/auth/AuthProvider'
 export function SettingsModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const wholesalers = useWholesalersStore((s) => s.wholesalers)
   const setWholesalers = useWholesalersStore((s) => s.setWholesalers)
-  const { subscriptionTier, activeOrgId } = useAuth()
+  const { subscriptionTier, activeOrgId, session } = useAuth()
+  const [billingLoading, setBillingLoading] = useState(false)
+  const [billingError, setBillingError] = useState('')
 
   // El modal se remonta al abrir (key en AppShell), así que el estado inicial
   // refleja siempre los mayoristas actuales sin necesidad de un efecto.
@@ -21,6 +23,41 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
     }
     setWholesalers(draft, activeOrgId)
     onClose()
+  }
+
+  async function handleManageBilling() {
+    setBillingLoading(true)
+    setBillingError('')
+    try {
+      const token = session?.access_token
+      if (!token) throw new Error('No se encontró sesión de usuario.')
+
+      const res = await fetch('/api/portal', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        throw new Error(data.error || 'Error al conectar con la gestión de facturación.')
+      }
+
+      const data = await res.json()
+      if (data.url) {
+        window.location.href = data.url
+      } else {
+        throw new Error('No se recibió la URL de facturación.')
+      }
+    } catch (err) {
+      console.error(err)
+      setBillingError(
+        err instanceof Error ? err.message : 'Error al conectar con Stripe.',
+      )
+      setBillingLoading(false)
+    }
   }
 
   return (
@@ -57,11 +94,17 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
         </div>
         <button
           type="button"
-          disabled
-          className="mt-3 w-full rounded-xl bg-slate-950 py-2.5 text-xs font-bold text-slate-500 border border-white/5 cursor-not-allowed uppercase tracking-wider opacity-60"
+          disabled={billingLoading}
+          onClick={handleManageBilling}
+          className="mt-3 w-full rounded-xl bg-slate-900 py-2.5 text-xs font-bold text-slate-200 border border-white/10 hover:bg-slate-800 transition-all cursor-pointer uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Gestión del Plan (Próximamente)
+          {billingLoading ? 'Cargando portal...' : 'Gestión del Plan (Stripe)'}
         </button>
+        {billingError && (
+          <p className="mt-2 text-center text-[10px] text-red-400 font-semibold">
+            {billingError}
+          </p>
+        )}
       </div>
 
       {/* Botones de Acción */}
