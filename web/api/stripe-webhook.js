@@ -29,6 +29,7 @@ export default async function handler(req, res) {
   const supabaseUrl = process.env.SUPABASE_URL
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
   const premiumPriceId = process.env.STRIPE_PREMIUM_PRICE_ID
+  const basicPriceId = process.env.STRIPE_BASIC_PRICE_ID
 
   if (
     !sig ||
@@ -36,9 +37,10 @@ export default async function handler(req, res) {
     !stripeSecretKey ||
     !supabaseUrl ||
     !supabaseServiceKey ||
-    !premiumPriceId
+    !premiumPriceId ||
+    !basicPriceId
   ) {
-    console.error('Missing environment variables or Stripe signature header.')
+    console.error('Missing environment variables (Basic or Premium Price ID, Webhook Secret, etc.) or Stripe signature header.')
     return res.status(500).json({ error: 'Server misconfiguration.' })
   }
 

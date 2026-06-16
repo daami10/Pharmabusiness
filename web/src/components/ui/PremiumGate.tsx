@@ -21,6 +21,7 @@ export function PremiumGate({ children }: { children: ReactNode }) {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
+        body: JSON.stringify({ plan: 'premium' }),
       })
 
       if (!res.ok) {

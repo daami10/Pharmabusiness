@@ -21,15 +21,19 @@ export default async function handler(req, res) {
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
   const stripeSecretKey = process.env.STRIPE_SECRET_KEY
   const premiumPriceId = process.env.STRIPE_PREMIUM_PRICE_ID
+  const basicPriceId = process.env.STRIPE_BASIC_PRICE_ID
 
-  if (!supabaseUrl || !supabaseServiceKey || !stripeSecretKey || !premiumPriceId) {
+  if (!supabaseUrl || !supabaseServiceKey || !stripeSecretKey || !premiumPriceId || !basicPriceId) {
     return res.status(500).json({
       error:
-        'Variables de entorno faltantes en el servidor para procesar Stripe Checkout.',
+        'Variables de entorno faltantes en el servidor para procesar Stripe Checkout (Basic y Premium).',
     })
   }
 
   try {
+    const { plan } = req.body || {}
+    const selectedPriceId = plan === 'premium' ? premiumPriceId : basicPriceId
+
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
     const {
       data: { user },
@@ -68,7 +72,7 @@ export default async function handler(req, res) {
       payment_method_types: ['card'],
       line_items: [
         {
-          price: premiumPriceId,
+          price: selectedPriceId,
           quantity: 1,
         },
       ],
