@@ -44,7 +44,9 @@ export function Dialog({ open, onClose, title, children, size }: DialogProps) {
         if (e.target === e.currentTarget) onClose()
       }}
     >
-      <div className={`max-h-[90vh] w-full ${sizeClass} overflow-y-auto rounded-2xl border border-accent-blue/15 bg-slate-900/90 p-6 shadow-2xl`}>
+      <div
+        className={`max-h-[90vh] w-full ${sizeClass} overflow-y-auto rounded-2xl border border-accent-blue/15 bg-slate-900/90 p-6 shadow-2xl`}
+      >
         <div className="mb-5 flex items-center justify-between">
           <h2 className="text-xl font-bold text-slate-100">{title}</h2>
           <button

@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import type { Nomina, NominaInput, Seguro, SeguroInput, Trabajador } from '@/types/domain'
+import { useAuth } from '@/features/auth/AuthProvider'
 
 async function currentUserId(): Promise<string> {
   const {
@@ -29,10 +30,14 @@ export function useTrabajadores() {
 
 export function useCreateTrabajador() {
   const qc = useQueryClient()
+  const { activeOrgId } = useAuth()
   return useMutation({
     mutationFn: async (nombre: string) => {
       const user_id = await currentUserId()
-      const { error } = await supabase.from('trabajadores').insert([{ nombre, user_id }])
+      if (!activeOrgId) throw new Error('No hay organización activa.')
+      const { error } = await supabase
+        .from('trabajadores')
+        .insert([{ nombre, user_id, org_id: activeOrgId }])
       if (error) throw new Error(error.message)
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: TRAB_KEY }),
@@ -58,12 +63,14 @@ export function useNominas() {
 
 export function useCreateNominas() {
   const qc = useQueryClient()
+  const { activeOrgId } = useAuth()
   return useMutation({
     mutationFn: async (inputs: NominaInput[]) => {
       const user_id = await currentUserId()
+      if (!activeOrgId) throw new Error('No hay organización activa.')
       const { error } = await supabase
         .from('nominas')
-        .insert(inputs.map((i) => ({ ...i, user_id })))
+        .insert(inputs.map((i) => ({ ...i, user_id, org_id: activeOrgId })))
       if (error) throw new Error(error.message)
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: NOM_KEY }),
@@ -111,12 +118,14 @@ export function useSeguros() {
 
 export function useCreateSeguros() {
   const qc = useQueryClient()
+  const { activeOrgId } = useAuth()
   return useMutation({
     mutationFn: async (inputs: SeguroInput[]) => {
       const user_id = await currentUserId()
+      if (!activeOrgId) throw new Error('No hay organización activa.')
       const { error } = await supabase
         .from('seguros_sociales')
-        .insert(inputs.map((i) => ({ ...i, user_id })))
+        .insert(inputs.map((i) => ({ ...i, user_id, org_id: activeOrgId })))
       if (error) throw new Error(error.message)
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: SEG_KEY }),
