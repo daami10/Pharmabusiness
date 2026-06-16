@@ -1,7 +1,17 @@
 import { useMemo, useState, useRef } from 'react'
 import type { ChangeEvent, DragEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { BarChart3, FileText, Landmark, TrendingUp, Users, Plus, Sparkles, ChevronRight, FileUp } from 'lucide-react'
+import {
+  BarChart3,
+  FileText,
+  Landmark,
+  TrendingUp,
+  Users,
+  Plus,
+  Sparkles,
+  ChevronRight,
+  FileUp,
+} from 'lucide-react'
 import { useFacturas } from '@/lib/queries/facturas'
 import { useFiscalidad } from '@/lib/queries/fiscalidad'
 import { useNominas, useSeguros } from '@/lib/queries/trabajadores'
@@ -18,7 +28,7 @@ export function InicioPage() {
   const fiscal = useFiscalidad()
   const nominas = useNominas()
   const seguros = useSeguros()
-  
+
   const [previsionOpen, setPrevisionOpen] = useState(false)
   const [fastActionOpen, setFastActionOpen] = useState(false)
   const [dragging, setDragging] = useState(false)
@@ -51,6 +61,7 @@ export function InicioPage() {
       amount: kpis.facturas.total,
       desc: `${kpis.facturas.count} factura${kpis.facturas.count !== 1 ? 's' : ''} este mes`,
       hoverCls: 'glow-blue glow-blue-hover',
+      hoverColor: 'group-hover:text-blue-400',
     },
     {
       to: '/abonos',
@@ -61,6 +72,7 @@ export function InicioPage() {
       amount: kpis.abonos.total,
       desc: `${kpis.abonos.count} abono${kpis.abonos.count !== 1 ? 's' : ''} recibido${kpis.abonos.count !== 1 ? 's' : ''}`,
       hoverCls: 'glow-emerald glow-emerald-hover',
+      hoverColor: 'group-hover:text-emerald-400',
     },
     {
       to: '/fiscalidad',
@@ -71,6 +83,7 @@ export function InicioPage() {
       amount: kpis.fiscal.total,
       desc: `${kpis.fiscal.count} impuesto${kpis.fiscal.count !== 1 ? 's' : ''} / tasa${kpis.fiscal.count !== 1 ? 's' : ''}`,
       hoverCls: 'glow-purple glow-purple-hover',
+      hoverColor: 'group-hover:text-purple-400',
     },
     {
       to: '/trabajadores',
@@ -81,6 +94,7 @@ export function InicioPage() {
       amount: kpis.trabajadores.total,
       desc: `${kpis.trabajadores.nominas} nómina${kpis.trabajadores.nominas !== 1 ? 's' : ''} y ${kpis.trabajadores.seguros} seguro${kpis.trabajadores.seguros !== 1 ? 's' : ''}`,
       hoverCls: 'glow-teal glow-teal-hover',
+      hoverColor: 'group-hover:text-teal-400',
     },
   ]
 
@@ -233,7 +247,9 @@ export function InicioPage() {
               <span className={`p-2.5 rounded-xl ${c.bgIcon} ${c.color} transition-all`}>
                 <c.icon className="h-5 w-5" />
               </span>
-              <span className={`text-2xs font-bold text-slate-500 group-hover:${c.color} transition-colors uppercase tracking-wider`}>
+              <span
+                className={`text-2xs font-bold text-slate-500 ${c.hoverColor} transition-colors uppercase tracking-wider`}
+              >
                 {c.label}
               </span>
             </div>
@@ -252,11 +268,14 @@ export function InicioPage() {
           <div>
             <div className="flex items-center gap-2 mb-3">
               <span className="w-2 h-6 bg-gradient-to-b from-[#00f2fe] to-blue-500 rounded-full"></span>
-              <h3 className="text-lg font-extrabold text-slate-100 tracking-tight">Carga Rápida con IA</h3>
+              <h3 className="text-lg font-extrabold text-slate-100 tracking-tight">
+                Carga Rápida con IA
+              </h3>
             </div>
             <p className="text-sm text-slate-400 leading-relaxed mb-4">
-              ¿Tienes una factura a mano? Arrástrala directamente aquí o haz clic abajo para subir una foto.
-              Gemini leerá el importe, el laboratorio y el vencimiento automáticamente por ti.
+              ¿Tienes una factura a mano? Arrástrala directamente aquí o haz clic abajo
+              para subir una foto. Gemini leerá el importe, el laboratorio y el
+              vencimiento automáticamente por ti.
             </p>
           </div>
 
@@ -274,9 +293,13 @@ export function InicioPage() {
               }`}
             />
             <span className="text-xs text-slate-300 group-hover:text-white transition-colors font-bold">
-              {dragging ? 'Suelta la factura para escanearla' : 'Arrastra o haz clic para escanear factura'}
+              {dragging
+                ? 'Suelta la factura para escanearla'
+                : 'Arrastra o haz clic para escanear factura'}
             </span>
-            <span className="text-3xs text-slate-500">Soporta imágenes de facturas (Gemini IA)</span>
+            <span className="text-3xs text-slate-500">
+              Soporta imágenes de facturas (Gemini IA)
+            </span>
             <input
               type="file"
               ref={fileInputRef}
@@ -292,7 +315,9 @@ export function InicioPage() {
           <div>
             <div className="flex items-center gap-2 mb-4">
               <span className="w-2 h-6 bg-gradient-to-b from-purple-500 to-indigo-600 rounded-full"></span>
-              <h3 className="text-lg font-extrabold text-slate-100 tracking-tight">Acciones Rápidas</h3>
+              <h3 className="text-lg font-extrabold text-slate-100 tracking-tight">
+                Acciones Rápidas
+              </h3>
             </div>
             <div className="space-y-2.5">
               <button
@@ -342,7 +367,7 @@ export function InicioPage() {
                 </span>
                 <ChevronRight className="h-4 w-4 text-slate-500 group-hover:text-white transition-colors" />
               </button>
-              
+
               <button
                 type="button"
                 onClick={() => triggerFastAction('add-fiscal')}

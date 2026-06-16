@@ -3,7 +3,7 @@ import { Lock, Sparkles, TrendingUp, Users } from 'lucide-react'
 import { useAuth } from '@/features/auth/AuthProvider'
 
 export function PremiumGate({ children }: { children: ReactNode }) {
-  const { subscriptionTier, updateSubscriptionTier } = useAuth()
+  const { subscriptionTier } = useAuth()
 
   if (subscriptionTier === 'premium') {
     return <>{children}</>
@@ -29,8 +29,9 @@ export function PremiumGate({ children }: { children: ReactNode }) {
             Acceso Premium Requerido
           </h3>
           <p className="text-xs text-slate-400 leading-relaxed mb-6">
-            Obtén el control total de tu farmacia. Sube al plan **Premium** para
-            desbloquear esta sección y las herramientas de análisis avanzado.
+            Obtén el control total de tu farmacia. Sube al plan{' '}
+            <strong className="font-bold text-[#fcf6ba]">Premium</strong> para desbloquear
+            esta sección y las herramientas de análisis avanzado.
           </p>
 
           {/* Benefits list */}
@@ -58,17 +59,16 @@ export function PremiumGate({ children }: { children: ReactNode }) {
           {/* Primary upgrade CTA button */}
           <button
             type="button"
-            onClick={() => void updateSubscriptionTier('premium')}
-            className="group relative w-full overflow-hidden rounded-full bg-gradient-to-r from-[#bf953f] via-[#fcf6ba] to-[#b38728] py-4 text-xs font-black text-[#3c2a05] shadow-[0_0_25px_rgba(212,175,55,0.35)] transition-all hover:scale-[1.02] hover:shadow-[0_0_40px_rgba(212,175,55,0.6)] cursor-pointer uppercase tracking-widest flex items-center justify-center gap-2 border border-[#fcf6ba]/30"
+            disabled
+            className="group relative w-full overflow-hidden rounded-full bg-gradient-to-r from-[#bf953f] via-[#fcf6ba] to-[#b38728] py-4 text-xs font-black text-[#3c2a05]/70 shadow-[0_0_25px_rgba(212,175,55,0.2)] cursor-not-allowed uppercase tracking-widest flex items-center justify-center gap-2 border border-[#fcf6ba]/20 opacity-90"
           >
             <span className="gold-btn-shimmer" />
-            <Sparkles className="h-4 w-4 text-[#3c2a05] shrink-0 animate-pulse" />
-            <span>Mejorar a Plan Premium</span>
+            <Sparkles className="h-4 w-4 text-[#3c2a05]/70 shrink-0" />
+            <span>Mejorar a Plan Premium (Próximamente)</span>
           </button>
 
           <p className="mt-3 text-[10px] text-slate-500 leading-normal">
-            * Nota: En esta versión de prueba, al pulsar el botón simularás la pasarela
-            real de Stripe y se activará el plan inmediatamente.
+            * Las suscripciones de pago mediante Stripe estarán disponibles próximamente.
           </p>
         </div>
       </div>
