@@ -79,12 +79,11 @@ export default async function handler(req, res) {
         
         let currentPeriodEnd
         try {
-          if (!stripeSubscription || !stripeSubscription.current_period_end) {
-            throw new Error(`Subscription object is invalid or missing current_period_end: ${JSON.stringify(stripeSubscription)}`)
+          const rawEnd = stripeSubscription.current_period_end || stripeSubscription.items?.data?.[0]?.current_period_end
+          if (!rawEnd) {
+            throw new Error(`No se encontró current_period_end en la suscripción ni en sus ítems: ${JSON.stringify(stripeSubscription)}`)
           }
-          currentPeriodEnd = new Date(
-            stripeSubscription.current_period_end * 1000
-          ).toISOString()
+          currentPeriodEnd = new Date(rawEnd * 1000).toISOString()
         } catch (dateErr) {
           console.error('Error parsing current_period_end:', dateErr)
           return res.status(400).json({
@@ -130,12 +129,11 @@ export default async function handler(req, res) {
         
         let currentPeriodEnd
         try {
-          if (!subscription || !subscription.current_period_end) {
-            throw new Error(`Subscription object is invalid or missing current_period_end on update: ${JSON.stringify(subscription)}`)
+          const rawEnd = subscription.current_period_end || subscription.items?.data?.[0]?.current_period_end
+          if (!rawEnd) {
+            throw new Error(`No se encontró current_period_end en la suscripción actualizada ni en sus ítems: ${JSON.stringify(subscription)}`)
           }
-          currentPeriodEnd = new Date(
-            subscription.current_period_end * 1000
-          ).toISOString()
+          currentPeriodEnd = new Date(rawEnd * 1000).toISOString()
         } catch (dateErr) {
           console.error('Error parsing current_period_end on update:', dateErr)
           return res.status(400).json({ error: dateErr.message })
