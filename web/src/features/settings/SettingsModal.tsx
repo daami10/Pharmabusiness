@@ -7,7 +7,7 @@ import { useAuth } from '@/features/auth/AuthProvider'
 export function SettingsModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const wholesalers = useWholesalersStore((s) => s.wholesalers)
   const setWholesalers = useWholesalersStore((s) => s.setWholesalers)
-  const { subscriptionTier, updateSubscriptionTier } = useAuth()
+  const { subscriptionTier } = useAuth()
 
   // El modal se remonta al abrir (key en AppShell), así que el estado inicial
   // refleja siempre los mayoristas actuales sin necesidad de un efecto.
@@ -57,16 +57,10 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
         </div>
         <button
           type="button"
-          onClick={() =>
-            void updateSubscriptionTier(
-              subscriptionTier === 'premium' ? 'basic' : 'premium',
-            )
-          }
-          className="mt-3 w-full rounded-xl bg-slate-900 hover:bg-slate-950 py-2.5 text-xs font-bold text-[#00f2fe] transition-colors border border-[#00f2fe]/20 cursor-pointer uppercase tracking-wider"
+          disabled
+          className="mt-3 w-full rounded-xl bg-slate-950 py-2.5 text-xs font-bold text-slate-500 border border-white/5 cursor-not-allowed uppercase tracking-wider opacity-60"
         >
-          {subscriptionTier === 'premium'
-            ? 'Cambiar a Plan Básico'
-            : 'Cambiar a Plan Premium'}
+          Gestión del Plan (Próximamente)
         </button>
       </div>
 

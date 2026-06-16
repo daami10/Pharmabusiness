@@ -18,10 +18,6 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 
 function getTierForUser(user: User | null): 'basic' | 'premium' {
   if (!user) return 'basic'
-  const email = user.email || ''
-  if (email === 'damianrossy10@gmail.com' || email.includes('test')) {
-    return 'premium'
-  }
   return user.user_metadata?.subscription_tier ?? 'basic'
 }
 

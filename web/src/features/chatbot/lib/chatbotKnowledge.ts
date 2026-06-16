@@ -175,29 +175,6 @@ export const KNOWLEDGE_BASE: KnowledgeArticle[] = [
     suggestions: ['¿Cómo añado una nómina?', '¿Dónde se ven los costes de personal?'],
   },
   {
-    id: 'presupuestos',
-    title: 'Límites de Presupuesto y Alertas',
-    keywords: [
-      'presupuesto',
-      'presupuestos',
-      'limite',
-      'límite',
-      'alerta',
-      'alertas',
-      'excedido',
-      'superado',
-      'rojo',
-      'advertencia',
-      'laboratorio presupuesto',
-    ],
-    content:
-      'Puedes establecer un límite de presupuesto de compra anual para tus laboratorios proveedores:\n\n* **Cómo configurarlo**: Pulsa en **"Configuración"** abajo en el menú lateral y ve a la sección de presupuestos.\n* **Cómo funcionan las Alertas**: Si la suma de las facturas ingresadas para un laboratorio supera el límite configurado dentro del año activo, aparecerá una **alerta roja de advertencia** en la parte superior del módulo de **Facturas**.',
-    suggestions: [
-      '¿Cómo configuro un límite de presupuesto?',
-      '¿Dónde se ven las alertas de presupuesto?',
-    ],
-  },
-  {
     id: 'mayoristas_config',
     title: 'Configuración de Mayoristas Predeterminados',
     keywords: [
@@ -316,7 +293,7 @@ export function searchKnowledge(
     return {
       response:
         '¡Hola! Encantado de saludarte. ¿Cómo te puedo ayudar hoy con el funcionamiento de la aplicación?',
-      suggestions: ['¿Cómo se suben facturas?', '¿Cómo se configuran presupuestos?'],
+      suggestions: ['¿Cómo se suben facturas?', '¿Cómo cambio los mayoristas?'],
     }
   }
 
