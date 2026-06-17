@@ -8,8 +8,9 @@ import { formatMoney } from '@/lib/utils/money'
 import { buildPrevision } from './lib/inicio-view'
 import type { PrevisionSection } from './lib/inicio-view'
 import type { Factura } from '@/types/domain'
-import { useYearStore } from '@/stores/yearStore'
 import { FacturaModal } from '../facturas/FacturaModal'
+import { useAuth } from '@/features/auth/AuthProvider'
+import { useYearStore } from '@/stores/yearStore'
 
 function InvoiceSubList({
   invoices,
@@ -167,6 +168,7 @@ export function PrevisionModal({
   open: boolean
   onClose: () => void
 }) {
+  const { subscriptionTier } = useAuth()
   const facturas = useFacturas()
   const fiscal = useFiscalidad()
   const nominas = useNominas()
@@ -192,14 +194,14 @@ export function PrevisionModal({
     return buildPrevision(
       {
         facturas: facturas.data ?? [],
-        fiscal: fiscal.data ?? [],
-        nominas: nominas.data ?? [],
-        seguros: seguros.data ?? [],
+        fiscal: subscriptionTier === 'premium' ? (fiscal.data ?? []) : [],
+        nominas: subscriptionTier === 'premium' ? (nominas.data ?? []) : [],
+        seguros: subscriptionTier === 'premium' ? (seguros.data ?? []) : [],
       },
       now.getFullYear(),
       now.getMonth() + 1,
     )
-  }, [facturas.data, fiscal.data, nominas.data, seguros.data])
+  }, [facturas.data, fiscal.data, nominas.data, seguros.data, subscriptionTier])
 
   return (
     <>
