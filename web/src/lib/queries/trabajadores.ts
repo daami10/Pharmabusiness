@@ -44,6 +44,20 @@ export function useCreateTrabajador() {
   })
 }
 
+export function useUpdateTrabajador() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ id, activo }: { id: string; activo: boolean }) => {
+      const { error } = await supabase
+        .from('trabajadores')
+        .update({ activo })
+        .eq('id', id)
+      if (error) throw new Error(error.message)
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: TRAB_KEY }),
+  })
+}
+
 // ─── Nóminas ──────────────────────────────────────────────────────────────────
 const NOM_KEY = ['nominas'] as const
 
