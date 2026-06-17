@@ -10,15 +10,20 @@ import { startCheckout } from '@/lib/billing'
 export function TrialBanner() {
   const { isTrialActive, trialDaysLeft, userRole, session } = useAuth()
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   if (!isTrialActive || userRole !== 'titular') return null
 
   async function handleSubscribe() {
     setLoading(true)
+    setError('')
     try {
       await startCheckout('premium', session?.access_token)
     } catch (err) {
       console.error(err)
+      setError(
+        err instanceof Error ? err.message : 'No se pudo conectar con la pasarela de pago.',
+      )
       setLoading(false)
     }
   }
@@ -43,6 +48,7 @@ export function TrialBanner() {
       >
         {loading ? 'Cargando…' : 'Suscríbete ahora'}
       </button>
+      {error && <span className="w-full text-[11px] font-semibold text-red-400">{error}</span>}
     </div>
   )
 }
