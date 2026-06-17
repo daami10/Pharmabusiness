@@ -18,11 +18,13 @@ import { useNominas, useSeguros } from '@/lib/queries/trabajadores'
 import { useYearStore } from '@/stores/yearStore'
 import { formatMoney } from '@/lib/utils/money'
 import { monthLabel } from '@/lib/utils/dates'
+import { useAuth } from '@/features/auth/AuthProvider'
 import { computeInicioKpis } from './lib/inicio-view'
 import { PrevisionModal } from './PrevisionModal'
 
 export function InicioPage() {
   const navigate = useNavigate()
+  const { subscriptionTier } = useAuth()
   const year = useYearStore((s) => s.year)
   const facturas = useFacturas()
   const fiscal = useFiscalidad()
@@ -74,28 +76,32 @@ export function InicioPage() {
       hoverCls: 'glow-emerald glow-emerald-hover',
       hoverColor: 'group-hover:text-emerald-400',
     },
-    {
-      to: '/fiscalidad',
-      icon: Landmark,
-      color: 'text-purple-400',
-      bgIcon: 'bg-purple-500/10 hover:bg-purple-500/20',
-      label: 'Fiscalidad',
-      amount: kpis.fiscal.total,
-      desc: `${kpis.fiscal.count} impuesto${kpis.fiscal.count !== 1 ? 's' : ''} / tasa${kpis.fiscal.count !== 1 ? 's' : ''}`,
-      hoverCls: 'glow-purple glow-purple-hover',
-      hoverColor: 'group-hover:text-purple-400',
-    },
-    {
-      to: '/trabajadores',
-      icon: Users,
-      color: 'text-teal-400',
-      bgIcon: 'bg-teal-500/10 hover:bg-teal-500/20',
-      label: 'Personal',
-      amount: kpis.trabajadores.total,
-      desc: `${kpis.trabajadores.nominas} nómina${kpis.trabajadores.nominas !== 1 ? 's' : ''} y ${kpis.trabajadores.seguros} seguro${kpis.trabajadores.seguros !== 1 ? 's' : ''}`,
-      hoverCls: 'glow-teal glow-teal-hover',
-      hoverColor: 'group-hover:text-teal-400',
-    },
+    ...(subscriptionTier === 'premium'
+      ? [
+          {
+            to: '/fiscalidad',
+            icon: Landmark,
+            color: 'text-purple-400',
+            bgIcon: 'bg-purple-500/10 hover:bg-purple-500/20',
+            label: 'Fiscalidad',
+            amount: kpis.fiscal.total,
+            desc: `${kpis.fiscal.count} impuesto${kpis.fiscal.count !== 1 ? 's' : ''} / tasa${kpis.fiscal.count !== 1 ? 's' : ''}`,
+            hoverCls: 'glow-purple glow-purple-hover',
+            hoverColor: 'group-hover:text-purple-400',
+          },
+          {
+            to: '/trabajadores',
+            icon: Users,
+            color: 'text-teal-400',
+            bgIcon: 'bg-teal-500/10 hover:bg-teal-500/20',
+            label: 'Personal',
+            amount: kpis.trabajadores.total,
+            desc: `${kpis.trabajadores.nominas} nómina${kpis.trabajadores.nominas !== 1 ? 's' : ''} y ${kpis.trabajadores.seguros} seguro${kpis.trabajadores.seguros !== 1 ? 's' : ''}`,
+            hoverCls: 'glow-teal glow-teal-hover',
+            hoverColor: 'group-hover:text-teal-400',
+          },
+        ]
+      : []),
   ]
 
   // Lanza el escaneo IA: navega a Facturas abriendo el modal con el archivo.
@@ -192,7 +198,7 @@ export function InicioPage() {
                     onClick={() => triggerFastAction('scan-factura')}
                     className="w-full text-left px-4 py-2.5 text-xs hover:text-white hover:bg-white/5 transition-colors flex items-center gap-2"
                   >
-                    <Sparkles className="h-4 w-4 text-[#00f2fe]" />
+                    <Sparkles className="h-4.5 w-4.5 text-[#00f2fe]" />
                     Escanear Factura con IA
                   </button>
                   <button
@@ -200,33 +206,37 @@ export function InicioPage() {
                     onClick={() => triggerFastAction('add-factura')}
                     className="w-full text-left px-4 py-2.5 text-xs hover:text-white hover:bg-white/5 transition-colors flex items-center gap-2"
                   >
-                    <FileText className="h-4 w-4 text-blue-400" />
+                    <FileText className="h-4.5 w-4.5 text-blue-400" />
                     Nueva Factura (Manual)
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => triggerFastAction('add-nomina')}
-                    className="w-full text-left px-4 py-2.5 text-xs hover:text-white hover:bg-white/5 transition-colors flex items-center gap-2"
-                  >
-                    <Users className="h-4 w-4 text-teal-400" />
-                    Registrar Nómina
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => triggerFastAction('add-seguro')}
-                    className="w-full text-left px-4 py-2.5 text-xs hover:text-white hover:bg-white/5 transition-colors flex items-center gap-2"
-                  >
-                    <Landmark className="h-4 w-4 text-orange-400" />
-                    Registrar Seguro Social
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => triggerFastAction('add-fiscal')}
-                    className="w-full text-left px-4 py-2.5 text-xs hover:text-white hover:bg-white/5 transition-colors flex items-center gap-2"
-                  >
-                    <Landmark className="h-4 w-4 text-purple-400" />
-                    Añadir Impuesto / Tasa
-                  </button>
+                  {subscriptionTier === 'premium' && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => triggerFastAction('add-nomina')}
+                        className="w-full text-left px-4 py-2.5 text-xs hover:text-white hover:bg-white/5 transition-colors flex items-center gap-2"
+                      >
+                        <Users className="h-4.5 w-4.5 text-teal-400" />
+                        Registrar Nómina
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => triggerFastAction('add-seguro')}
+                        className="w-full text-left px-4 py-2.5 text-xs hover:text-white hover:bg-white/5 transition-colors flex items-center gap-2"
+                      >
+                        <Landmark className="h-4.5 w-4.5 text-orange-400" />
+                        Registrar Seguro Social
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => triggerFastAction('add-fiscal')}
+                        className="w-full text-left px-4 py-2.5 text-xs hover:text-white hover:bg-white/5 transition-colors flex items-center gap-2"
+                      >
+                        <Landmark className="h-4.5 w-4.5 text-purple-400" />
+                        Añadir Impuesto / Tasa
+                      </button>
+                    </>
+                  )}
                 </div>
               </>
             )}
@@ -235,7 +245,11 @@ export function InicioPage() {
       </div>
 
       {/* KPI Cards Grid */}
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-10">
+      <div
+        className={`grid grid-cols-1 gap-5 sm:grid-cols-2 ${
+          subscriptionTier === 'premium' ? 'lg:grid-cols-4' : 'lg:grid-cols-2'
+        } mb-10`}
+      >
         {cards.map((c) => (
           <button
             key={c.to}
@@ -344,41 +358,45 @@ export function InicioPage() {
                 <ChevronRight className="h-4 w-4 text-slate-500 group-hover:text-white transition-colors" />
               </button>
 
-              <button
-                type="button"
-                onClick={() => triggerFastAction('add-nomina')}
-                className="w-full flex items-center justify-between p-3.5 bg-white/3 hover:bg-white/8 rounded-xl border border-white/5 transition-all text-left text-sm font-semibold text-slate-200 hover:text-white group"
-              >
-                <span className="flex items-center gap-2.5">
-                  <Users className="h-4.5 w-4.5 text-teal-400" />
-                  Registrar Nómina
-                </span>
-                <ChevronRight className="h-4 w-4 text-slate-500 group-hover:text-white transition-colors" />
-              </button>
+              {subscriptionTier === 'premium' && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => triggerFastAction('add-nomina')}
+                    className="w-full flex items-center justify-between p-3.5 bg-white/3 hover:bg-white/8 rounded-xl border border-white/5 transition-all text-left text-sm font-semibold text-slate-200 hover:text-white group"
+                  >
+                    <span className="flex items-center gap-2.5">
+                      <Users className="h-4.5 w-4.5 text-teal-400" />
+                      Registrar Nómina
+                    </span>
+                    <ChevronRight className="h-4 w-4 text-slate-500 group-hover:text-white transition-colors" />
+                  </button>
 
-              <button
-                type="button"
-                onClick={() => triggerFastAction('add-seguro')}
-                className="w-full flex items-center justify-between p-3.5 bg-white/3 hover:bg-white/8 rounded-xl border border-white/5 transition-all text-left text-sm font-semibold text-slate-200 hover:text-white group"
-              >
-                <span className="flex items-center gap-2.5">
-                  <Landmark className="h-4.5 w-4.5 text-orange-400" />
-                  Registrar Seguro Social
-                </span>
-                <ChevronRight className="h-4 w-4 text-slate-500 group-hover:text-white transition-colors" />
-              </button>
+                  <button
+                    type="button"
+                    onClick={() => triggerFastAction('add-seguro')}
+                    className="w-full flex items-center justify-between p-3.5 bg-white/3 hover:bg-white/8 rounded-xl border border-white/5 transition-all text-left text-sm font-semibold text-slate-200 hover:text-white group"
+                  >
+                    <span className="flex items-center gap-2.5">
+                      <Landmark className="h-4.5 w-4.5 text-orange-400" />
+                      Registrar Seguro Social
+                    </span>
+                    <ChevronRight className="h-4 w-4 text-slate-500 group-hover:text-white transition-colors" />
+                  </button>
 
-              <button
-                type="button"
-                onClick={() => triggerFastAction('add-fiscal')}
-                className="w-full flex items-center justify-between p-3.5 bg-white/3 hover:bg-white/8 rounded-xl border border-white/5 transition-all text-left text-sm font-semibold text-slate-200 hover:text-white group"
-              >
-                <span className="flex items-center gap-2.5">
-                  <Landmark className="h-4.5 w-4.5 text-purple-400" />
-                  Añadir Impuesto / Tasa
-                </span>
-                <ChevronRight className="h-4 w-4 text-slate-500 group-hover:text-white transition-colors" />
-              </button>
+                  <button
+                    type="button"
+                    onClick={() => triggerFastAction('add-fiscal')}
+                    className="w-full flex items-center justify-between p-3.5 bg-white/3 hover:bg-white/8 rounded-xl border border-white/5 transition-all text-left text-sm font-semibold text-slate-200 hover:text-white group"
+                  >
+                    <span className="flex items-center gap-2.5">
+                      <Landmark className="h-4.5 w-4.5 text-purple-400" />
+                      Añadir Impuesto / Tasa
+                    </span>
+                    <ChevronRight className="h-4 w-4 text-slate-500 group-hover:text-white transition-colors" />
+                  </button>
+                </>
+              )}
             </div>
           </div>
           <p className="text-3xs text-slate-500 text-center mt-4">

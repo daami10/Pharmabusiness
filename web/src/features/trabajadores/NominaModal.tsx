@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -38,6 +38,12 @@ export function NominaModal({
   nomina: Nomina | null
 }) {
   const { data: trabajadores } = useTrabajadores()
+
+  const selectOptions = useMemo(() => {
+    return (trabajadores ?? []).filter(
+      (t) => t.activo !== false || t.id === nomina?.trabajador_id,
+    )
+  }, [trabajadores, nomina])
   const createNominas = useCreateNominas()
   const updateNomina = useUpdateNomina()
   const [serverError, setServerError] = useState('')
@@ -124,7 +130,7 @@ export function NominaModal({
           </label>
           <select {...register('trabajador_id')} className={inputCls}>
             <option value="">Seleccionar trabajador…</option>
-            {(trabajadores ?? []).map((t) => (
+            {selectOptions.map((t) => (
               <option key={t.id} value={t.id}>
                 {t.nombre}
               </option>

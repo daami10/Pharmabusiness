@@ -38,6 +38,7 @@ export interface Trabajador {
   id: string
   user_id: string
   nombre: string
+  activo?: boolean
 }
 
 export interface Nomina {

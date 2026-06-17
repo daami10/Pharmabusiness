@@ -2,6 +2,7 @@ import { useMemo, useState, useEffect } from 'react'
 import { ChevronDown, Download, Pencil, Plus, Search, Trash2 } from 'lucide-react'
 import { useLocation } from 'react-router-dom'
 import { FacturaModal } from './FacturaModal'
+import { AbonoModal } from '../abonos/AbonoModal'
 import { Calendar } from './Calendar'
 import { downloadFacturasCSV } from './lib/csv'
 import { useFacturas, useDeleteFactura } from '@/lib/queries/facturas'
@@ -64,10 +65,9 @@ export function FacturasPage() {
   const [maxImporte, setMaxImporte] = useState('')
   const [vencStatus, setVencStatus] = useState<'' | VencStatus>('')
 
-  // Estado de expansión: solo guardamos las desviaciones del usuario respecto al
-  // valor por defecto (primer grupo abierto, resto cerrados).
   const [overrides, setOverrides] = useState<Record<string, boolean>>({})
   const [modalOpen, setModalOpen] = useState(false)
+  const [abonoModalOpen, setAbonoModalOpen] = useState(false)
   const [editing, setEditing] = useState<Factura | null>(null)
   const [initialFile, setInitialFile] = useState<File | null>(null)
 
@@ -174,7 +174,11 @@ export function FacturasPage() {
 
   function openEdit(f: Factura) {
     setEditing(f)
-    setModalOpen(true)
+    if (f.tipo === 'Abono') {
+      setAbonoModalOpen(true)
+    } else {
+      setModalOpen(true)
+    }
   }
 
   const total = netTotal(visible)
@@ -351,7 +355,7 @@ export function FacturasPage() {
                   onClick={() => setCategory(c.value)}
                   className={`rounded-xl border px-3.5 py-1.5 text-xs font-bold transition-all ${
                     category === c.value
-                      ? 'border-blue-400/20 bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg'
+                      ? 'border-accent-blue/40 bg-accent-blue/10 text-accent-blue shadow-[0_0_12px_rgba(0,242,254,0.25)]'
                       : 'border-white/5 bg-white/5 text-slate-300 hover:bg-white/10'
                   }`}
                 >
@@ -422,7 +426,17 @@ export function FacturasPage() {
         }}
         factura={editing}
         initialFile={initialFile}
+        activeYear={year}
       />
+
+      {abonoModalOpen && (
+        <AbonoModal
+          open={abonoModalOpen}
+          onClose={() => setAbonoModalOpen(false)}
+          abono={editing}
+          activeYear={year}
+        />
+      )}
     </div>
   )
 }
