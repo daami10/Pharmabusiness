@@ -44,6 +44,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    let currentUserId: string | null = null
+
     const resetAccess = () => {
       setSubscriptionTier('basic')
       setIsTrialActive(false)
@@ -51,16 +53,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setHasAccess(false)
     }
 
-    const loadOrgData = async (user: User | null) => {
+    const loadOrgData = async (user: User | null): Promise<boolean> => {
       if (!user) {
+        const changed = currentUserId !== null
+        currentUserId = null
         setActiveOrgId(null)
         setActiveOrgName(null)
         setUserRole(null)
         setSubscriptionStatus(null)
         setTrialEndsAt(null)
         resetAccess()
-        return
+        return changed
       }
+
+      if (user.id === currentUserId) return false
+      currentUserId = user.id
 
       try {
         // Query memberships to resolve organization details
@@ -114,8 +121,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
           }
         }
+        return true
       } catch (err) {
         console.error('Error loading organization metadata:', err)
+        return true
       }
     }
 
@@ -131,9 +140,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data: sub } = supabase.auth.onAuthStateChange((_event, newSession) => {
       setSession(newSession)
       if (newSession?.user) {
-        loadOrgData(newSession.user)
+        const isNewUser = newSession.user.id !== currentUserId
+        if (isNewUser) {
+          setLoading(true)
+        }
+        loadOrgData(newSession.user).then((loaded) => {
+          if (loaded || isNewUser) {
+            setLoading(false)
+          }
+        })
       } else {
-        loadOrgData(null)
+        loadOrgData(null).then(() => {
+          setLoading(false)
+        })
       }
     })
 
