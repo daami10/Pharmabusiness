@@ -351,7 +351,7 @@ export function FacturasPage() {
                   onClick={() => setCategory(c.value)}
                   className={`rounded-xl border px-3.5 py-1.5 text-xs font-bold transition-all ${
                     category === c.value
-                      ? 'border-blue-400/20 bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg'
+                      ? 'border-accent-blue/40 bg-accent-blue/10 text-accent-blue shadow-[0_0_12px_rgba(0,242,254,0.25)]'
                       : 'border-white/5 bg-white/5 text-slate-300 hover:bg-white/10'
                   }`}
                 >

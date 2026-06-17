@@ -693,7 +693,7 @@ export function AnalisisPage() {
             onClick={() => setCategory(c.value)}
             className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all ${
               category === c.value
-                ? 'bg-gradient-to-r from-blue-500 to-indigo-600 border border-blue-400/20 text-white shadow-lg'
+                ? 'border-accent-blue/40 bg-accent-blue/10 text-accent-blue shadow-[0_0_12px_rgba(0,242,254,0.25)]'
                 : 'bg-white/5 border border-white/5 text-slate-300 hover:bg-white/10'
             }`}
           >
