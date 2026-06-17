@@ -10,13 +10,20 @@ import { FiscalidadPage } from '@/features/fiscalidad/FiscalidadPage'
 import { TrabajadoresPage } from '@/features/trabajadores/TrabajadoresPage'
 import { PremiumGate } from '@/components/ui/PremiumGate'
 import { RoleGate } from '@/components/ui/RoleGate'
+import { SubscriptionGate } from '@/components/ui/SubscriptionGate'
 
 export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route element={<ProtectedRoute />}>
-        <Route element={<AppShell />}>
+        <Route
+          element={
+            <SubscriptionGate>
+              <AppShell />
+            </SubscriptionGate>
+          }
+        >
           <Route index element={<InicioPage />} />
           <Route path="facturas" element={<FacturasPage />} />
           <Route

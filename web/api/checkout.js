@@ -31,13 +31,8 @@ export default async function handler(req, res) {
   if (!basicPriceId) missing.push('STRIPE_BASIC_PRICE_ID')
 
   if (missing.length > 0) {
-    const envKeys = Object.keys(process.env).filter(
-      (k) => k.startsWith('STRIPE_') || k.startsWith('SUPABASE_')
-    )
-    return res.status(500).json({
-      error: `Variables de entorno faltantes en el servidor: ${missing.join(', ')}`,
-      envKeys,
-    })
+    console.error(`Missing environment variables: ${missing.join(', ')}`)
+    return res.status(500).json({ error: 'Server misconfiguration.' })
   }
 
   try {
