@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react'
-import { Pencil, Plus, RefreshCw, Trash2 } from 'lucide-react'
+import { ChevronDown, Pencil, Plus, RefreshCw, Trash2 } from 'lucide-react'
 import { useFacturas, useDeleteFactura } from '@/lib/queries/facturas'
 import { useYearStore } from '@/stores/yearStore'
 import { formatMoney } from '@/lib/utils/money'
-import { formatDate } from '@/lib/utils/dates'
+import { formatDate, monthLabel } from '@/lib/utils/dates'
 import type { Factura } from '@/types/domain'
 import { AbonoModal } from './AbonoModal'
 
@@ -14,6 +14,7 @@ export function AbonosPage() {
 
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState<Factura | null>(null)
+  const [overrides, setOverrides] = useState<Record<string, boolean>>({})
 
   const abonos = useMemo(() => {
     return (data ?? [])
@@ -21,7 +22,37 @@ export function AbonosPage() {
       .sort((a, b) => (b.fecha ?? '').localeCompare(a.fecha ?? ''))
   }, [data, year])
 
+  const groups = useMemo(() => {
+    const map = new Map<string, Factura[]>()
+    for (const a of abonos) {
+      const key = (a.fecha ?? '0000-00').slice(0, 7)
+      const bucket = map.get(key)
+      if (bucket) {
+        bucket.push(a)
+      } else {
+        map.set(key, [a])
+      }
+    }
+    return [...map.entries()]
+      .sort((a, b) => b[0].localeCompare(a[0]))
+      .map(([key, items]) => {
+        const total = items.reduce((sum, item) => sum + item.importe, 0)
+        return {
+          key,
+          label: key === '0000-00' ? 'Sin fecha' : monthLabel(key),
+          items,
+          total,
+        }
+      })
+  }, [abonos])
+
   const total = abonos.reduce((sum, a) => sum + a.importe, 0)
+
+  const isOpen = (key: string) => overrides[key] ?? false
+
+  function toggle(key: string) {
+    setOverrides((prev) => ({ ...prev, [key]: !isOpen(key) }))
+  }
 
   function onDelete(a: Factura) {
     if (!confirm(`¿Eliminar el abono de ${a.laboratorio}?`)) return
@@ -78,47 +109,22 @@ export function AbonosPage() {
           <div className="mt-6 overflow-hidden rounded-2xl border border-white/5 glass-card">
             <table className="w-full text-left">
               <tbody className="divide-y divide-white/5">
-                {abonos.map((a) => (
-                  <tr
-                    key={a.id}
-                    className="bg-emerald-500/5 transition-colors hover:bg-white/5"
-                  >
-                    <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-300">
-                      {formatDate(a.fecha)}
-                    </td>
-                    <td className="px-6 py-4 text-sm font-bold text-white">
-                      {a.laboratorio || '—'}
-                    </td>
-                    <td className="px-6 py-4 text-right text-sm font-extrabold text-emerald-400">
-                      + {formatMoney(a.importe)}
-                    </td>
-                    <td className="hidden max-w-xs truncate px-6 py-4 text-sm text-slate-500 lg:table-cell">
-                      {a.notas ?? ''}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <span className="flex items-center justify-end gap-1.5">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setEditing(a)
-                            setModalOpen(true)
-                          }}
-                          className="rounded-xl p-1.5 text-slate-400 transition-all hover:bg-white/5 hover:text-white"
-                          aria-label="Editar"
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => onDelete(a)}
-                          className="rounded-xl p-1.5 text-slate-400 transition-all hover:bg-white/5 hover:text-red-400"
-                          aria-label="Eliminar"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </span>
-                    </td>
-                  </tr>
+                {groups.map((g) => (
+                  <AbonoGroupRow
+                    key={g.key}
+                    groupKey={g.key}
+                    label={g.label}
+                    count={g.items.length}
+                    total={g.total}
+                    open={isOpen(g.key)}
+                    onToggle={() => toggle(g.key)}
+                    items={g.items}
+                    onEdit={(a) => {
+                      setEditing(a)
+                      setModalOpen(true)
+                    }}
+                    onDelete={onDelete}
+                  />
                 ))}
               </tbody>
             </table>
@@ -144,5 +150,93 @@ export function AbonosPage() {
         />
       )}
     </div>
+  )
+}
+
+function AbonoGroupRow({
+  groupKey,
+  label,
+  count,
+  total,
+  open,
+  onToggle,
+  items,
+  onEdit,
+  onDelete,
+}: {
+  groupKey: string
+  label: string
+  count: number
+  total: number
+  open: boolean
+  onToggle: () => void
+  items: Factura[]
+  onEdit: (a: Factura) => void
+  onDelete: (a: Factura) => void
+}) {
+  return (
+    <>
+      <tr
+        className="cursor-pointer select-none bg-white/5 transition-colors hover:bg-white/10"
+        onClick={onToggle}
+      >
+        <td colSpan={5} className="px-6 py-3.5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <ChevronDown
+                className={`h-4 w-4 text-slate-400 transition-transform ${open ? '' : '-rotate-90'}`}
+              />
+              <span className="text-sm font-bold capitalize text-slate-200">{label}</span>
+              <span className="rounded bg-white/5 px-2 py-0.5 text-xs font-bold text-slate-500">
+                {count} abono{count !== 1 ? 's' : ''}
+              </span>
+            </div>
+            <span className="text-sm font-extrabold text-emerald-400">
+              + {formatMoney(total)}
+            </span>
+          </div>
+        </td>
+      </tr>
+      {open &&
+        items.map((a) => (
+          <tr
+            key={`${groupKey}-${a.id}`}
+            className="bg-emerald-500/5 transition-colors hover:bg-white/5"
+          >
+            <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-300">
+              {formatDate(a.fecha)}
+            </td>
+            <td className="px-6 py-4 text-sm font-bold text-white">
+              {a.laboratorio || '—'}
+            </td>
+            <td className="px-6 py-4 text-right text-sm font-extrabold text-emerald-400">
+              + {formatMoney(a.importe)}
+            </td>
+            <td className="hidden max-w-xs truncate px-6 py-4 text-sm text-slate-500 lg:table-cell">
+              {a.notas ?? ''}
+            </td>
+            <td className="px-6 py-4 text-right">
+              <span className="flex items-center justify-end gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => onEdit(a)}
+                  className="rounded-xl p-1.5 text-slate-400 transition-all hover:bg-white/5 hover:text-white"
+                  aria-label="Editar"
+                >
+                  <Pencil className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onDelete(a)}
+                  className="rounded-xl p-1.5 text-slate-400 transition-all hover:bg-white/5 hover:text-red-400"
+                  aria-label="Eliminar"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </span>
+            </td>
+          </tr>
+        ))}
+    </>
   )
 }
