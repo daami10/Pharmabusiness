@@ -117,7 +117,7 @@ export function TrabajadorModal({
               <button
                 type="button"
                 onClick={() => handleToggleActivo(t.id, false)}
-                className="rounded-lg border border-red-500/20 bg-red-500/5 px-2.5 py-1.5 text-2xs font-extrabold uppercase text-red-400 transition-all hover:bg-red-500/10 active:scale-95"
+                className="text-2xs font-bold uppercase tracking-wider text-red-400/50 transition-colors hover:text-red-400 active:scale-95"
               >
                 Dar de baja
               </button>
@@ -154,7 +154,7 @@ export function TrabajadorModal({
                   <button
                     type="button"
                     onClick={() => handleToggleActivo(t.id, true)}
-                    className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 px-2.5 py-1.5 text-2xs font-extrabold uppercase text-emerald-400 transition-all hover:bg-emerald-500/10 active:scale-95"
+                    className="text-2xs font-bold uppercase tracking-wider text-emerald-400/50 transition-colors hover:text-emerald-400 active:scale-95"
                   >
                     Reactivar
                   </button>
