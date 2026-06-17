@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Pencil, Plus, Trash2 } from 'lucide-react'
+import { Pencil, Plus, RefreshCw, Trash2 } from 'lucide-react'
 import { useFacturas, useDeleteFactura } from '@/lib/queries/facturas'
 import { useYearStore } from '@/stores/yearStore'
 import { formatMoney } from '@/lib/utils/money'
@@ -8,7 +8,7 @@ import type { Factura } from '@/types/domain'
 import { AbonoModal } from './AbonoModal'
 
 export function AbonosPage() {
-  const { data, isLoading, isError, error } = useFacturas()
+  const { data, isLoading, isError, error, refetch } = useFacturas()
   const deleteFactura = useDeleteFactura()
   const year = useYearStore((s) => s.year)
 
@@ -35,17 +35,28 @@ export function AbonosPage() {
           <h1 className="text-3xl font-extrabold tracking-tight text-white">Abonos</h1>
           <p className="mt-1 text-sm text-slate-400">Devoluciones y abonos de {year}.</p>
         </div>
-        <button
-          type="button"
-          onClick={() => {
-            setEditing(null)
-            setModalOpen(true)
-          }}
-          className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 px-5 py-2.5 text-sm font-bold text-slate-950 shadow-lg transition-all hover:opacity-90"
-        >
-          <Plus className="h-4 w-4" strokeWidth={2.5} />
-          Nuevo abono
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => refetch()}
+            className="flex items-center gap-2 rounded-xl border border-purple-500/30 px-4 py-2.5 text-sm font-bold text-slate-200 transition-all hover:bg-white/5 shadow-lg glow-purple glow-purple-hover"
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.8)] shrink-0 animate-pulse"></span>
+            <RefreshCw className="h-4 w-4 text-purple-400" />
+            Actualizar
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setEditing(null)
+              setModalOpen(true)
+            }}
+            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 px-5 py-2.5 text-sm font-bold text-slate-950 shadow-lg transition-all hover:opacity-90"
+          >
+            <Plus className="h-4 w-4" strokeWidth={2.5} />
+            Nuevo abono
+          </button>
+        </div>
       </div>
 
       {isLoading && (
@@ -64,7 +75,7 @@ export function AbonosPage() {
 
       {!isLoading && !isError && abonos.length > 0 && (
         <>
-          <div className="mt-6 overflow-hidden rounded-2xl border border-white/5">
+          <div className="mt-6 overflow-hidden rounded-2xl border border-white/5 glass-card">
             <table className="w-full text-left">
               <tbody className="divide-y divide-white/5">
                 {abonos.map((a) => (
@@ -113,7 +124,7 @@ export function AbonosPage() {
             </table>
           </div>
 
-          <div className="mt-4 flex items-center justify-between rounded-2xl border border-white/5 bg-white/5 px-6 py-4">
+          <div className="mt-4 flex items-center justify-between rounded-2xl border border-white/5 glass-card px-6 py-4">
             <span className="text-sm text-slate-400">
               {abonos.length} abono{abonos.length !== 1 ? 's' : ''}
             </span>
@@ -124,7 +135,14 @@ export function AbonosPage() {
         </>
       )}
 
-      <AbonoModal open={modalOpen} onClose={() => setModalOpen(false)} abono={editing} />
+      {modalOpen && (
+        <AbonoModal
+          open={modalOpen}
+          onClose={() => setModalOpen(false)}
+          abono={editing}
+          activeYear={year}
+        />
+      )}
     </div>
   )
 }

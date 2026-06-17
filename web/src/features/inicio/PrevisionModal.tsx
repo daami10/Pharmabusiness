@@ -8,6 +8,7 @@ import { formatMoney } from '@/lib/utils/money'
 import { buildPrevision } from './lib/inicio-view'
 import type { PrevisionSection } from './lib/inicio-view'
 import type { Factura } from '@/types/domain'
+import { useYearStore } from '@/stores/yearStore'
 import { FacturaModal } from '../facturas/FacturaModal'
 
 function InvoiceSubList({
@@ -171,6 +172,7 @@ export function PrevisionModal({
   const nominas = useNominas()
   const seguros = useSeguros()
 
+  const year = useYearStore((s) => s.year)
   const [editing, setEditing] = useState<Factura | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
   const deleteFactura = useDeleteFactura()
@@ -225,6 +227,7 @@ export function PrevisionModal({
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         factura={editing}
+        activeYear={year}
       />
     </>
   )
