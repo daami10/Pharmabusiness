@@ -26,7 +26,11 @@ export function PremiumGate({ children }: { children: ReactNode }) {
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}))
-        throw new Error(data.error || 'Error al iniciar la pasarela de pago.')
+        let errMsg = data.error || 'Error al iniciar la pasarela de pago.'
+        if (data.envKeys && data.envKeys.length > 0) {
+          errMsg += ` (Claves en servidor: ${data.envKeys.join(', ')})`
+        }
+        throw new Error(errMsg)
       }
 
       const data = await res.json()

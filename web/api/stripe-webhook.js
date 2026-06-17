@@ -76,10 +76,28 @@ export default async function handler(req, res) {
 
         const stripeCustomerId = session.customer
         const status = stripeSubscription.status
-        const currentPeriodEnd = new Date(
-          stripeSubscription.current_period_end * 1000,
-        ).toISOString()
-        const priceId = stripeSubscription.items.data[0].price.id
+        
+        let currentPeriodEnd
+        try {
+          const rawEnd = stripeSubscription.current_period_end || stripeSubscription.items?.data?.[0]?.current_period_end
+          if (!rawEnd) {
+            throw new Error('No se encontró current_period_end en la suscripción ni en sus ítems.')
+          }
+          currentPeriodEnd = new Date(rawEnd * 1000).toISOString()
+        } catch (dateErr) {
+          console.error('Error parsing current_period_end:', dateErr, {
+            subscriptionId,
+            status: stripeSubscription?.status,
+          })
+          return res
+            .status(400)
+            .json({ error: 'No se pudo determinar el periodo de la suscripción.' })
+        }
+
+        const priceId = stripeSubscription.items?.data?.[0]?.price?.id
+        if (!priceId) {
+          throw new Error('No price ID found in stripe subscription items')
+        }
 
         const plan = priceId === premiumPriceId ? 'premium' : 'basico'
 
@@ -104,11 +122,25 @@ export default async function handler(req, res) {
       case 'customer.subscription.updated': {
         const subscription = event.data.object
         const status = subscription.status
-        const currentPeriodEnd = new Date(
-          subscription.current_period_end * 1000,
-        ).toISOString()
-        const priceId = subscription.items.data[0].price.id
+        
+        let currentPeriodEnd
+        try {
+          const rawEnd = subscription.current_period_end || subscription.items?.data?.[0]?.current_period_end
+          if (!rawEnd) {
+            throw new Error('No se encontró current_period_end en la suscripción actualizada ni en sus ítems.')
+          }
+          currentPeriodEnd = new Date(rawEnd * 1000).toISOString()
+        } catch (dateErr) {
+          console.error('Error parsing current_period_end on update:', dateErr, {
+            subscriptionId: subscription.id,
+            status: subscription.status,
+          })
+          return res
+            .status(400)
+            .json({ error: 'No se pudo determinar el periodo de la suscripción.' })
+        }
 
+        const priceId = subscription.items?.data?.[0]?.price?.id
         const plan =
           priceId === premiumPriceId && (status === 'active' || status === 'trialing')
             ? 'premium'
@@ -154,6 +186,6 @@ export default async function handler(req, res) {
     return res.status(200).json({ received: true })
   } catch (err) {
     console.error(`Error processing webhook event ${event.type}:`, err)
-    return res.status(500).json({ error: err.message })
+    return res.status(500).json({ error: 'Webhook handler failed.' })
   }
 }

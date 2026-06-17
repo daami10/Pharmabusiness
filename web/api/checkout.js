@@ -23,11 +23,16 @@ export default async function handler(req, res) {
   const premiumPriceId = process.env.STRIPE_PREMIUM_PRICE_ID
   const basicPriceId = process.env.STRIPE_BASIC_PRICE_ID
 
-  if (!supabaseUrl || !supabaseServiceKey || !stripeSecretKey || !premiumPriceId || !basicPriceId) {
-    return res.status(500).json({
-      error:
-        'Variables de entorno faltantes en el servidor para procesar Stripe Checkout (Basic y Premium).',
-    })
+  const missing = []
+  if (!supabaseUrl) missing.push('SUPABASE_URL')
+  if (!supabaseServiceKey) missing.push('SUPABASE_SERVICE_ROLE_KEY')
+  if (!stripeSecretKey) missing.push('STRIPE_SECRET_KEY')
+  if (!premiumPriceId) missing.push('STRIPE_PREMIUM_PRICE_ID')
+  if (!basicPriceId) missing.push('STRIPE_BASIC_PRICE_ID')
+
+  if (missing.length > 0) {
+    console.error(`Missing environment variables: ${missing.join(', ')}`)
+    return res.status(500).json({ error: 'Server misconfiguration.' })
   }
 
   try {
