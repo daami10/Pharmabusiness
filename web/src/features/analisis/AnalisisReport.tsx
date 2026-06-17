@@ -1,31 +1,139 @@
 import { formatMoney } from '@/lib/utils/money'
-import type { AnalisisData } from './lib/analisis-view'
+
+export interface InvoiceLike {
+  id?: string
+  importe: number
+  laboratorio?: string | null
+  fecha?: string | null
+  fecha_vencimiento?: string | null
+  tipo?: string | null
+}
+
+export interface FiscalLike {
+  id?: string
+  importe: number
+  concepto: string
+  fecha: string | null
+}
+
+export interface NominaLike {
+  id?: string
+  importe: number
+  trabajador_nombre?: string | null
+  fecha: string | null
+}
+
+export interface SeguroLike {
+  id?: string
+  importe: number
+  fecha: string | null
+}
 
 export interface ReportProps {
   period: string
   generatedAt: string
-  analysis: AnalisisData
-  fiscalTotal: number
-  trabTotal: number
-  granTotal: number
+  includeFacturas: boolean
+  includeAbonos: boolean
+  includeFiscalidad: boolean
+  includeTrabajadores: boolean
+  facturas: InvoiceLike[]
+  abonos: InvoiceLike[]
+  fiscal: FiscalLike[]
+  nominas: NominaLike[]
+  seguros: SeguroLike[]
 }
 
 const MEDALS = ['1º', '2º', '3º']
 
-/**
- * Informe imprimible (tema claro) para exportar a PDF con html2pdf.
- * Se renderiza fuera de pantalla y se captura por referencia.
- */
 export function AnalisisReport({
   period,
   generatedAt,
-  analysis,
-  fiscalTotal,
-  trabTotal,
-  granTotal,
+  includeFacturas,
+  includeAbonos,
+  includeFiscalidad,
+  includeTrabajadores,
+  facturas,
+  abonos,
+  fiscal,
+  nominas,
+  seguros,
 }: ReportProps) {
-  const top = analysis.byLab.slice(0, 10)
-  const totalLabs = analysis.byLab.reduce((s, r) => s + r.amount, 0)
+  // 1. Calculations - Facturas
+  const totalFacturas = facturas.reduce((sum, f) => sum + f.importe, 0)
+  const countFacturas = facturas.length
+  const avgFactura = countFacturas ? totalFacturas / countFacturas : 0
+
+  const providerTotals: Record<string, number> = {}
+  for (const f of facturas) {
+    const p = f.laboratorio || 'Sin nombre'
+    providerTotals[p] = (providerTotals[p] ?? 0) + f.importe
+  }
+  const sortedProviders = Object.entries(providerTotals).sort((a, b) => b[1] - a[1])
+  const topProvider = sortedProviders[0]?.[0] ?? '—'
+  const topProviders10 = sortedProviders.slice(0, 10).map(([lab, amount]) => ({ lab, amount }))
+
+  // 2. Calculations - Abonos
+  const totalAbonos = abonos.reduce((sum, a) => sum + a.importe, 0)
+  const countAbonos = abonos.length
+  const avgAbono = countAbonos ? totalAbonos / countAbonos : 0
+
+  const abonoTotals: Record<string, number> = {}
+  for (const a of abonos) {
+    const l = a.laboratorio || 'Sin nombre'
+    abonoTotals[l] = (abonoTotals[l] ?? 0) + a.importe
+  }
+  const sortedAbonos = Object.entries(abonoTotals).sort((a, b) => b[1] - a[1])
+  const topAbonos10 = sortedAbonos.slice(0, 10).map(([lab, amount]) => ({ lab, amount }))
+
+  // 3. Calculations - Fiscalidad
+  const totalFiscal = fiscal.reduce((sum, f) => sum + f.importe, 0)
+  const countFiscal = fiscal.length
+  const avgFiscal = countFiscal ? totalFiscal / countFiscal : 0
+  const sortedFiscal = [...fiscal].sort((a, b) => {
+    const da = a.fecha || ''
+    const db = b.fecha || ''
+    return db.localeCompare(da)
+  })
+
+  // 4. Calculations - Trabajadores
+  const totalNominas = nominas.reduce((sum, n) => sum + n.importe, 0)
+  const totalSeguros = seguros.reduce((sum, s) => sum + s.importe, 0)
+  const totalTrabajadores = totalNominas + totalSeguros
+  const countTrabajadores = nominas.length + seguros.length
+
+  const personnelItems = [
+    ...nominas.map((n) => ({
+      concepto: n.trabajador_nombre || 'Nómina de Trabajador',
+      tipo: 'Nómina',
+      fecha: n.fecha,
+      importe: n.importe,
+    })),
+    ...seguros.map((s) => ({
+      concepto: 'Seguros Sociales',
+      tipo: 'Seguros Sociales',
+      fecha: s.fecha,
+      importe: s.importe,
+    })),
+  ].sort((a, b) => {
+    const da = a.fecha || ''
+    const db = b.fecha || ''
+    return db.localeCompare(da)
+  })
+
+  // 5. Calculations - Net Consolidated
+  let granTotal = 0
+  if (includeFacturas) granTotal += totalFacturas
+  if (includeAbonos) granTotal -= totalAbonos
+  if (includeFiscalidad) granTotal += totalFiscal
+  if (includeTrabajadores) granTotal += totalTrabajadores
+
+  const formatFecha = (dStr: string | null | undefined) => {
+    if (!dStr) return '—'
+    const clean = dStr.slice(0, 10)
+    const [y, m, d] = clean.split('-')
+    if (!y || !m || !d) return clean
+    return `${d}/${m}/${y}`
+  }
 
   return (
     <div
@@ -37,6 +145,7 @@ export function AnalisisReport({
         fontFamily: "'Outfit', 'Inter', sans-serif",
       }}
     >
+      {/* Header */}
       <div
         style={{
           borderBottom: '2px solid #2563eb',
@@ -44,107 +153,281 @@ export function AnalisisReport({
           marginBottom: '24px',
         }}
       >
-        <h1 style={{ fontSize: '26px', fontWeight: 800, margin: 0 }}>
+        <h1 style={{ fontSize: '24px', fontWeight: 800, margin: 0, color: '#1e293b' }}>
           GFarma — Informe de Inversiones
         </h1>
-        <p style={{ fontSize: '13px', color: '#64748b', margin: '6px 0 0' }}>
+        <p style={{ fontSize: '12px', color: '#64748b', margin: '6px 0 0', fontWeight: 500 }}>
           Periodo: {period} · Generado el {generatedAt}
         </p>
       </div>
 
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(4, 1fr)',
-          gap: '12px',
-          marginBottom: '24px',
-        }}
-      >
-        {[
-          { label: 'Total facturas', value: formatMoney(analysis.total) },
-          { label: 'Nº facturas', value: String(analysis.count) },
-          { label: 'Top proveedor', value: analysis.topLab },
-          { label: 'Media', value: formatMoney(analysis.avg) },
-        ].map((k) => (
-          <div
-            key={k.label}
-            style={{ border: '1px solid #e2e8f0', borderRadius: '10px', padding: '12px' }}
-          >
-            <div style={{ fontSize: '16px', fontWeight: 800 }}>{k.value}</div>
-            <div style={{ fontSize: '11px', color: '#64748b', marginTop: '4px' }}>
-              {k.label}
+      {/* Resumen de Gasto Consolidado */}
+      <div style={{ marginBottom: '28px' }}>
+        <h2 style={{ fontSize: '14px', fontWeight: 800, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px' }}>
+          Gasto Consolidado del Periodo
+        </h2>
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: '12px',
+          }}
+        >
+          {includeFacturas && (
+            <div style={{ flex: '1 1 120px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '12px' }}>
+              <div style={{ fontSize: '11px', color: '#64748b', fontWeight: 600, textTransform: 'uppercase', marginBottom: '4px' }}>Facturas</div>
+              <div style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a' }}>{formatMoney(totalFacturas)}</div>
             </div>
+          )}
+          {includeAbonos && (
+            <div style={{ flex: '1 1 120px', background: '#f0fdf4', border: '1px solid #dcfce7', borderRadius: '10px', padding: '12px' }}>
+              <div style={{ fontSize: '11px', color: '#166534', fontWeight: 600, textTransform: 'uppercase', marginBottom: '4px' }}>Abonos</div>
+              <div style={{ fontSize: '15px', fontWeight: 800, color: '#15803d' }}>-{formatMoney(totalAbonos)}</div>
+            </div>
+          )}
+          {includeFiscalidad && (
+            <div style={{ flex: '1 1 120px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '12px' }}>
+              <div style={{ fontSize: '11px', color: '#64748b', fontWeight: 600, textTransform: 'uppercase', marginBottom: '4px' }}>Fiscalidad</div>
+              <div style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a' }}>{formatMoney(totalFiscal)}</div>
+            </div>
+          )}
+          {includeTrabajadores && (
+            <div style={{ flex: '1 1 120px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '12px' }}>
+              <div style={{ fontSize: '11px', color: '#64748b', fontWeight: 600, textTransform: 'uppercase', marginBottom: '4px' }}>Trabajadores</div>
+              <div style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a' }}>{formatMoney(totalTrabajadores)}</div>
+            </div>
+          )}
+          <div style={{ flex: '1 1 120px', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '10px', padding: '12px' }}>
+            <div style={{ fontSize: '11px', color: '#1e40af', fontWeight: 700, textTransform: 'uppercase', marginBottom: '4px' }}>Balance Total</div>
+            <div style={{ fontSize: '16px', fontWeight: 900, color: '#1d4ed8' }}>{formatMoney(granTotal)}</div>
           </div>
-        ))}
+        </div>
       </div>
 
-      <h2 style={{ fontSize: '15px', fontWeight: 700, marginBottom: '10px' }}>
-        Gasto consolidado
-      </h2>
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(4, 1fr)',
-          gap: '12px',
-          marginBottom: '28px',
-        }}
-      >
-        {[
-          { label: 'Facturas', value: analysis.total },
-          { label: 'Fiscalidad', value: fiscalTotal },
-          { label: 'Trabajadores', value: trabTotal },
-          { label: 'Gasto total', value: granTotal },
-        ].map((k) => (
-          <div
-            key={k.label}
-            style={{ background: '#f1f5f9', borderRadius: '10px', padding: '12px' }}
-          >
-            <div style={{ fontSize: '15px', fontWeight: 800 }}>
-              {formatMoney(k.value)}
+      {/* Secciones Detalladas */}
+      
+      {/* 1. FACTURAS DETALLADO */}
+      {includeFacturas && (
+        <div style={{ pageBreakInside: 'avoid', marginTop: '28px', borderTop: '1px solid #e2e8f0', paddingTop: '20px' }}>
+          <h2 style={{ fontSize: '14px', fontWeight: 800, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#2563eb' }}></span>
+            Detalle de Facturas Proveedores
+          </h2>
+          
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '20px' }}>
+            <div style={{ border: '1px solid #f1f5f9', borderRadius: '8px', padding: '10px', background: '#fafafa' }}>
+              <div style={{ fontSize: '14px', fontWeight: 800 }}>{formatMoney(totalFacturas)}</div>
+              <div style={{ fontSize: '10px', color: '#64748b', marginTop: '2px' }}>Total Invertido</div>
             </div>
-            <div style={{ fontSize: '11px', color: '#64748b', marginTop: '4px' }}>
-              {k.label}
+            <div style={{ border: '1px solid #f1f5f9', borderRadius: '8px', padding: '10px', background: '#fafafa' }}>
+              <div style={{ fontSize: '14px', fontWeight: 800 }}>{countFacturas}</div>
+              <div style={{ fontSize: '10px', color: '#64748b', marginTop: '2px' }}>Nº Facturas</div>
+            </div>
+            <div style={{ border: '1px solid #f1f5f9', borderRadius: '8px', padding: '10px', background: '#fafafa' }}>
+              <div style={{ fontSize: '14px', fontWeight: 800 }}>{formatMoney(avgFactura)}</div>
+              <div style={{ fontSize: '10px', color: '#64748b', marginTop: '2px' }}>Promedio / Factura</div>
             </div>
           </div>
-        ))}
-      </div>
 
-      <h2 style={{ fontSize: '15px', fontWeight: 700, marginBottom: '10px' }}>
-        Ranking de proveedores (Top 10)
-      </h2>
-      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
-        <thead>
-          <tr style={{ borderBottom: '2px solid #e2e8f0', textAlign: 'left' }}>
-            <th style={{ padding: '8px' }}>#</th>
-            <th style={{ padding: '8px' }}>Proveedor</th>
-            <th style={{ padding: '8px', textAlign: 'right' }}>Importe</th>
-            <th style={{ padding: '8px', textAlign: 'right' }}>%</th>
-          </tr>
-        </thead>
-        <tbody>
-          {top.map((r, i) => (
-            <tr key={r.lab} style={{ borderBottom: '1px solid #f1f5f9' }}>
-              <td style={{ padding: '8px', fontWeight: 700 }}>
-                {MEDALS[i] ?? `${i + 1}º`}
-              </td>
-              <td style={{ padding: '8px', fontWeight: 600 }}>{r.lab}</td>
-              <td style={{ padding: '8px', textAlign: 'right', fontWeight: 700 }}>
-                {formatMoney(r.amount)}
-              </td>
-              <td
-                style={{
-                  padding: '8px',
-                  textAlign: 'right',
-                  color: '#2563eb',
-                  fontWeight: 600,
-                }}
-              >
-                {totalLabs > 0 ? ((r.amount / totalLabs) * 100).toFixed(1) : '0.0'}%
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+          <div style={{ border: '1px solid #f1f5f9', borderRadius: '8px', padding: '10px', background: '#fafafa', marginBottom: '20px' }}>
+            <div style={{ fontSize: '13px', fontWeight: 700 }}>{topProvider}</div>
+            <div style={{ fontSize: '10px', color: '#64748b', marginTop: '2px' }}>Proveedor Principal</div>
+          </div>
+
+          <h3 style={{ fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '10px' }}>Ranking de Proveedores (Top 10)</h3>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+            <thead>
+              <tr style={{ borderBottom: '2px solid #e2e8f0', textAlign: 'left', color: '#64748b' }}>
+                <th style={{ padding: '6px 8px' }}>#</th>
+                <th style={{ padding: '6px 8px' }}>Proveedor</th>
+                <th style={{ padding: '6px 8px', textAlign: 'right' }}>Importe</th>
+                <th style={{ padding: '6px 8px', textAlign: 'right' }}>%</th>
+              </tr>
+            </thead>
+            <tbody>
+              {topProviders10.length === 0 ? (
+                <tr>
+                  <td colSpan={4} style={{ padding: '12px', textAlign: 'center', color: '#94a3b8' }}>Sin facturas en este rango.</td>
+                </tr>
+              ) : (
+                topProviders10.map((r, i) => (
+                  <tr key={r.lab} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                    <td style={{ padding: '6px 8px', fontWeight: 700, color: '#64748b' }}>{MEDALS[i] ?? `${i + 1}º`}</td>
+                    <td style={{ padding: '6px 8px', fontWeight: 600 }}>{r.lab}</td>
+                    <td style={{ padding: '6px 8px', textAlign: 'right', fontWeight: 700 }}>{formatMoney(r.amount)}</td>
+                    <td style={{ padding: '6px 8px', textAlign: 'right', color: '#2563eb', fontWeight: 600 }}>
+                      {totalFacturas > 0 ? ((r.amount / totalFacturas) * 100).toFixed(1) : '0.0'}%
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* 2. ABONOS DETALLADO */}
+      {includeAbonos && (
+        <div style={{ pageBreakInside: 'avoid', marginTop: '28px', borderTop: '1px solid #e2e8f0', paddingTop: '20px' }}>
+          <h2 style={{ fontSize: '14px', fontWeight: 800, color: '#16a34a', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#16a34a' }}></span>
+            Detalle de Abonos y Devoluciones
+          </h2>
+          
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '20px' }}>
+            <div style={{ border: '1px solid #f1f5f9', borderRadius: '8px', padding: '10px', background: '#fafafa' }}>
+              <div style={{ fontSize: '14px', fontWeight: 800, color: '#166534' }}>{formatMoney(totalAbonos)}</div>
+              <div style={{ fontSize: '10px', color: '#64748b', marginTop: '2px' }}>Total Abonado</div>
+            </div>
+            <div style={{ border: '1px solid #f1f5f9', borderRadius: '8px', padding: '10px', background: '#fafafa' }}>
+              <div style={{ fontSize: '14px', fontWeight: 800 }}>{countAbonos}</div>
+              <div style={{ fontSize: '10px', color: '#64748b', marginTop: '2px' }}>Nº Abonos</div>
+            </div>
+            <div style={{ border: '1px solid #f1f5f9', borderRadius: '8px', padding: '10px', background: '#fafafa' }}>
+              <div style={{ fontSize: '14px', fontWeight: 800 }}>{formatMoney(avgAbono)}</div>
+              <div style={{ fontSize: '10px', color: '#64748b', marginTop: '2px' }}>Promedio / Abono</div>
+            </div>
+          </div>
+
+          <h3 style={{ fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '10px' }}>Desglose de Abonos por Laboratorio (Top 10)</h3>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+            <thead>
+              <tr style={{ borderBottom: '2px solid #e2e8f0', textAlign: 'left', color: '#64748b' }}>
+                <th style={{ padding: '6px 8px' }}>#</th>
+                <th style={{ padding: '6px 8px' }}>Laboratorio</th>
+                <th style={{ padding: '6px 8px', textAlign: 'right' }}>Importe</th>
+                <th style={{ padding: '6px 8px', textAlign: 'right' }}>%</th>
+              </tr>
+            </thead>
+            <tbody>
+              {topAbonos10.length === 0 ? (
+                <tr>
+                  <td colSpan={4} style={{ padding: '12px', textAlign: 'center', color: '#94a3b8' }}>Sin abonos en este rango.</td>
+                </tr>
+              ) : (
+                topAbonos10.map((r, i) => (
+                  <tr key={r.lab} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                    <td style={{ padding: '6px 8px', fontWeight: 700, color: '#64748b' }}>{MEDALS[i] ?? `${i + 1}º`}</td>
+                    <td style={{ padding: '6px 8px', fontWeight: 600 }}>{r.lab}</td>
+                    <td style={{ padding: '6px 8px', textAlign: 'right', fontWeight: 700, color: '#166534' }}>{formatMoney(r.amount)}</td>
+                    <td style={{ padding: '6px 8px', textAlign: 'right', color: '#16a34a', fontWeight: 600 }}>
+                      {totalAbonos > 0 ? ((r.amount / totalAbonos) * 100).toFixed(1) : '0.0'}%
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* 3. FISCALIDAD DETALLADO */}
+      {includeFiscalidad && (
+        <div style={{ pageBreakInside: 'avoid', marginTop: '28px', borderTop: '1px solid #e2e8f0', paddingTop: '20px' }}>
+          <h2 style={{ fontSize: '14px', fontWeight: 800, color: '#0d9488', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#0d9488' }}></span>
+            Detalle de Impuestos y Tasas (Fiscalidad)
+          </h2>
+          
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '20px' }}>
+            <div style={{ border: '1px solid #f1f5f9', borderRadius: '8px', padding: '10px', background: '#fafafa' }}>
+              <div style={{ fontSize: '14px', fontWeight: 800, color: '#0f766e' }}>{formatMoney(totalFiscal)}</div>
+              <div style={{ fontSize: '10px', color: '#64748b', marginTop: '2px' }}>Total Pagado</div>
+            </div>
+            <div style={{ border: '1px solid #f1f5f9', borderRadius: '8px', padding: '10px', background: '#fafafa' }}>
+              <div style={{ fontSize: '14px', fontWeight: 800 }}>{countFiscal}</div>
+              <div style={{ fontSize: '10px', color: '#64748b', marginTop: '2px' }}>Nº Liquidaciones</div>
+            </div>
+            <div style={{ border: '1px solid #f1f5f9', borderRadius: '8px', padding: '10px', background: '#fafafa' }}>
+              <div style={{ fontSize: '14px', fontWeight: 800 }}>{formatMoney(avgFiscal)}</div>
+              <div style={{ fontSize: '10px', color: '#64748b', marginTop: '2px' }}>Promedio / Pago</div>
+            </div>
+          </div>
+
+          <h3 style={{ fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '10px' }}>Desglose de Liquidaciones Fiscales</h3>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+            <thead>
+              <tr style={{ borderBottom: '2px solid #e2e8f0', textAlign: 'left', color: '#64748b' }}>
+                <th style={{ padding: '6px 8px' }}>Fecha</th>
+                <th style={{ padding: '6px 8px' }}>Concepto / Impuesto</th>
+                <th style={{ padding: '6px 8px', textAlign: 'right' }}>Importe</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sortedFiscal.length === 0 ? (
+                <tr>
+                  <td colSpan={3} style={{ padding: '12px', textAlign: 'center', color: '#94a3b8' }}>Sin registros fiscales en este rango.</td>
+                </tr>
+              ) : (
+                sortedFiscal.map((f, idx) => (
+                  <tr key={f.id || idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                    <td style={{ padding: '6px 8px', color: '#475569' }}>{formatFecha(f.fecha)}</td>
+                    <td style={{ padding: '6px 8px', fontWeight: 600 }}>{f.concepto}</td>
+                    <td style={{ padding: '6px 8px', textAlign: 'right', fontWeight: 700, color: '#0f766e' }}>{formatMoney(f.importe)}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* 4. TRABAJADORES DETALLADO */}
+      {includeTrabajadores && (
+        <div style={{ pageBreakInside: 'avoid', marginTop: '28px', borderTop: '1px solid #e2e8f0', paddingTop: '20px' }}>
+          <h2 style={{ fontSize: '14px', fontWeight: 800, color: '#ea580c', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#ea580c' }}></span>
+            Detalle de Gasto de Trabajadores y Personal
+          </h2>
+          
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '20px' }}>
+            <div style={{ border: '1px solid #f1f5f9', borderRadius: '8px', padding: '10px', background: '#fafafa' }}>
+              <div style={{ fontSize: '13px', fontWeight: 800, color: '#c2410c' }}>{formatMoney(totalTrabajadores)}</div>
+              <div style={{ fontSize: '9px', color: '#64748b', marginTop: '2px' }}>Total Personal</div>
+            </div>
+            <div style={{ border: '1px solid #f1f5f9', borderRadius: '8px', padding: '10px', background: '#fafafa' }}>
+              <div style={{ fontSize: '13px', fontWeight: 800 }}>{countTrabajadores}</div>
+              <div style={{ fontSize: '9px', color: '#64748b', marginTop: '2px' }}>Nº Registros</div>
+            </div>
+            <div style={{ border: '1px solid #f1f5f9', borderRadius: '8px', padding: '10px', background: '#fafafa' }}>
+              <div style={{ fontSize: '13px', fontWeight: 800 }}>{formatMoney(totalNominas)}</div>
+              <div style={{ fontSize: '9px', color: '#64748b', marginTop: '2px' }}>Nóminas Netas</div>
+            </div>
+            <div style={{ border: '1px solid #f1f5f9', borderRadius: '8px', padding: '10px', background: '#fafafa' }}>
+              <div style={{ fontSize: '13px', fontWeight: 800 }}>{formatMoney(totalSeguros)}</div>
+              <div style={{ fontSize: '9px', color: '#64748b', marginTop: '2px' }}>Seguros Sociales</div>
+            </div>
+          </div>
+
+          <h3 style={{ fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '10px' }}>Desglose de Gastos de Personal</h3>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+            <thead>
+              <tr style={{ borderBottom: '2px solid #e2e8f0', textAlign: 'left', color: '#64748b' }}>
+                <th style={{ padding: '6px 8px' }}>Fecha</th>
+                <th style={{ padding: '6px 8px' }}>Detalle</th>
+                <th style={{ padding: '6px 8px' }}>Tipo</th>
+                <th style={{ padding: '6px 8px', textAlign: 'right' }}>Importe</th>
+              </tr>
+            </thead>
+            <tbody>
+              {personnelItems.length === 0 ? (
+                <tr>
+                  <td colSpan={4} style={{ padding: '12px', textAlign: 'center', color: '#94a3b8' }}>Sin registros de personal en este rango.</td>
+                </tr>
+              ) : (
+                personnelItems.map((p, idx) => (
+                  <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                    <td style={{ padding: '6px 8px', color: '#475569' }}>{formatFecha(p.fecha)}</td>
+                    <td style={{ padding: '6px 8px', fontWeight: 600 }}>{p.concepto}</td>
+                    <td style={{ padding: '6px 8px', color: '#64748b' }}>{p.tipo}</td>
+                    <td style={{ padding: '6px 8px', textAlign: 'right', fontWeight: 700, color: '#c2410c' }}>{formatMoney(p.importe)}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   )
 }

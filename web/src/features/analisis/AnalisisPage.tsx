@@ -1,10 +1,9 @@
-import { useMemo, useRef, useState, useCallback } from 'react'
+import { useMemo, useState, useCallback } from 'react'
 import type { ReactNode } from 'react'
 import { Bar, Doughnut } from 'react-chartjs-2'
 import type { ChartOptions } from 'chart.js'
 import { Download, Landmark, RefreshCw } from 'lucide-react'
 import { palette } from '@/lib/chartSetup'
-import { AnalisisReport } from './AnalisisReport'
 import { useFacturas } from '@/lib/queries/facturas'
 import { useFiscalidad } from '@/lib/queries/fiscalidad'
 import { useNominas, useSeguros } from '@/lib/queries/trabajadores'
@@ -14,6 +13,7 @@ import { formatMoney } from '@/lib/utils/money'
 import { monthLabel } from '@/lib/utils/dates'
 import { isWholesaler } from '@/lib/config/wholesalers'
 import { RankingModal } from './RankingModal'
+import { ExportPdfModal } from './ExportPdfModal'
 import { stackedByWholesaler } from './lib/analisis-view'
 
 const eur = (v: string | number) => `${Number(v).toLocaleString('es-ES')} €`
@@ -75,8 +75,7 @@ export function AnalisisPage() {
   const [desde, setDesde] = useState('')
   const [hasta, setHasta] = useState('')
   const [rankingOpen, setRankingOpen] = useState(false)
-  const reportRef = useRef<HTMLDivElement>(null)
-  const [exporting, setExporting] = useState(false)
+  const [exportModalOpen, setExportModalOpen] = useState(false)
 
   const hasRange = !!(desde || hasta)
 
@@ -536,33 +535,11 @@ export function AnalisisPage() {
     { value: 'Trabajadores', label: 'Trabajadores' },
   ]
 
-  const period = hasRange ? `${desde || 'inicio'} – ${hasta || 'actual'}` : `Año ${year}`
-
   const refetchAll = () => {
     facturas.refetch()
     fiscal.refetch()
     nominas.refetch()
     seguros.refetch()
-  }
-
-  async function exportPDF() {
-    if (!reportRef.current) return
-    setExporting(true)
-    try {
-      const html2pdf = (await import('html2pdf.js')).default
-      await html2pdf()
-        .set({
-          margin: 10,
-          filename: `analisis_gfarma_${new Date().toISOString().slice(0, 10)}.pdf`,
-          image: { type: 'jpeg', quality: 0.98 },
-          html2canvas: { scale: 2, useCORS: true },
-          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        })
-        .from(reportRef.current)
-        .save()
-    } finally {
-      setExporting(false)
-    }
   }
 
   return (
@@ -580,19 +557,20 @@ export function AnalisisPage() {
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={exportPDF}
-            disabled={exporting || !facturasOnly.length}
-            className="flex items-center gap-2 rounded-xl border border-white/10 px-4 py-2.5 text-sm font-bold text-slate-300 transition-all hover:bg-white/5 disabled:opacity-50 shadow-lg"
+            onClick={() => setExportModalOpen(true)}
+            className="flex items-center gap-2 rounded-xl border border-[#00f2fe]/30 px-4 py-2.5 text-sm font-bold text-slate-200 transition-all hover:bg-white/5 shadow-lg glow-blue glow-blue-hover"
           >
-            <Download className="h-4 w-4" />
-            {exporting ? 'Generando…' : 'Exportar PDF'}
+            <span className="w-1.5 h-1.5 rounded-full bg-[#00f2fe] shadow-[0_0_8px_#00f2fe] shrink-0 animate-pulse"></span>
+            <Download className="h-4 w-4 text-[#00f2fe]" />
+            Exportar PDF
           </button>
           <button
             type="button"
             onClick={refetchAll}
-            className="flex items-center gap-2 rounded-xl border border-white/10 px-4 py-2.5 text-sm font-bold text-slate-300 transition-all hover:bg-white/5 shadow-lg"
+            className="flex items-center gap-2 rounded-xl border border-purple-500/30 px-4 py-2.5 text-sm font-bold text-slate-200 transition-all hover:bg-white/5 shadow-lg glow-purple glow-purple-hover"
           >
-            <RefreshCw className="h-4 w-4" />
+            <span className="w-1.5 h-1.5 rounded-full bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.8)] shrink-0 animate-pulse"></span>
+            <RefreshCw className="h-4 w-4 text-purple-400" />
             Actualizar
           </button>
         </div>
@@ -1098,51 +1076,14 @@ export function AnalisisPage() {
         items={chartsData.byLab}
       />
 
-      {/* Informe imprimible (fuera de pantalla) para el export a PDF */}
-      <div
-        style={{
-          position: 'fixed',
-          left: 0,
-          top: 0,
-          width: 0,
-          height: 0,
-          overflow: 'hidden',
-          zIndex: -9999,
-          pointerEvents: 'none',
-        }}
-        aria-hidden
-      >
-        <div ref={reportRef}>
-          <AnalisisReport
-            period={period}
-            generatedAt={new Date().toLocaleString('es-ES')}
-            analysis={{
-              total: topKpis.total,
-              count: topKpis.count,
-              topLab: topKpis.top,
-              avg: topKpis.avg,
-              byLab: chartsData.byLab,
-              byMonth: chartsData.monthlyLabels.map((l, i) => {
-                const amount =
-                  category === 'Mayorista'
-                    ? chartsData.monthlyDatasets.reduce(
-                        (sum, ds) => sum + (ds.data[i] ?? 0),
-                        0,
-                      )
-                    : (chartsData.monthlyDatasets[0]?.data[i] ?? 0)
-                return {
-                  key: String(i),
-                  label: l,
-                  amount,
-                }
-              }),
-            }}
-            fiscalTotal={totalFiscalCons}
-            trabTotal={totalTrabajadoresCons}
-            granTotal={totalGastosConsolidado}
-          />
-        </div>
-      </div>
+      {exportModalOpen && (
+        <ExportPdfModal
+          open={exportModalOpen}
+          onClose={() => setExportModalOpen(false)}
+          defaultDesde={desde}
+          defaultHasta={hasta}
+        />
+      )}
     </div>
   )
 }
