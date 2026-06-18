@@ -3854,7 +3854,11 @@ function renderCalListFiltered() {
 }
 
 function updateCalStats() {
-  const recs = allFacturas.filter(r => r.fields.Tipo !== 'Abono');
+  const recs = allFacturas.filter(r => {
+    if (r.fields.Tipo === 'Abono') return false;
+    const dateVal = r.fields.FechaVencimiento || r.fields.Fecha;
+    return dateVal && dateVal.startsWith(activeYear);
+  });
   let overdue=0, neardue=0, pending=0, paid=0;
   recs.forEach(r => {
     const s = getEffectiveVencStatus(r);
@@ -4626,7 +4630,11 @@ function showVencListModal(status) {
   };
 
   // Get matching records globally
-  const recs = allFacturas.filter(r => r.fields.Tipo !== 'Abono');
+  const recs = allFacturas.filter(r => {
+    if (r.fields.Tipo === 'Abono') return false;
+    const dateVal = r.fields.FechaVencimiento || r.fields.Fecha;
+    return dateVal && dateVal.startsWith(activeYear);
+  });
   currentVencModalRecords = recs.filter(r => {
     const s = getEffectiveVencStatus(r);
     return status === 'pending' ? (s === 'pending' || s === 'neardue') : s === status;

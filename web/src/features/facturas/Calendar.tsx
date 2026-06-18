@@ -71,7 +71,10 @@ export function Calendar({
   }
 
   const facturas = useMemo(() => data ?? [], [data])
-  const stats = useMemo(() => vencStats(facturas), [facturas])
+  const facturasOfYear = useMemo(() => {
+    return facturas.filter((f) => (f.fecha_vencimiento ?? f.fecha ?? '').startsWith(String(year)))
+  }, [facturas, year])
+  const stats = useMemo(() => vencStats(facturasOfYear), [facturasOfYear])
   const grid = useMemo(() => buildCalendarGrid(year, month0), [year, month0])
   const monthVenc = useMemo(
     () => getMonthVencimientos(facturas, year, month0),
@@ -370,6 +373,7 @@ export function Calendar({
 
       <VencListModal
         status={modalStatus}
+        year={year}
         onClose={() => setModalStatus(null)}
         onEdit={onEdit}
         onDelete={onDelete}
