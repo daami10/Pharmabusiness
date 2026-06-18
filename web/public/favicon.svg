@@ -1,19 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
-  <defs>
-    <linearGradient id="logo-g-grad-fav" x1="0%" y1="100%" x2="100%" y2="0%">
-      <stop offset="0%" stopColor="#10b981" />
-      <stop offset="100%" stopColor="#00f2fe" />
-    </linearGradient>
-  </defs>
   <path
     d="M 76 30 A 33 33 0 1 0 76 70 L 76 50 H 65"
-    stroke="url(#logo-g-grad-fav)"
+    stroke="#10b981"
     strokeWidth="12"
     strokeLinecap="round"
     strokeLinejoin="round"
   />
   <path
     d="M 45 37 H 55 V 45 H 63 V 55 H 55 V 63 H 45 V 55 H 37 V 45 H 45 Z"
-    fill="url(#logo-g-grad-fav)"
+    fill="#10b981"
   />
 </svg>
