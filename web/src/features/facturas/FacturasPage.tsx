@@ -64,6 +64,8 @@ export function FacturasPage() {
   const [minImporte, setMinImporte] = useState('')
   const [maxImporte, setMaxImporte] = useState('')
   const [vencStatus, setVencStatus] = useState<'' | VencStatus>('')
+  const [startDate, setStartDate] = useState('')
+  const [endDate, setEndDate] = useState('')
 
   const [overrides, setOverrides] = useState<Record<string, boolean>>({})
   const [modalOpen, setModalOpen] = useState(false)
@@ -103,10 +105,12 @@ export function FacturasPage() {
           month,
           minImporte,
           maxImporte,
+          startDate,
+          endDate,
         },
         wholesalers,
       ),
-    [facturas, year, search, wholesalers, month, minImporte, maxImporte],
+    [facturas, year, search, wholesalers, month, minImporte, maxImporte, startDate, endDate],
   )
 
   const counts = useMemo(() => {
@@ -132,6 +136,8 @@ export function FacturasPage() {
           month,
           minImporte,
           maxImporte,
+          startDate,
+          endDate,
         },
         wholesalers,
       ),
@@ -145,6 +151,8 @@ export function FacturasPage() {
       month,
       minImporte,
       maxImporte,
+      startDate,
+      endDate,
     ],
   )
 
@@ -336,6 +344,39 @@ export function FacturasPage() {
                   setMaxImporte('')
                 }}
                 className="text-xs font-bold text-red-400 hover:text-red-300 px-2 py-1"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+
+          {/* Rango de Fecha */}
+          <div className="flex items-center gap-2 border-l border-white/5 pl-6">
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+              FECHA EMISIÓN:
+            </span>
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="rounded-xl border border-white/5 bg-slate-950/40 py-2 px-3 text-xs text-slate-100 placeholder-slate-500 focus:border-accent-blue/40 focus:outline-none"
+            />
+            <span className="text-slate-500">—</span>
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="rounded-xl border border-white/5 bg-slate-950/40 py-2 px-3 text-xs text-slate-100 placeholder-slate-500 focus:border-accent-blue/40 focus:outline-none"
+            />
+            {(startDate || endDate) && (
+              <button
+                type="button"
+                onClick={() => {
+                  setStartDate('')
+                  setEndDate('')
+                }}
+                className="text-xs font-bold text-red-400 hover:text-red-300 px-2 py-1"
+                title="Limpiar rango de fechas"
               >
                 ✕
               </button>
