@@ -4,23 +4,42 @@ import { Dialog } from '@/components/ui/Dialog'
 interface CsvExportModalProps {
   open: boolean
   onClose: () => void
-  onExport: (startDate: string, endDate: string) => void
+  onExport: (
+    startDate: string,
+    endDate: string,
+    categories: { labs: boolean; wholesalers: boolean; others: boolean; abonos: boolean },
+  ) => void
 }
 
 export function CsvExportModal({ open, onClose, onExport }: CsvExportModalProps) {
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
+  const [labs, setLabs] = useState(false)
+  const [wholesalers, setWholesalers] = useState(false)
+  const [others, setOthers] = useState(false)
+  const [abonos, setAbonos] = useState(false)
+  const [errorMsg, setErrorMsg] = useState('')
 
   // Reset inputs when modal is opened
   useEffect(() => {
     if (open) {
       setStartDate('')
       setEndDate('')
+      setLabs(false)
+      setWholesalers(false)
+      setOthers(false)
+      setAbonos(false)
+      setErrorMsg('')
     }
   }, [open])
 
   const handleExport = () => {
-    onExport(startDate, endDate)
+    if (!labs && !wholesalers && !others && !abonos) {
+      setErrorMsg('Selecciona al menos una categoría para exportar')
+      return
+    }
+    setErrorMsg('')
+    onExport(startDate, endDate, { labs, wholesalers, others, abonos })
     onClose()
   }
 
@@ -28,8 +47,7 @@ export function CsvExportModal({ open, onClose, onExport }: CsvExportModalProps)
     <Dialog open={open} onClose={onClose} title="Exportar Facturas a CSV" size="md">
       <div className="space-y-4">
         <p className="text-xs text-slate-400">
-          Selecciona el rango de fechas de emisión para la exportación de facturas.
-          Si no seleccionas ninguna fecha, se exportará la lista completa con los filtros actuales.
+          Selecciona el rango de fechas de emisión y las categorías para la exportación de facturas.
         </p>
 
         <div className="space-y-3">
@@ -56,6 +74,68 @@ export function CsvExportModal({ open, onClose, onExport }: CsvExportModalProps)
               className="w-full rounded-xl border border-white/10 bg-slate-950/40 px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:border-accent-blue/40 focus:outline-none"
             />
           </div>
+        </div>
+
+        {/* Checkboxes de categorías */}
+        <div className="border-t border-white/5 pt-4">
+          <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">
+            Categorías a Exportar:
+          </label>
+          <div className="grid grid-cols-2 gap-3">
+            <label className="flex items-center gap-2.5 cursor-pointer text-sm text-slate-300 hover:text-white select-none">
+              <input
+                type="checkbox"
+                checked={labs}
+                onChange={(e) => {
+                  setLabs(e.target.checked)
+                  setErrorMsg('')
+                }}
+                className="h-4 w-4 rounded border-white/10 bg-slate-950/40 text-accent-blue focus:ring-0 focus:outline-none cursor-pointer"
+              />
+              Laboratorios
+            </label>
+            <label className="flex items-center gap-2.5 cursor-pointer text-sm text-slate-300 hover:text-white select-none">
+              <input
+                type="checkbox"
+                checked={wholesalers}
+                onChange={(e) => {
+                  setWholesalers(e.target.checked)
+                  setErrorMsg('')
+                }}
+                className="h-4 w-4 rounded border-white/10 bg-slate-950/40 text-accent-blue focus:ring-0 focus:outline-none cursor-pointer"
+              />
+              Mayoristas
+            </label>
+            <label className="flex items-center gap-2.5 cursor-pointer text-sm text-slate-300 hover:text-white select-none">
+              <input
+                type="checkbox"
+                checked={others}
+                onChange={(e) => {
+                  setOthers(e.target.checked)
+                  setErrorMsg('')
+                }}
+                className="h-4 w-4 rounded border-white/10 bg-slate-950/40 text-accent-blue focus:ring-0 focus:outline-none cursor-pointer"
+              />
+              Otros
+            </label>
+            <label className="flex items-center gap-2.5 cursor-pointer text-sm text-slate-300 hover:text-white select-none">
+              <input
+                type="checkbox"
+                checked={abonos}
+                onChange={(e) => {
+                  setAbonos(e.target.checked)
+                  setErrorMsg('')
+                }}
+                className="h-4 w-4 rounded border-white/10 bg-slate-950/40 text-accent-blue focus:ring-0 focus:outline-none cursor-pointer"
+              />
+              Abonos
+            </label>
+          </div>
+          {errorMsg && (
+            <p className="text-xs text-red-400 font-semibold mt-3 animate-pulse">
+              ⚠️ {errorMsg}
+            </p>
+          )}
         </div>
 
         <div className="flex gap-3 pt-4 border-t border-white/5">

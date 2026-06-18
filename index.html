@@ -587,6 +587,14 @@
       </div>
       <button onclick="clearImporteFilter()" class="text-xs text-slate-500 hover:text-slate-300 px-2 py-2 rounded-lg hover:bg-white/5 transition-colors" title="Limpiar filtro de importe">✕</button>
     </div>
+    <!-- Filtro por fecha de emisión -->
+    <div class="flex items-center gap-2 bg-slate-900/20 border border-white/5 p-3 rounded-xl max-w-max">
+      <span class="text-xs text-slate-400 font-bold uppercase tracking-wider shrink-0">Fecha Emisión:</span>
+      <input id="filter-fecha-desde" type="date" onchange="filterFacturas()" class="px-2.5 py-1.5 rounded-lg border border-white/5 focus:border-[#00f2fe]/40 focus:ring-0 focus:outline-none text-xs bg-slate-950/40 text-slate-200 transition-all">
+      <span class="text-slate-600 text-sm">—</span>
+      <input id="filter-fecha-hasta" type="date" onchange="filterFacturas()" class="px-2.5 py-1.5 rounded-lg border border-white/5 focus:border-[#00f2fe]/40 focus:ring-0 focus:outline-none text-xs bg-slate-950/40 text-slate-200 transition-all">
+      <button onclick="clearFechaFilter()" class="text-xs text-slate-500 hover:text-slate-300 px-2 py-2 rounded-lg hover:bg-white/5 transition-colors" title="Limpiar filtro de fecha">✕</button>
+    </div>
   </div>
   <!-- Filtro de estado activo -->
   <div id="venc-filter-bar" class="hidden flex items-center gap-2 mb-3 bg-white/5 border border-white/5 px-3 py-2 rounded-xl max-w-max">
@@ -1707,7 +1715,7 @@
       </button>
     </div>
     
-    <p class="text-xs text-slate-400 mb-6">Selecciona el rango de fechas de emisión para la exportación de facturas. Si no seleccionas ninguna fecha, se exportará la lista completa con los filtros actuales.</p>
+    <p class="text-xs text-slate-400 mb-6">Selecciona el rango de fechas de emisión y las categorías para la exportación de facturas.</p>
     
     <div class="space-y-4 mb-6">
       <div>
@@ -1717,6 +1725,30 @@
       <div>
         <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Fecha Hasta (Emisión):</label>
         <input id="export-fecha-hasta" type="date" class="w-full px-4 py-2.5 rounded-xl border border-white/5 focus:border-[#00f2fe]/40 focus:ring-0 focus:outline-none text-sm bg-slate-950/40 text-slate-100 placeholder-slate-500 transition-all">
+      </div>
+      
+      <!-- Checkboxes de categorías -->
+      <div class="border-t border-white/5 pt-4">
+        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Categorías a Exportar:</label>
+        <div class="grid grid-cols-2 gap-3">
+          <label class="flex items-center gap-2.5 cursor-pointer text-sm text-slate-300 hover:text-white select-none">
+            <input id="export-cat-labs" type="checkbox" onchange="clearExportError()" class="h-4 w-4 rounded border-white/10 bg-slate-950/40 text-[#00f2fe] focus:ring-0 focus:outline-none cursor-pointer">
+            Laboratorios
+          </label>
+          <label class="flex items-center gap-2.5 cursor-pointer text-sm text-slate-300 hover:text-white select-none">
+            <input id="export-cat-wholesalers" type="checkbox" onchange="clearExportError()" class="h-4 w-4 rounded border-white/10 bg-slate-950/40 text-[#00f2fe] focus:ring-0 focus:outline-none cursor-pointer">
+            Mayoristas
+          </label>
+          <label class="flex items-center gap-2.5 cursor-pointer text-sm text-slate-300 hover:text-white select-none">
+            <input id="export-cat-others" type="checkbox" onchange="clearExportError()" class="h-4 w-4 rounded border-white/10 bg-slate-950/40 text-[#00f2fe] focus:ring-0 focus:outline-none cursor-pointer">
+            Otros
+          </label>
+          <label class="flex items-center gap-2.5 cursor-pointer text-sm text-slate-300 hover:text-white select-none">
+            <input id="export-cat-abonos" type="checkbox" onchange="clearExportError()" class="h-4 w-4 rounded border-white/10 bg-slate-950/40 text-[#00f2fe] focus:ring-0 focus:outline-none cursor-pointer">
+            Abonos
+          </label>
+        </div>
+        <div id="export-modal-error" class="hidden text-xs text-red-400 font-semibold mt-3 animate-pulse"></div>
       </div>
     </div>
     
@@ -2682,6 +2714,12 @@ function clearImporteFilter() {
   filterFacturas();
 }
 
+function clearFechaFilter() {
+  document.getElementById('filter-fecha-desde').value = '';
+  document.getElementById('filter-fecha-hasta').value = '';
+  filterFacturas();
+}
+
 function filterFacturas() {
   const s = document.getElementById('search-facturas').value.toLowerCase();
   const m = document.getElementById('filter-mes').value;
@@ -2689,10 +2727,13 @@ function filterFacturas() {
   const maxVal = document.getElementById('filter-importe-max').value;
   const min = minVal !== '' ? parseFloat(minVal) : null;
   const max = maxVal !== '' ? parseFloat(maxVal) : null;
+  const fechaDesde = document.getElementById('filter-fecha-desde').value;
+  const fechaHasta = document.getElementById('filter-fecha-hasta').value;
+  const hasDateRange = !!(fechaDesde || fechaHasta);
 
   renderTable(allFacturas.filter(r => {
     const dateVal = r.fields.Fecha || r.fields.FechaVencimiento;
-    const okYear = dateVal && dateVal.slice(0,4) === activeYear;
+    const okYear = hasDateRange ? true : (dateVal && dateVal.slice(0,4) === activeYear);
     const ok1 = !s || (r.fields.Laboratorio||'').toLowerCase().includes(s) || (r.fields.NumFactura||'').toLowerCase().includes(s);
     const ok2 = !m || (r.fields.Fecha||'').slice(5,7) === m;
     const ok3 = !activeTipo || (activeTipo === 'FedeFarma' ? isWholesaler(r.fields.Tipo) : (r.fields.Tipo||'') === activeTipo);
@@ -2700,7 +2741,10 @@ function filterFacturas() {
     const imp = r.fields.Importe || 0;
     const ok5 = min === null || imp >= min;
     const ok6 = max === null || imp <= max;
-    return okYear && ok1 && ok2 && ok3 && ok4 && ok5 && ok6;
+    const fFecha = r.fields.Fecha || '';
+    const okDesde = !fechaDesde || (fFecha && fFecha >= fechaDesde);
+    const okHasta = !fechaHasta || (fFecha && fFecha <= fechaHasta);
+    return okYear && ok1 && ok2 && ok3 && ok4 && ok5 && ok6 && okDesde && okHasta;
   }));
 }
 
@@ -2941,6 +2985,11 @@ function showModalError(msg) {
 function exportCSV() {
   document.getElementById('export-fecha-desde').value = '';
   document.getElementById('export-fecha-hasta').value = '';
+  document.getElementById('export-cat-labs').checked = false;
+  document.getElementById('export-cat-wholesalers').checked = false;
+  document.getElementById('export-cat-others').checked = false;
+  document.getElementById('export-cat-abonos').checked = false;
+  clearExportError();
   document.getElementById('csv-export-modal').classList.remove('hidden');
 }
 
@@ -2948,7 +2997,25 @@ function closeCsvExportModal() {
   document.getElementById('csv-export-modal').classList.add('hidden');
 }
 
+function clearExportError() {
+  const err = document.getElementById('export-modal-error');
+  err.textContent = '';
+  err.classList.add('hidden');
+}
+
 function confirmExportCSV() {
+  const labs = document.getElementById('export-cat-labs').checked;
+  const wholesalers = document.getElementById('export-cat-wholesalers').checked;
+  const others = document.getElementById('export-cat-others').checked;
+  const abonos = document.getElementById('export-cat-abonos').checked;
+  
+  if (!labs && !wholesalers && !others && !abonos) {
+    const err = document.getElementById('export-modal-error');
+    err.textContent = '⚠️ Selecciona al menos una categoría para exportar';
+    err.classList.remove('hidden');
+    return;
+  }
+  
   const fechaDesde = document.getElementById('export-fecha-desde').value;
   const fechaHasta = document.getElementById('export-fecha-hasta').value;
   const hasDateRange = !!(fechaDesde || fechaHasta);
@@ -2974,7 +3041,15 @@ function confirmExportCSV() {
     const okDesde = !fechaDesde || (fFecha && fFecha >= fechaDesde);
     const okHasta = !fechaHasta || (fFecha && fFecha <= fechaHasta);
     
-    return okYear && ok1 && ok2 && ok3 && ok4 && ok5 && ok6 && okDesde && okHasta;
+    // Filtrar por categorías seleccionadas en el modal
+    const t = r.fields.Tipo || '';
+    let okCat = false;
+    if (labs && t === 'Laboratorio') okCat = true;
+    if (wholesalers && isWholesaler(t)) okCat = true;
+    if (abonos && t === 'Abono') okCat = true;
+    if (others && t !== 'Laboratorio' && !isWholesaler(t) && t !== 'Abono') okCat = true;
+    
+    return okYear && ok1 && ok2 && ok3 && ok4 && ok5 && ok6 && okDesde && okHasta && okCat;
   });
   
   if (!filtered.length) {
