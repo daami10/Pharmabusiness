@@ -1,16 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <!-- Large G in Emerald Green (#10b981) -->
+  <!-- Extra thick G in Emerald Green (#10b981) -->
   <path
     d="M 76 30 A 33 33 0 1 0 76 70 L 76 50 H 65"
     stroke="#10b981"
-    strokeWidth="14"
-    strokeLinecap="round"
-    strokeLinejoin="round"
+    stroke-width="18"
+    stroke-linecap="round"
+    stroke-linejoin="round"
     fill="none"
   />
-  <!-- Solid filled medical cross in Emerald Green (#10b981) -->
+  <!-- Large solid filled medical cross in Emerald Green (#10b981) -->
   <path
-    d="M 43 32 H 57 V 43 H 68 V 57 H 57 V 68 H 43 V 57 H 32 V 43 H 43 Z"
+    d="M 42 30 H 58 V 42 H 70 V 58 H 58 V 70 H 42 V 58 H 30 V 42 H 42 Z"
     fill="#10b981"
   />
 </svg>
