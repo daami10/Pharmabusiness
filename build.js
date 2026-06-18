@@ -22,3 +22,26 @@ html = html.replace(/__SUPABASE_ANON_KEY__/g, supabaseKey);
 fs.mkdirSync(path.join(__dirname, 'dist'), { recursive: true });
 fs.writeFileSync(dest, html);
 console.log(`Build OK — ${html.length} chars desde ${src}`);
+
+// Copiar recursos de marca (favicons, manifest) a dist
+const assetsToCopy = [
+  'favicon.svg',
+  'favicon.ico',
+  'favicon-16x16.png',
+  'favicon-32x32.png',
+  'apple-touch-icon.png',
+  'android-chrome-192x192.png',
+  'android-chrome-512x512.png',
+  'site.webmanifest'
+];
+
+assetsToCopy.forEach(asset => {
+  const assetSrc = path.join(__dirname, 'web', 'public', asset);
+  const assetDest = path.join(__dirname, 'dist', asset);
+  if (fs.existsSync(assetSrc)) {
+    fs.copyFileSync(assetSrc, assetDest);
+    console.log(`Copiado: ${asset} -> dist/${asset}`);
+  } else {
+    console.warn(`Advertencia: No se encontró el recurso ${assetSrc}`);
+  }
+});
