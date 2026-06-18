@@ -520,11 +520,13 @@ export function FacturasPage() {
         />
       )}
 
-      <CsvExportModal
-        open={csvModalOpen}
-        onClose={() => setCsvModalOpen(false)}
-        onExport={handleExportCsv}
-      />
+      {csvModalOpen && (
+        <CsvExportModal
+          open={csvModalOpen}
+          onClose={() => setCsvModalOpen(false)}
+          onExport={handleExportCsv}
+        />
+      )}
     </div>
   )
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Dialog } from '@/components/ui/Dialog'
 
 interface CsvExportModalProps {
@@ -20,18 +20,7 @@ export function CsvExportModal({ open, onClose, onExport }: CsvExportModalProps)
   const [abonos, setAbonos] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
 
-  // Reset inputs when modal is opened
-  useEffect(() => {
-    if (open) {
-      setStartDate('')
-      setEndDate('')
-      setLabs(false)
-      setWholesalers(false)
-      setOthers(false)
-      setAbonos(false)
-      setErrorMsg('')
-    }
-  }, [open])
+
 
   const handleExport = () => {
     if (!labs && !wholesalers && !others && !abonos) {
