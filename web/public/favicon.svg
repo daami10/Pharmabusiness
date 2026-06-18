@@ -1,18 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <!-- Solid dark navy blue background circle (#0d1b32) -->
-  <circle cx="50" cy="50" r="46" fill="#0d1b32" />
-  <!-- Thick neon emerald green G -->
+  <!-- Large G in Emerald Green (#10b981) -->
   <path
     d="M 76 30 A 33 33 0 1 0 76 70 L 76 50 H 65"
-    stroke="#00df89"
+    stroke="#10b981"
     strokeWidth="14"
     strokeLinecap="round"
     strokeLinejoin="round"
     fill="none"
   />
-  <!-- Solid filled neon emerald green medical cross -->
+  <!-- Solid filled medical cross in Emerald Green (#10b981) -->
   <path
     d="M 43 32 H 57 V 43 H 68 V 57 H 57 V 68 H 43 V 57 H 32 V 43 H 43 Z"
-    fill="#00df89"
+    fill="#10b981"
   />
 </svg>
