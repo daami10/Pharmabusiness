@@ -70,6 +70,16 @@ describe('filterFacturas', () => {
     const r = filterFacturas(data, { ...filters, search: 'alfa' }, WHOLESALERS)
     expect(r.map((f) => f.id)).toEqual(['a'])
   })
+  it('filtra por rango de fechas (startDate/endDate)', () => {
+    const rStart = filterFacturas(data, { ...filters, startDate: '2025-12-01' }, WHOLESALERS)
+    expect(rStart.map((f) => f.id).sort()).toEqual(['a', 'b', 'c', 'd'])
+
+    const rEnd = filterFacturas(data, { ...filters, endDate: '2026-02-15' }, WHOLESALERS)
+    expect(rEnd.map((f) => f.id).sort()).toEqual(['a', 'c'])
+
+    const rRange = filterFacturas(data, { ...filters, startDate: '2026-01-01', endDate: '2026-03-15' }, WHOLESALERS)
+    expect(rRange.map((f) => f.id).sort()).toEqual(['a', 'b'])
+  })
 })
 
 describe('groupByMonth', () => {

@@ -7,6 +7,10 @@
   <meta http-equiv="X-Frame-Options" content="DENY">
   <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
   <title>GFarma — Gestión Farmacéutica</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="alternate icon" type="image/png" href="/favicon-32x32.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -568,19 +572,29 @@
       Actualizar
     </button>
   </div>
-  <!-- Filtro por importe -->
-  <div class="flex items-center gap-2 mb-4 bg-slate-900/20 border border-white/5 p-3 rounded-xl max-w-max">
-    <span class="text-xs text-slate-400 font-bold uppercase tracking-wider shrink-0">Importe:</span>
-    <div class="relative">
-      <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">€</span>
-      <input id="filter-importe-min" type="number" min="0" step="0.01" placeholder="Desde" oninput="filterFacturas()" class="pl-7 pr-3 py-1.5 w-28 rounded-lg border border-white/5 focus:border-[#00f2fe]/40 focus:ring-0 focus:outline-none text-xs bg-slate-950/40 text-slate-200 placeholder-slate-600 transition-all">
+  <div class="flex flex-wrap items-center gap-4 mb-4">
+    <!-- Filtro por importe -->
+    <div class="flex items-center gap-2 bg-slate-900/20 border border-white/5 p-3 rounded-xl max-w-max">
+      <span class="text-xs text-slate-400 font-bold uppercase tracking-wider shrink-0">Importe:</span>
+      <div class="relative">
+        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">€</span>
+        <input id="filter-importe-min" type="number" min="0" step="0.01" placeholder="Desde" oninput="filterFacturas()" class="pl-7 pr-3 py-1.5 w-28 rounded-lg border border-white/5 focus:border-[#00f2fe]/40 focus:ring-0 focus:outline-none text-xs bg-slate-950/40 text-slate-200 placeholder-slate-600 transition-all">
+      </div>
+      <span class="text-slate-600 text-sm">—</span>
+      <div class="relative">
+        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">€</span>
+        <input id="filter-importe-max" type="number" min="0" step="0.01" placeholder="Hasta" oninput="filterFacturas()" class="pl-7 pr-3 py-1.5 w-28 rounded-lg border border-white/5 focus:border-[#00f2fe]/40 focus:ring-0 focus:outline-none text-xs bg-slate-950/40 text-slate-200 placeholder-slate-600 transition-all">
+      </div>
+      <button onclick="clearImporteFilter()" class="text-xs text-slate-500 hover:text-slate-300 px-2 py-2 rounded-lg hover:bg-white/5 transition-colors" title="Limpiar filtro de importe">✕</button>
     </div>
-    <span class="text-slate-600 text-sm">—</span>
-    <div class="relative">
-      <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">€</span>
-      <input id="filter-importe-max" type="number" min="0" step="0.01" placeholder="Hasta" oninput="filterFacturas()" class="pl-7 pr-3 py-1.5 w-28 rounded-lg border border-white/5 focus:border-[#00f2fe]/40 focus:ring-0 focus:outline-none text-xs bg-slate-950/40 text-slate-200 placeholder-slate-600 transition-all">
+    <!-- Filtro por fecha de emisión -->
+    <div class="flex items-center gap-2 bg-slate-900/20 border border-white/5 p-3 rounded-xl max-w-max">
+      <span class="text-xs text-slate-400 font-bold uppercase tracking-wider shrink-0">Fecha Emisión:</span>
+      <input id="filter-fecha-desde" type="date" onchange="filterFacturas()" class="px-2.5 py-1.5 rounded-lg border border-white/5 focus:border-[#00f2fe]/40 focus:ring-0 focus:outline-none text-xs bg-slate-950/40 text-slate-200 transition-all">
+      <span class="text-slate-600 text-sm">—</span>
+      <input id="filter-fecha-hasta" type="date" onchange="filterFacturas()" class="px-2.5 py-1.5 rounded-lg border border-white/5 focus:border-[#00f2fe]/40 focus:ring-0 focus:outline-none text-xs bg-slate-950/40 text-slate-200 transition-all">
+      <button onclick="clearFechaFilter()" class="text-xs text-slate-500 hover:text-slate-300 px-2 py-2 rounded-lg hover:bg-white/5 transition-colors" title="Limpiar filtro de fecha">✕</button>
     </div>
-    <button onclick="clearImporteFilter()" class="text-xs text-slate-500 hover:text-slate-300 px-2 py-2 rounded-lg hover:bg-white/5 transition-colors" title="Limpiar filtro de importe">✕</button>
   </div>
   <!-- Filtro de estado activo -->
   <div id="venc-filter-bar" class="hidden flex items-center gap-2 mb-3 bg-white/5 border border-white/5 px-3 py-2 rounded-xl max-w-max">
@@ -1689,6 +1703,59 @@
       <span id="ranking-modal-total-label" class="text-xs text-slate-500 font-bold uppercase tracking-wider">Total Acumulado Laboratorios:</span>
       <span id="ranking-modal-total" class="text-lg font-black text-[#00f2fe] drop-shadow-[0_0_8px_rgba(0,242,254,0.3)]">0,00 €</span>
     </div>
+</div>
+
+<!-- CSV EXPORT MODAL -->
+<div id="csv-export-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
+  <div class="glass-card rounded-2xl p-8 shadow-2xl w-full max-w-md border border-white/10 fade-in flex flex-col">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-xl font-black text-slate-100 tracking-tight">Exportar Facturas a CSV</h3>
+      <button onclick="closeCsvExportModal()" class="text-slate-400 hover:text-white hover:bg-white/5 p-1 rounded-lg transition-colors">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    
+    <p class="text-xs text-slate-400 mb-6">Selecciona el rango de fechas de emisión y las categorías para la exportación de facturas.</p>
+    
+    <div class="space-y-4 mb-6">
+      <div>
+        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Fecha Desde (Emisión):</label>
+        <input id="export-fecha-desde" type="date" class="w-full px-4 py-2.5 rounded-xl border border-white/5 focus:border-[#00f2fe]/40 focus:ring-0 focus:outline-none text-sm bg-slate-950/40 text-slate-100 placeholder-slate-500 transition-all">
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Fecha Hasta (Emisión):</label>
+        <input id="export-fecha-hasta" type="date" class="w-full px-4 py-2.5 rounded-xl border border-white/5 focus:border-[#00f2fe]/40 focus:ring-0 focus:outline-none text-sm bg-slate-950/40 text-slate-100 placeholder-slate-500 transition-all">
+      </div>
+      
+      <!-- Checkboxes de categorías -->
+      <div class="border-t border-white/5 pt-4">
+        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Categorías a Exportar:</label>
+        <div class="grid grid-cols-2 gap-3">
+          <label class="flex items-center gap-2.5 cursor-pointer text-sm text-slate-300 hover:text-white select-none">
+            <input id="export-cat-labs" type="checkbox" onchange="clearExportError()" class="h-4 w-4 rounded border-white/10 bg-slate-950/40 text-[#00f2fe] focus:ring-0 focus:outline-none cursor-pointer">
+            Laboratorios
+          </label>
+          <label class="flex items-center gap-2.5 cursor-pointer text-sm text-slate-300 hover:text-white select-none">
+            <input id="export-cat-wholesalers" type="checkbox" onchange="clearExportError()" class="h-4 w-4 rounded border-white/10 bg-slate-950/40 text-[#00f2fe] focus:ring-0 focus:outline-none cursor-pointer">
+            Mayoristas
+          </label>
+          <label class="flex items-center gap-2.5 cursor-pointer text-sm text-slate-300 hover:text-white select-none">
+            <input id="export-cat-others" type="checkbox" onchange="clearExportError()" class="h-4 w-4 rounded border-white/10 bg-slate-950/40 text-[#00f2fe] focus:ring-0 focus:outline-none cursor-pointer">
+            Otros
+          </label>
+          <label class="flex items-center gap-2.5 cursor-pointer text-sm text-slate-300 hover:text-white select-none">
+            <input id="export-cat-abonos" type="checkbox" onchange="clearExportError()" class="h-4 w-4 rounded border-white/10 bg-slate-950/40 text-[#00f2fe] focus:ring-0 focus:outline-none cursor-pointer">
+            Abonos
+          </label>
+        </div>
+        <div id="export-modal-error" class="hidden text-xs text-red-400 font-semibold mt-3 animate-pulse"></div>
+      </div>
+    </div>
+    
+    <div class="flex gap-3 mt-2">
+      <button onclick="closeCsvExportModal()" class="flex-1 py-3 rounded-xl border border-white/10 hover:bg-white/5 text-slate-300 text-sm font-semibold transition-all">Cancelar</button>
+      <button onclick="confirmExportCSV()" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 text-white text-sm font-semibold transition-all shadow-lg shadow-blue-500/20 hover:scale-[1.01]">Exportar</button>
+    </div>
   </div>
 </div>
 
@@ -2647,6 +2714,12 @@ function clearImporteFilter() {
   filterFacturas();
 }
 
+function clearFechaFilter() {
+  document.getElementById('filter-fecha-desde').value = '';
+  document.getElementById('filter-fecha-hasta').value = '';
+  filterFacturas();
+}
+
 function filterFacturas() {
   const s = document.getElementById('search-facturas').value.toLowerCase();
   const m = document.getElementById('filter-mes').value;
@@ -2654,9 +2727,13 @@ function filterFacturas() {
   const maxVal = document.getElementById('filter-importe-max').value;
   const min = minVal !== '' ? parseFloat(minVal) : null;
   const max = maxVal !== '' ? parseFloat(maxVal) : null;
+  const fechaDesde = document.getElementById('filter-fecha-desde').value;
+  const fechaHasta = document.getElementById('filter-fecha-hasta').value;
+  const hasDateRange = !!(fechaDesde || fechaHasta);
+
   renderTable(allFacturas.filter(r => {
     const dateVal = r.fields.Fecha || r.fields.FechaVencimiento;
-    const okYear = dateVal && dateVal.slice(0,4) === activeYear;
+    const okYear = hasDateRange ? true : (dateVal && dateVal.slice(0,4) === activeYear);
     const ok1 = !s || (r.fields.Laboratorio||'').toLowerCase().includes(s) || (r.fields.NumFactura||'').toLowerCase().includes(s);
     const ok2 = !m || (r.fields.Fecha||'').slice(5,7) === m;
     const ok3 = !activeTipo || (activeTipo === 'FedeFarma' ? isWholesaler(r.fields.Tipo) : (r.fields.Tipo||'') === activeTipo);
@@ -2664,7 +2741,10 @@ function filterFacturas() {
     const imp = r.fields.Importe || 0;
     const ok5 = min === null || imp >= min;
     const ok6 = max === null || imp <= max;
-    return okYear && ok1 && ok2 && ok3 && ok4 && ok5 && ok6;
+    const fFecha = r.fields.Fecha || '';
+    const okDesde = !fechaDesde || (fFecha && fFecha >= fechaDesde);
+    const okHasta = !fechaHasta || (fFecha && fFecha <= fechaHasta);
+    return okYear && ok1 && ok2 && ok3 && ok4 && ok5 && ok6 && okDesde && okHasta;
   }));
 }
 
@@ -2903,9 +2983,82 @@ function showModalError(msg) {
 
 // ─── Exportar CSV ─────────────────────────────────────────────────────────────
 function exportCSV() {
-  if (!currentFiltered.length) { alert('No hay facturas para exportar.'); return; }
+  document.getElementById('export-fecha-desde').value = '';
+  document.getElementById('export-fecha-hasta').value = '';
+  document.getElementById('export-cat-labs').checked = false;
+  document.getElementById('export-cat-wholesalers').checked = false;
+  document.getElementById('export-cat-others').checked = false;
+  document.getElementById('export-cat-abonos').checked = false;
+  clearExportError();
+  document.getElementById('csv-export-modal').classList.remove('hidden');
+}
+
+function closeCsvExportModal() {
+  document.getElementById('csv-export-modal').classList.add('hidden');
+}
+
+function clearExportError() {
+  const err = document.getElementById('export-modal-error');
+  err.textContent = '';
+  err.classList.add('hidden');
+}
+
+function confirmExportCSV() {
+  const labs = document.getElementById('export-cat-labs').checked;
+  const wholesalers = document.getElementById('export-cat-wholesalers').checked;
+  const others = document.getElementById('export-cat-others').checked;
+  const abonos = document.getElementById('export-cat-abonos').checked;
+  
+  if (!labs && !wholesalers && !others && !abonos) {
+    const err = document.getElementById('export-modal-error');
+    err.textContent = '⚠️ Selecciona al menos una categoría para exportar';
+    err.classList.remove('hidden');
+    return;
+  }
+  
+  const fechaDesde = document.getElementById('export-fecha-desde').value;
+  const fechaHasta = document.getElementById('export-fecha-hasta').value;
+  const hasDateRange = !!(fechaDesde || fechaHasta);
+  
+  const s = document.getElementById('search-facturas').value.toLowerCase();
+  const m = document.getElementById('filter-mes').value;
+  const minVal = document.getElementById('filter-importe-min').value;
+  const maxVal = document.getElementById('filter-importe-max').value;
+  const min = minVal !== '' ? parseFloat(minVal) : null;
+  const max = maxVal !== '' ? parseFloat(maxVal) : null;
+  
+  const filtered = allFacturas.filter(r => {
+    const dateVal = r.fields.Fecha || r.fields.FechaVencimiento;
+    const okYear = hasDateRange ? true : (dateVal && dateVal.slice(0,4) === activeYear);
+    const ok1 = !s || (r.fields.Laboratorio||'').toLowerCase().includes(s) || (r.fields.NumFactura||'').toLowerCase().includes(s);
+    const ok2 = !m || (r.fields.Fecha||'').slice(5,7) === m;
+    const ok3 = !activeTipo || (activeTipo === 'FedeFarma' ? isWholesaler(r.fields.Tipo) : (r.fields.Tipo||'') === activeTipo);
+    const ok4 = !activeVencStatus || getEffectiveVencStatus(r) === activeVencStatus;
+    const imp = r.fields.Importe || 0;
+    const ok5 = min === null || imp >= min;
+    const ok6 = max === null || imp <= max;
+    const fFecha = r.fields.Fecha || '';
+    const okDesde = !fechaDesde || (fFecha && fFecha >= fechaDesde);
+    const okHasta = !fechaHasta || (fFecha && fFecha <= fechaHasta);
+    
+    // Filtrar por categorías seleccionadas en el modal
+    const t = r.fields.Tipo || '';
+    let okCat = false;
+    if (labs && t === 'Laboratorio') okCat = true;
+    if (wholesalers && isWholesaler(t)) okCat = true;
+    if (abonos && t === 'Abono') okCat = true;
+    if (others && t !== 'Laboratorio' && !isWholesaler(t) && t !== 'Abono') okCat = true;
+    
+    return okYear && ok1 && ok2 && ok3 && ok4 && ok5 && ok6 && okDesde && okHasta && okCat;
+  });
+  
+  if (!filtered.length) {
+    alert('No hay facturas para exportar con los filtros seleccionados.');
+    return;
+  }
+  
   const headers = ['Fecha','Laboratorio','Tipo','Nº Factura','Importe','FechaVencimiento','Pagada','Notas'];
-  const rows = currentFiltered.map(r => {
+  const rows = filtered.map(r => {
     const f = r.fields;
     return [f.Fecha||'', f.Laboratorio||'', f.Tipo||'', f.NumFactura||'', f.Importe||0, f.FechaVencimiento||'', f.Pagada?'Sí':'No', f.Notas||'']
       .map(v => '"'+String(v).replace(/"/g,'""')+'"').join(',');
@@ -2915,6 +3068,7 @@ function exportCSV() {
   a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
   a.download = 'facturas_'+new Date().toISOString().slice(0,10)+'.csv';
   a.click();
+  closeCsvExportModal();
 }
 
 // ─── Alertas de presupuesto ───────────────────────────────────────────────────
@@ -3850,7 +4004,11 @@ function renderCalListFiltered() {
 }
 
 function updateCalStats() {
-  const recs = allFacturas.filter(r => r.fields.Tipo !== 'Abono');
+  const recs = allFacturas.filter(r => {
+    if (r.fields.Tipo === 'Abono') return false;
+    const dateVal = r.fields.FechaVencimiento || r.fields.Fecha;
+    return dateVal && dateVal.startsWith(activeYear);
+  });
   let overdue=0, neardue=0, pending=0, paid=0;
   recs.forEach(r => {
     const s = getEffectiveVencStatus(r);
@@ -4622,7 +4780,11 @@ function showVencListModal(status) {
   };
 
   // Get matching records globally
-  const recs = allFacturas.filter(r => r.fields.Tipo !== 'Abono');
+  const recs = allFacturas.filter(r => {
+    if (r.fields.Tipo === 'Abono') return false;
+    const dateVal = r.fields.FechaVencimiento || r.fields.Fecha;
+    return dateVal && dateVal.startsWith(activeYear);
+  });
   currentVencModalRecords = recs.filter(r => {
     const s = getEffectiveVencStatus(r);
     return status === 'pending' ? (s === 'pending' || s === 'neardue') : s === status;
