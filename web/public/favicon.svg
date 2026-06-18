@@ -8,15 +8,12 @@
   <path
     d="M 76 30 A 33 33 0 1 0 76 70 L 76 50 H 65"
     stroke="url(#logo-g-grad-fav)"
-    strokeWidth="6.5"
+    strokeWidth="12"
     strokeLinecap="round"
     strokeLinejoin="round"
   />
   <path
     d="M 45 37 H 55 V 45 H 63 V 55 H 55 V 63 H 45 V 55 H 37 V 45 H 45 Z"
-    stroke="url(#logo-g-grad-fav)"
-    strokeWidth="5.5"
-    strokeLinecap="round"
-    strokeLinejoin="round"
+    fill="url(#logo-g-grad-fav)"
   />
 </svg>
