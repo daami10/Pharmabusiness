@@ -49,9 +49,14 @@ export function LoginPage() {
   const [resetError, setResetError] = useState('')
   const [isSubmittingReset, setIsSubmittingReset] = useState(false)
 
+  // Invitation checking states
+  const [isInvitedWorker, setIsInvitedWorker] = useState(false)
+  const [inviteCode, setInviteCode] = useState('')
+
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({ resolver: zodResolver(schema) })
 
@@ -69,10 +74,51 @@ export function LoginPage() {
     }
   }, [])
 
+  // Watch email dynamically to verify if they are invited
+  const watchedEmail = watch('email')
+  useEffect(() => {
+    if (mode !== 'register' || !watchedEmail || !watchedEmail.includes('@')) {
+      setIsInvitedWorker(false)
+      return
+    }
+    const delayDebounce = setTimeout(async () => {
+      try {
+        const { data, error } = await supabase.rpc('is_email_invited', { check_email: watchedEmail.trim() })
+        if (!error && data !== null) {
+          setIsInvitedWorker(!!data)
+        } else {
+          setIsInvitedWorker(false)
+        }
+      } catch (err) {
+        console.error(err)
+        setIsInvitedWorker(false)
+      }
+    }, 400)
+    return () => clearTimeout(delayDebounce)
+  }, [watchedEmail, mode])
+
   const handleAuthSubmit = handleSubmit(async ({ email, password }) => {
     setServerError('')
     setInfo('')
     if (mode === 'register') {
+      // Re-verify invitation on submit for security
+      let isEmailInvited = false
+      try {
+        const { data, error } = await supabase.rpc('is_email_invited', { check_email: email.trim() })
+        if (!error && data !== null) {
+          isEmailInvited = !!data
+        }
+      } catch (err) {
+        console.error(err)
+      }
+
+      if (!isEmailInvited) {
+        if (inviteCode.trim().toUpperCase() !== 'GFARMA2026') {
+          setServerError('Código de invitación incorrecto. Introduce un código válido para registrarte.')
+          return
+        }
+      }
+
       const { error } = await supabase.auth.signUp({ email, password })
       if (error) setServerError(error.message)
       else
@@ -366,6 +412,25 @@ export function LoginPage() {
                     </p>
                   )}
                 </div>
+
+                {/* Campo: Código de invitación (solo si es registro y no es trabajador invitado) */}
+                {mode === 'register' && !isInvitedWorker && (
+                  <div className="transition-all duration-300">
+                    <label className="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">
+                      Código de Invitación
+                    </label>
+                    <div className="relative">
+                      <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+                      <input
+                        type="text"
+                        placeholder="Introduce el código GFARMA..."
+                        value={inviteCode}
+                        onChange={(e) => setInviteCode(e.target.value)}
+                        className="w-full rounded-xl border border-white/10 bg-slate-950/60 pl-10 pr-4 py-3 text-xs text-slate-100 placeholder-slate-600 focus:border-[#00f2fe]/60 focus:ring-1 focus:ring-[#00f2fe]/30 focus:shadow-[0_0_12px_rgba(0,242,254,0.25)] focus:outline-none transition-all uppercase"
+                      />
+                    </div>
+                  </div>
+                )}
 
                 {serverError && (
                   <p className="rounded-xl border border-red-500/20 bg-red-950/40 px-4 py-3 text-xs text-red-400 leading-normal">
