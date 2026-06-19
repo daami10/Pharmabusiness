@@ -11,6 +11,8 @@ interface AuthContextValue {
   activeOrgId: string | null
   activeOrgName: string | null
   userRole: 'titular' | 'empleado' | null
+  customName: string | null
+  permissions: Record<string, boolean> | null
   /** Effective tier for feature-gating: during an active trial it is 'premium'. */
   subscriptionTier: 'basic' | 'premium'
   /** Raw subscription status from the organization (Stripe status or 'trialing'). */
@@ -34,6 +36,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [activeOrgId, setActiveOrgId] = useState<string | null>(null)
   const [activeOrgName, setActiveOrgName] = useState<string | null>(null)
   const [userRole, setUserRole] = useState<'titular' | 'empleado' | null>(null)
+  const [customName, setCustomName] = useState<string | null>(null)
+  const [permissions, setPermissions] = useState<Record<string, boolean> | null>(null)
   const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null)
   const [trialEndsAt, setTrialEndsAt] = useState<string | null>(null)
   // Derived access state, computed when org data loads (Date.now() must not run during render).
@@ -51,6 +55,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsTrialActive(false)
       setTrialDaysLeft(null)
       setHasAccess(false)
+      setCustomName(null)
+      setPermissions(null)
     }
 
     const loadOrgData = async (user: User | null): Promise<boolean> => {
@@ -60,6 +66,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setActiveOrgId(null)
         setActiveOrgName(null)
         setUserRole(null)
+        setCustomName(null)
+        setPermissions(null)
         setSubscriptionStatus(null)
         setTrialEndsAt(null)
         resetAccess()
@@ -74,7 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const { data: membership, error } = await supabase
           .from('memberships')
           .select(
-            'org_id, role, organizations(nombre, plan, subscription_status, trial_ends_at, wholesalers)',
+            'org_id, role, custom_name, permissions, organizations(nombre, plan, subscription_status, trial_ends_at, wholesalers)',
           )
           .eq('user_id', user.id)
           .maybeSingle()
@@ -84,6 +92,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (membership) {
           setActiveOrgId(membership.org_id)
           setUserRole(membership.role)
+          setCustomName(membership.custom_name ?? null)
+
+          const isTitular = membership.role === 'titular'
+          const rawPerms = (membership.permissions as Record<string, boolean>) || {}
+          const resolvedPerms = isTitular
+            ? {
+                facturas_read: true,
+                facturas_write: true,
+                abonos_read: true,
+                abonos_write: true,
+                analisis_read: true,
+                fiscalidad_read: true,
+                trabajadores_read: true,
+              }
+            : rawPerms
+          setPermissions(resolvedPerms)
 
           const org = membership.organizations as unknown as {
             nombre: string | null
@@ -175,6 +199,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     activeOrgId,
     activeOrgName,
     userRole,
+    customName,
+    permissions,
     subscriptionTier,
     subscriptionStatus,
     trialEndsAt,

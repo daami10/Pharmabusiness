@@ -25,23 +25,23 @@ export default function App() {
           }
         >
           <Route index element={<InicioPage />} />
-          <Route path="facturas" element={<FacturasPage />} />
+          <Route path="facturas" element={<RoleGate permission="facturas_read"><FacturasPage /></RoleGate>} />
           <Route
             path="analisis"
             element={
               <PremiumGate>
-                <RoleGate>
+                <RoleGate permission="analisis_read">
                   <AnalisisPage />
                 </RoleGate>
               </PremiumGate>
             }
           />
-          <Route path="abonos" element={<AbonosPage />} />
+          <Route path="abonos" element={<RoleGate permission="abonos_read"><AbonosPage /></RoleGate>} />
           <Route
             path="fiscalidad"
             element={
               <PremiumGate>
-                <RoleGate>
+                <RoleGate permission="fiscalidad_read">
                   <FiscalidadPage />
                 </RoleGate>
               </PremiumGate>
@@ -51,7 +51,7 @@ export default function App() {
             path="trabajadores"
             element={
               <PremiumGate>
-                <RoleGate>
+                <RoleGate permission="trabajadores_read">
                   <TrabajadoresPage />
                 </RoleGate>
               </PremiumGate>

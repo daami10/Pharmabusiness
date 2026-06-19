@@ -2,10 +2,20 @@ import type { ReactNode } from 'react'
 import { ShieldAlert } from 'lucide-react'
 import { useAuth } from '@/features/auth/AuthProvider'
 
-export function RoleGate({ children }: { children: ReactNode }) {
-  const { userRole } = useAuth()
+interface RoleGateProps {
+  children: ReactNode
+  permission?: string
+}
 
-  if (userRole === 'titular') {
+export function RoleGate({ children, permission }: RoleGateProps) {
+  const { userRole, permissions } = useAuth()
+
+  // Propietario (titular) always has access, employee needs the specific permission toggle to be true
+  const hasAccess =
+    userRole === 'titular' ||
+    (permission && permissions?.[permission] === true)
+
+  if (hasAccess) {
     return <>{children}</>
   }
 
@@ -26,17 +36,14 @@ export function RoleGate({ children }: { children: ReactNode }) {
           </div>
 
           <h3 className="text-xl font-black text-white tracking-tight mb-2">
-            Área Exclusiva del Titular
+            Acceso Restringido
           </h3>
           <p className="text-xs text-slate-400 leading-relaxed mb-6">
-            Esta sección contiene información fiscal y laboral de la farmacia. Tu rol
-            actual de <strong className="text-red-400 font-semibold">Empleado</strong> no
-            dispone de permisos para consultar estos datos.
+            Tu rol actual de <strong className="text-red-400 font-semibold">Empleado</strong> no dispone de permisos para consultar esta sección de la farmacia.
           </p>
 
           <div className="text-xs text-slate-500 leading-normal border-t border-white/5 pt-4">
-            Si crees que deberías tener acceso, solicita al propietario de la farmacia que
-            actualice tu rol a Titular.
+            Si crees que deberías tener acceso, solicita al Titular de la farmacia que habilite tu acceso en el panel de **Gestión de Usuarios**.
           </div>
         </div>
       </div>
