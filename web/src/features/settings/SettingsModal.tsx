@@ -85,6 +85,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
     if (open && activeTab === 'users' && subscriptionTier === 'premium' && activeOrgId) {
       loadUsersData()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, activeTab, subscriptionTier, activeOrgId])
 
   async function loadUsersData() {
@@ -197,9 +198,9 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
       setInviting(false)
 
       await loadUsersData()
-    } catch (err: any) {
+    } catch (err) {
       console.error(err)
-      setInviteError(err.message || 'Error al crear la invitación.')
+      setInviteError(err instanceof Error ? err.message : 'Error al crear la invitación.')
     } finally {
       setSubmittingInvite(false)
     }
