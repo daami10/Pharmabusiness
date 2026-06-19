@@ -15,7 +15,8 @@ const COMPARISON_FEATURES: PlanFeature[] = [
   { name: 'Gestión de Facturas e IA', basic: true, premium: true },
   { name: 'Control de Abonos', basic: true, premium: true },
   { name: 'Análisis y gráficos avanzados', basic: false, premium: true },
-  { name: 'Fiscalidad, IVA y Nóminas', basic: false, premium: true },
+  { name: 'Fiscalidad e IVA', basic: false, premium: true },
+  { name: 'Trabajadores y Seguros Sociales', basic: false, premium: true },
   { name: 'Usuarios permitidos', basic: '1 usuario', premium: 'Hasta 3 usuarios' },
 ]
 
@@ -113,7 +114,7 @@ export function SubscriptionGate({ children }: { children: ReactNode }) {
           // Titular: choose a plan and pay.
           <div className="w-full max-w-3xl">
             <div className="text-center mb-8">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-[#00f2fe]/35 bg-[#00f2fe]/10 text-[#00f2fe] shadow-[0_0_20px_rgba(0,242,254,0.25)] mb-5">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-[#bf953f]/35 bg-[#bf953f]/10 text-[#fcf6ba] shadow-[0_0_20px_rgba(212,175,55,0.15)] mb-5 animate-pulse">
                 <Lock className="h-7 w-7" />
               </div>
               <h2 className="text-2xl font-black text-white tracking-tight mb-2">
@@ -129,27 +130,27 @@ export function SubscriptionGate({ children }: { children: ReactNode }) {
               {PLANS.map((p) => (
                 <div
                   key={p.id}
-                  className={`relative flex flex-col rounded-3xl border p-7 backdrop-blur-xl transition-all ${
+                  className={`relative flex flex-col rounded-3xl border p-7 backdrop-blur-xl transition-all duration-300 ${
                     p.highlight
-                      ? 'border-[#00f2fe]/35 bg-[#0b111e]/90 shadow-[0_0_40px_rgba(0,242,254,0.18)]'
-                      : 'border-white/10 bg-[#0b111e]/70'
+                      ? 'border-[#bf953f]/30 bg-slate-950/80 shadow-[0_0_30px_rgba(212,175,55,0.06)] hover:border-[#fcf6ba]/50 hover:shadow-[0_0_40px_rgba(252,246,186,0.15)]'
+                      : 'border-white/10 bg-[#0b111e]/70 hover:border-[#e2e8f0]/30 hover:shadow-[0_0_30px_rgba(148,163,184,0.12)]'
                   }`}
                 >
                   {p.highlight && (
-                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-blue-500 to-[#00f2fe] px-3 py-1 text-[10px] font-black uppercase tracking-wider text-[#04121a]">
+                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-[#bf953f] to-[#fcf6ba] px-3 py-1 text-[10px] font-black uppercase tracking-wider text-[#3c2a05] shadow-md">
                       Recomendado
                     </span>
                   )}
                   <div className="flex items-center gap-2 mb-1">
                     {p.highlight ? (
-                      <Sparkles className="h-5 w-5 text-[#00f2fe]" />
+                      <Sparkles className="h-5 w-5 text-[#fcf6ba] animate-pulse" />
                     ) : (
                       <BarChart3 className="h-5 w-5 text-slate-300" />
                     )}
                     <h3 className="text-lg font-black text-white">{p.name}</h3>
                   </div>
                   <div className="mb-5">
-                    <span className="text-3xl font-black text-white font-mono">{p.price}</span>
+                    <span className={`text-3xl font-black font-mono ${p.highlight ? 'text-[#fcf6ba]' : 'text-white'}`}>{p.price}</span>
                     <span className="text-xs text-slate-400 font-semibold"> /mes + IVA</span>
                   </div>
                   <ul className="space-y-3 mb-7 flex-1">
@@ -159,14 +160,14 @@ export function SubscriptionGate({ children }: { children: ReactNode }) {
                         <li key={idx} className="flex items-start gap-2.5">
                           {typeof hasFeature === 'string' ? (
                             <>
-                              <Check className={`h-4 w-4 shrink-0 mt-0.5 ${p.highlight ? 'text-[#00f2fe]' : 'text-blue-400'}`} />
+                              <Check className={`h-4 w-4 shrink-0 mt-0.5 ${p.highlight ? 'text-[#fcf6ba]' : 'text-[#cbd5e1]'}`} />
                               <span className="text-xs font-semibold text-slate-300">
                                 {feature.name}: <strong className="text-white font-black">{hasFeature}</strong>
                               </span>
                             </>
                           ) : hasFeature ? (
                             <>
-                              <Check className={`h-4 w-4 shrink-0 mt-0.5 ${p.highlight ? 'text-[#00f2fe]' : 'text-blue-400'}`} />
+                              <Check className={`h-4 w-4 shrink-0 mt-0.5 ${p.highlight ? 'text-[#fcf6ba]' : 'text-[#cbd5e1]'}`} />
                               <span className="text-xs font-semibold text-slate-300">{feature.name}</span>
                             </>
                           ) : (
@@ -185,10 +186,10 @@ export function SubscriptionGate({ children }: { children: ReactNode }) {
                     type="button"
                     disabled={loadingPlan !== null}
                     onClick={() => void handleSubscribe(p.id)}
-                    className={`w-full rounded-full py-3.5 text-xs font-black uppercase tracking-widest transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
+                    className={`w-full rounded-full py-3.5 text-xs font-black uppercase tracking-widest transition-all duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
                       p.highlight
-                        ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:scale-[1.02]'
-                        : 'border border-white/15 text-slate-200 hover:bg-white/5'
+                        ? 'bg-gradient-to-r from-[#bf953f] via-[#fcf6ba] to-[#b38728] text-[#3c2a05] border border-[#fcf6ba]/30 shadow-[0_0_20px_rgba(212,175,55,0.2)] hover:scale-[1.02] hover:shadow-[0_0_25px_rgba(252,246,186,0.3)]'
+                        : 'bg-gradient-to-r from-[#94a3b8] via-[#e2e8f0] to-[#64748b] text-[#0f172a] border border-[#e2e8f0]/30 shadow-[0_0_20px_rgba(148,163,184,0.15)] hover:scale-[1.02] hover:shadow-[0_0_25px_rgba(226,232,240,0.25)]'
                     }`}
                   >
                     {loadingPlan === p.id ? 'Cargando pasarela…' : `Suscribirme a ${p.name}`}
@@ -219,4 +220,3 @@ export function SubscriptionGate({ children }: { children: ReactNode }) {
     </div>
   )
 }
-
