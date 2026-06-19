@@ -4,11 +4,25 @@ import { BarChart3, Check, LogOut, Lock, ShieldAlert, Sparkles } from 'lucide-re
 import { useAuth } from '@/features/auth/AuthProvider'
 import { startCheckout } from '@/lib/billing'
 
+interface PlanFeature {
+  name: string
+  basic: boolean | string
+  premium: boolean | string
+}
+
+const COMPARISON_FEATURES: PlanFeature[] = [
+  { name: 'Inicio y panel de KPIs', basic: true, premium: true },
+  { name: 'Gestión de Facturas e IA', basic: true, premium: true },
+  { name: 'Control de Abonos', basic: true, premium: true },
+  { name: 'Análisis y gráficos avanzados', basic: false, premium: true },
+  { name: 'Fiscalidad, IVA y Nóminas', basic: false, premium: true },
+  { name: 'Usuarios permitidos', basic: '1 usuario', premium: 'Hasta 3 usuarios' },
+]
+
 interface PlanCard {
   id: 'basic' | 'premium'
   name: string
   price: string
-  features: string[]
   highlight: boolean
 }
 
@@ -17,19 +31,12 @@ const PLANS: PlanCard[] = [
     id: 'basic',
     name: 'Básico',
     price: '24,99€',
-    features: ['Inicio y panel de KPIs', 'Gestión de Facturas y escaneo IA', 'Abonos', '1 usuario'],
     highlight: false,
   },
   {
     id: 'premium',
     name: 'Premium',
-    price: '39,99€',
-    features: [
-      'Todo lo de Básico',
-      'Análisis y gráficos avanzados',
-      'Fiscalidad, IVA y Nóminas',
-      'Hasta 3 usuarios',
-    ],
+    price: '34,99€', // Corrected to match Stripe
     highlight: true,
   },
 ]
@@ -122,7 +129,7 @@ export function SubscriptionGate({ children }: { children: ReactNode }) {
               {PLANS.map((p) => (
                 <div
                   key={p.id}
-                  className={`relative rounded-3xl border p-7 backdrop-blur-xl transition-all ${
+                  className={`relative flex flex-col rounded-3xl border p-7 backdrop-blur-xl transition-all ${
                     p.highlight
                       ? 'border-[#00f2fe]/35 bg-[#0b111e]/90 shadow-[0_0_40px_rgba(0,242,254,0.18)]'
                       : 'border-white/10 bg-[#0b111e]/70'
@@ -142,16 +149,37 @@ export function SubscriptionGate({ children }: { children: ReactNode }) {
                     <h3 className="text-lg font-black text-white">{p.name}</h3>
                   </div>
                   <div className="mb-5">
-                    <span className="text-3xl font-black text-white">{p.price}</span>
+                    <span className="text-3xl font-black text-white font-mono">{p.price}</span>
                     <span className="text-xs text-slate-400 font-semibold"> /mes + IVA</span>
                   </div>
-                  <ul className="space-y-2.5 mb-7">
-                    {p.features.map((f) => (
-                      <li key={f} className="flex items-center gap-2.5">
-                        <Check className="h-4 w-4 text-[#00f2fe] shrink-0" />
-                        <span className="text-xs text-slate-300 font-semibold">{f}</span>
-                      </li>
-                    ))}
+                  <ul className="space-y-3 mb-7 flex-1">
+                    {COMPARISON_FEATURES.map((feature, idx) => {
+                      const hasFeature = p.id === 'basic' ? feature.basic : feature.premium;
+                      return (
+                        <li key={idx} className="flex items-start gap-2.5">
+                          {typeof hasFeature === 'string' ? (
+                            <>
+                              <Check className={`h-4 w-4 shrink-0 mt-0.5 ${p.highlight ? 'text-[#00f2fe]' : 'text-blue-400'}`} />
+                              <span className="text-xs font-semibold text-slate-300">
+                                {feature.name}: <strong className="text-white font-black">{hasFeature}</strong>
+                              </span>
+                            </>
+                          ) : hasFeature ? (
+                            <>
+                              <Check className={`h-4 w-4 shrink-0 mt-0.5 ${p.highlight ? 'text-[#00f2fe]' : 'text-blue-400'}`} />
+                              <span className="text-xs font-semibold text-slate-300">{feature.name}</span>
+                            </>
+                          ) : (
+                            <>
+                              <Lock className="h-4 w-4 text-slate-600 shrink-0 mt-0.5" />
+                              <span className="text-xs font-semibold text-slate-500 line-through decoration-slate-700/50">
+                                {feature.name}
+                              </span>
+                            </>
+                          )}
+                        </li>
+                      )
+                    })}
                   </ul>
                   <button
                     type="button"
@@ -191,3 +219,4 @@ export function SubscriptionGate({ children }: { children: ReactNode }) {
     </div>
   )
 }
+
