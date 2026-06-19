@@ -15,7 +15,7 @@ const COMPARISON_FEATURES: PlanFeature[] = [
   { name: 'Gestión de Facturas e IA', basic: true, premium: true },
   { name: 'Control de Abonos', basic: true, premium: true },
   { name: 'Análisis y gráficos avanzados', basic: false, premium: true },
-  { name: 'Fiscalidad e IVA', basic: false, premium: true },
+  { name: 'Fiscalidad', basic: false, premium: true },
   { name: 'Trabajadores y Seguros Sociales', basic: false, premium: true },
   { name: 'Usuarios permitidos', basic: '1 usuario', premium: 'Hasta 3 usuarios' },
 ]
