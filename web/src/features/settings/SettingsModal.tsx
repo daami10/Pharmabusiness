@@ -83,8 +83,10 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
 
   useEffect(() => {
     if (open) {
-      setOrgName(activeOrgName || '')
-      setDraft(wholesalers)
+      Promise.resolve().then(() => {
+        setOrgName(activeOrgName || '')
+        setDraft(wholesalers)
+      })
     }
   }, [open, activeOrgName, wholesalers])
 

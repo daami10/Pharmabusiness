@@ -20,8 +20,10 @@ export function AdminDashboardPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [search, setSearch] = useState('')
+  const [now, setNow] = useState(() => Date.now())
 
   async function fetchOrgs() {
+    setNow(Date.now())
     setLoading(true)
     setError('')
     try {
@@ -50,7 +52,17 @@ export function AdminDashboardPage() {
   }
 
   useEffect(() => {
-    fetchOrgs()
+    let ignore = false
+    const init = async () => {
+      await Promise.resolve()
+      if (!ignore) {
+        fetchOrgs()
+      }
+    }
+    init()
+    return () => {
+      ignore = true
+    }
   }, [])
 
   // Calculate KPIs
@@ -81,7 +93,7 @@ export function AdminDashboardPage() {
 
   function getTrialDaysLeft(trialEndsAt: string | null) {
     if (!trialEndsAt) return 0
-    const diff = new Date(trialEndsAt).getTime() - Date.now()
+    const diff = new Date(trialEndsAt).getTime() - now
     return Math.max(0, Math.ceil(diff / 86_400_000))
   }
 
