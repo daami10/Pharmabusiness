@@ -23,10 +23,12 @@ interface AuthContextValue {
   isTrialActive: boolean
   /** Whole days left in the trial (>= 0), or null if not on an active trial. */
   trialDaysLeft: number | null
+  isSuperAdmin: boolean
   /** Whether the org currently has access to the app (paid or trialing). */
   hasAccess: boolean
   signOut: () => Promise<void>
   updateSubscriptionTier: (tier: 'basic' | 'premium') => Promise<void>
+  updateActiveOrgName: (name: string) => void
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
@@ -45,6 +47,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isTrialActive, setIsTrialActive] = useState(false)
   const [trialDaysLeft, setTrialDaysLeft] = useState<number | null>(null)
   const [hasAccess, setHasAccess] = useState(false)
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -55,6 +58,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsTrialActive(false)
       setTrialDaysLeft(null)
       setHasAccess(false)
+      setIsSuperAdmin(false)
       setCustomName(null)
       setPermissions(null)
     }
@@ -88,6 +92,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           .maybeSingle()
 
         if (error) throw error
+
+        // Check if user is a super-admin
+        const { data: superAdmin, error: saError } = await supabase
+          .from('super_admins')
+          .select('user_id')
+          .eq('user_id', user.id)
+          .maybeSingle()
+
+        const isSA = !saError && !!superAdmin
+        setIsSuperAdmin(isSA)
+
+        if (isSA) {
+          setHasAccess(true)
+        }
 
         if (membership) {
           setActiveOrgId(membership.org_id)
@@ -192,6 +210,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     )
   }
 
+  const updateActiveOrgName = (name: string) => {
+    setActiveOrgName(name)
+  }
+
   const value: AuthContextValue = {
     session,
     user: session?.user ?? null,
@@ -207,10 +229,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isTrialActive,
     trialDaysLeft,
     hasAccess,
+    isSuperAdmin,
     signOut: async () => {
       await supabase.auth.signOut()
     },
     updateSubscriptionTier,
+    updateActiveOrgName,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

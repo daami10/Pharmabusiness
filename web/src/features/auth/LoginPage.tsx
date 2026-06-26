@@ -12,14 +12,16 @@ import {
   Lock,
   Mail,
   Sparkles,
+  Store,
   TrendingUp,
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from './AuthProvider'
 
 const schema = z.object({
-  email: z.email('Introduce un email válido'),
+  email: z.string().email('Introduce un email válido'),
   password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),
+  organizationName: z.string().optional(),
 })
 type FormValues = z.infer<typeof schema>
 
@@ -97,7 +99,7 @@ export function LoginPage() {
     return () => clearTimeout(delayDebounce)
   }, [watchedEmail, mode])
 
-  const handleAuthSubmit = handleSubmit(async ({ email, password }) => {
+  const handleAuthSubmit = handleSubmit(async ({ email, password, organizationName }) => {
     setServerError('')
     setInfo('')
     if (mode === 'register') {
@@ -113,13 +115,25 @@ export function LoginPage() {
       }
 
       if (!isEmailInvited) {
+        if (!organizationName || organizationName.trim().length === 0) {
+          setServerError('Introduce el nombre de tu farmacia.')
+          return
+        }
         if (inviteCode.trim().toUpperCase() !== 'GFARMA2026') {
           setServerError('Código de invitación incorrecto. Introduce un código válido para registrarte.')
           return
         }
       }
 
-      const { error } = await supabase.auth.signUp({ email, password })
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            organization_name: organizationName?.trim(),
+          },
+        },
+      })
       if (error) setServerError(error.message)
       else
         setInfo('Cuenta creada. Revisa tu email para confirmarla y luego inicia sesión.')
@@ -353,6 +367,24 @@ export function LoginPage() {
               </div>
 
               <form onSubmit={handleAuthSubmit} className="space-y-4" noValidate>
+                {/* Campo: Nombre de la Farmacia (solo si es registro de nueva farmacia) */}
+                {mode === 'register' && !isInvitedWorker && (
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">
+                      Nombre de la Farmacia
+                    </label>
+                    <div className="relative">
+                      <Store className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+                      <input
+                        type="text"
+                        placeholder="Ej. Farmacia Central"
+                        {...register('organizationName')}
+                        className="w-full rounded-xl border border-white/10 bg-slate-950/60 pl-10 pr-4 py-3 text-xs text-slate-100 placeholder-slate-600 focus:border-[#00f2fe]/60 focus:ring-1 focus:ring-[#00f2fe]/30 focus:shadow-[0_0_12px_rgba(0,242,254,0.25)] focus:outline-none transition-all"
+                      />
+                    </div>
+                  </div>
+                )}
+
                 {/* Campo: Correo */}
                 <div>
                   <label className="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">

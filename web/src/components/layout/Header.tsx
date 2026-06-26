@@ -3,7 +3,7 @@ import { useAuth } from '@/features/auth/AuthProvider'
 import { useYearStore } from '@/stores/yearStore'
 
 export function Header({ onMenu }: { onMenu: () => void }) {
-  const { user } = useAuth()
+  const { user, activeOrgName } = useAuth()
   const { year, availableYears, setYear } = useYearStore()
 
   return (
@@ -36,7 +36,14 @@ export function Header({ onMenu }: { onMenu: () => void }) {
         </div>
       </div>
 
-      <span className="max-w-[180px] truncate text-xs text-slate-400">{user?.email}</span>
+      <div className="flex flex-col items-end text-right select-none">
+        <span className="max-w-[200px] truncate text-xs font-bold text-white">
+          {activeOrgName || 'Farmacia'}
+        </span>
+        <span className="max-w-[180px] truncate text-[10px] font-medium text-slate-400 font-mono mt-0.5">
+          {user?.email}
+        </span>
+      </div>
     </header>
   )
 }
