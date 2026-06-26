@@ -14,7 +14,7 @@ export function Sidebar({
   onSettings: () => void
   onPrivacy: () => void
 }) {
-  const { signOut, subscriptionTier, userRole } = useAuth()
+  const { signOut, subscriptionTier, userRole, isSuperAdmin } = useAuth()
   const secondaryCls =
     'flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-400 transition-all hover:bg-white/5 hover:text-white'
 
@@ -106,6 +106,25 @@ export function Sidebar({
                   </NavLink>
                 )
               },
+            )}
+
+            {isSuperAdmin && (
+              <NavLink
+                to="/admin"
+                onClick={onClose}
+                className={({ isActive }) =>
+                  `flex items-center justify-between px-4 py-3.5 text-sm font-semibold transition-all border border-transparent ${
+                    isActive
+                      ? 'tab-active'
+                      : 'text-slate-400 hover:text-white hover:bg-white/5'
+                  }`
+                }
+              >
+                <div className="flex items-center gap-3.5 text-[#00f2fe] font-black">
+                  <ShieldCheck className="h-5 w-5 text-[#00f2fe]" />
+                  Panel Admin
+                </div>
+              </NavLink>
             )}
           </nav>
         </div>
