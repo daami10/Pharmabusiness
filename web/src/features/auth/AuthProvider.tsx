@@ -28,6 +28,7 @@ interface AuthContextValue {
   hasAccess: boolean
   signOut: () => Promise<void>
   updateSubscriptionTier: (tier: 'basic' | 'premium') => Promise<void>
+  updateActiveOrgName: (name: string) => void
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
@@ -209,6 +210,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     )
   }
 
+  const updateActiveOrgName = (name: string) => {
+    setActiveOrgName(name)
+  }
+
   const value: AuthContextValue = {
     session,
     user: session?.user ?? null,
@@ -229,6 +234,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await supabase.auth.signOut()
     },
     updateSubscriptionTier,
+    updateActiveOrgName,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

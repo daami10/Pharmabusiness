@@ -57,13 +57,14 @@ const PERMISSION_LABELS: Record<string, string> = {
 export function SettingsModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const wholesalers = useWholesalersStore((s) => s.wholesalers)
   const setWholesalers = useWholesalersStore((s) => s.setWholesalers)
-  const { subscriptionTier, activeOrgId, userRole, session } = useAuth()
+  const { subscriptionTier, activeOrgId, activeOrgName, userRole, session, updateActiveOrgName } = useAuth()
   
   const [activeTab, setActiveTab] = useState<'wholesalers' | 'users'>('wholesalers')
   const [billingLoading, setBillingLoading] = useState(false)
   const [billingError, setBillingError] = useState('')
 
-  // Wholesalers draft state
+  // Settings states
+  const [orgName, setOrgName] = useState(activeOrgName || '')
   const [draft, setDraft] = useState<string[]>(wholesalers)
   const [wholesalerError, setWholesalerError] = useState('')
 
@@ -79,6 +80,13 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
   const [inviteError, setInviteError] = useState('')
   const [editingPermissionsUserId, setEditingPermissionsUserId] = useState<string | null>(null)
   const [editPermissionsDraft, setEditPermissionsDraft] = useState<Record<string, boolean>>({})
+
+  useEffect(() => {
+    if (open) {
+      setOrgName(activeOrgName || '')
+      setDraft(wholesalers)
+    }
+  }, [open, activeOrgName, wholesalers])
 
   // Load members and invitations when users tab is active
   useEffect(() => {
@@ -117,13 +125,34 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
 
   const seatsUsed = members.length + invitations.length
 
-  function saveWholesalers() {
+  async function saveSettings() {
+    if (orgName.trim().length === 0) {
+      setWholesalerError('Introduce el nombre de la farmacia.')
+      return
+    }
     if (draft.length === 0) {
       setWholesalerError('Selecciona al menos un mayorista.')
       return
     }
-    setWholesalers(draft, activeOrgId)
-    onClose()
+    setWholesalerError('')
+    try {
+      const { error } = await supabase
+        .from('organizations')
+        .update({
+          nombre: orgName.trim(),
+          wholesalers: draft,
+        })
+        .eq('id', activeOrgId)
+      
+      if (error) throw error
+      
+      await setWholesalers(draft)
+      updateActiveOrgName(orgName.trim())
+      onClose()
+    } catch (err) {
+      console.error(err)
+      setWholesalerError(err instanceof Error ? err.message : 'Error al guardar los ajustes.')
+    }
   }
 
   async function handleManageBilling() {
@@ -278,7 +307,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
               : 'border-transparent text-slate-400 hover:text-slate-200'
           }`}
         >
-          Mayoristas
+          General
         </button>
         <button
           type="button"
@@ -294,12 +323,31 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
       </div>
 
       {activeTab === 'wholesalers' ? (
-        // Wholesalers Tab Panel
+        // General Tab Panel
         <>
-          <p className="mb-4 text-sm text-slate-400">
-            Mayoristas / distribuidores que utilizas. Se usan en filtros, categorías y análisis.
-          </p>
-          <WholesalersEditor value={draft} onChange={setDraft} />
+          {/* Nombre de la Farmacia */}
+          <div className="mb-6">
+            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+              Nombre de la Farmacia
+            </label>
+            <input
+              type="text"
+              value={orgName}
+              onChange={(e) => setOrgName(e.target.value)}
+              placeholder="Ej. Farmacia Central"
+              className="w-full rounded-xl border border-white/10 bg-slate-950/40 px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:border-[#00f2fe]/40 focus:outline-none"
+            />
+          </div>
+
+          <div className="border-t border-white/5 my-5 pt-4">
+            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
+              Distribución / Mayoristas
+            </label>
+            <p className="mb-3 text-2xs text-slate-500">
+              Mayoristas que utilizas. Se usan en filtros, categorías y análisis.
+            </p>
+            <WholesalersEditor value={draft} onChange={setDraft} />
+          </div>
           {wholesalerError && <p className="mt-3 text-xs text-red-400">{wholesalerError}</p>}
 
           {/* Licenciamiento y Planes (Stripe panel) */}
@@ -349,7 +397,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
             </button>
             <button
               type="button"
-              onClick={saveWholesalers}
+              onClick={saveSettings}
               className="flex-1 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 py-3 text-sm font-semibold text-white shadow-lg hover:from-blue-400 hover:to-indigo-500"
             >
               Guardar
