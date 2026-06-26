@@ -8,6 +8,7 @@ interface CsvExportModalProps {
     startDate: string,
     endDate: string,
     categories: { labs: boolean; wholesalers: boolean; others: boolean; abonos: boolean },
+    format: 'csv' | 'xlsx',
   ) => void
 }
 
@@ -18,6 +19,7 @@ export function CsvExportModal({ open, onClose, onExport }: CsvExportModalProps)
   const [wholesalers, setWholesalers] = useState(false)
   const [others, setOthers] = useState(false)
   const [abonos, setAbonos] = useState(false)
+  const [format, setFormat] = useState<'csv' | 'xlsx'>('xlsx')
   const [errorMsg, setErrorMsg] = useState('')
 
 
@@ -28,12 +30,12 @@ export function CsvExportModal({ open, onClose, onExport }: CsvExportModalProps)
       return
     }
     setErrorMsg('')
-    onExport(startDate, endDate, { labs, wholesalers, others, abonos })
+    onExport(startDate, endDate, { labs, wholesalers, others, abonos }, format)
     onClose()
   }
 
   return (
-    <Dialog open={open} onClose={onClose} title="Exportar Facturas a CSV" size="md">
+    <Dialog open={open} onClose={onClose} title="Exportar Facturas" size="md">
       <div className="space-y-4">
         <p className="text-xs text-slate-400">
           Selecciona el rango de fechas de emisión y las categorías para la exportación de facturas.
@@ -125,6 +127,37 @@ export function CsvExportModal({ open, onClose, onExport }: CsvExportModalProps)
               ⚠️ {errorMsg}
             </p>
           )}
+        </div>
+
+        {/* Formato de archivo */}
+        <div className="border-t border-white/5 pt-4">
+          <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">
+            Formato de Archivo:
+          </label>
+          <div className="flex gap-6">
+            <label className="flex items-center gap-2.5 cursor-pointer text-sm text-slate-300 hover:text-white select-none">
+              <input
+                type="radio"
+                name="exportFormat"
+                value="xlsx"
+                checked={format === 'xlsx'}
+                onChange={() => setFormat('xlsx')}
+                className="h-4 w-4 border-white/10 bg-slate-950/40 text-accent-blue focus:ring-0 focus:outline-none cursor-pointer"
+              />
+              Excel (.xlsx)
+            </label>
+            <label className="flex items-center gap-2.5 cursor-pointer text-sm text-slate-300 hover:text-white select-none">
+              <input
+                type="radio"
+                name="exportFormat"
+                value="csv"
+                checked={format === 'csv'}
+                onChange={() => setFormat('csv')}
+                className="h-4 w-4 border-white/10 bg-slate-950/40 text-accent-blue focus:ring-0 focus:outline-none cursor-pointer"
+              />
+              CSV (.csv)
+            </label>
+          </div>
         </div>
 
         <div className="flex gap-3 pt-4 border-t border-white/5">
