@@ -7,6 +7,7 @@ export interface InvoiceLike {
   fecha?: string | null
   fecha_vencimiento?: string | null
   tipo?: string | null
+  num_factura?: string | null
 }
 
 export interface FiscalLike {
@@ -70,7 +71,7 @@ export function AnalisisReport({
   }
   const sortedProviders = Object.entries(providerTotals).sort((a, b) => b[1] - a[1])
   const topProvider = sortedProviders[0]?.[0] ?? '—'
-  const topProviders10 = sortedProviders.slice(0, 10).map(([lab, amount]) => ({ lab, amount }))
+  const allProviders = sortedProviders.map(([lab, amount]) => ({ lab, amount }))
 
   // 2. Calculations - Abonos
   const totalAbonos = abonos.reduce((sum, a) => sum + a.importe, 0)
@@ -83,7 +84,7 @@ export function AnalisisReport({
     abonoTotals[l] = (abonoTotals[l] ?? 0) + a.importe
   }
   const sortedAbonos = Object.entries(abonoTotals).sort((a, b) => b[1] - a[1])
-  const topAbonos10 = sortedAbonos.slice(0, 10).map(([lab, amount]) => ({ lab, amount }))
+  const allAbonosProviders = sortedAbonos.map(([lab, amount]) => ({ lab, amount }))
 
   // 3. Calculations - Fiscalidad
   const totalFiscal = fiscal.reduce((sum, f) => sum + f.importe, 0)
@@ -234,8 +235,8 @@ export function AnalisisReport({
             <div style={{ fontSize: '10px', color: '#64748b', marginTop: '2px' }}>Proveedor Principal</div>
           </div>
 
-          <h3 style={{ fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '10px' }}>Ranking de Proveedores (Top 10)</h3>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+          <h3 style={{ fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '10px' }}>Ranking de Proveedores</h3>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px', marginBottom: '24px' }}>
             <thead>
               <tr style={{ borderBottom: '2px solid #e2e8f0', textAlign: 'left', color: '#64748b' }}>
                 <th style={{ padding: '6px 8px' }}>#</th>
@@ -245,12 +246,12 @@ export function AnalisisReport({
               </tr>
             </thead>
             <tbody>
-              {topProviders10.length === 0 ? (
+              {allProviders.length === 0 ? (
                 <tr>
                   <td colSpan={4} style={{ padding: '12px', textAlign: 'center', color: '#94a3b8' }}>Sin facturas en este rango.</td>
                 </tr>
               ) : (
-                topProviders10.map((r, i) => (
+                allProviders.map((r, i) => (
                   <tr key={r.lab} style={{ borderBottom: '1px solid #f1f5f9' }}>
                     <td style={{ padding: '6px 8px', fontWeight: 700, color: '#64748b' }}>{MEDALS[i] ?? `${i + 1}º`}</td>
                     <td style={{ padding: '6px 8px', fontWeight: 600 }}>{r.lab}</td>
@@ -260,6 +261,36 @@ export function AnalisisReport({
                     </td>
                   </tr>
                 ))
+              )}
+            </tbody>
+          </table>
+
+          <h3 style={{ fontSize: '12px', fontWeight: 700, color: '#475569', marginTop: '24px', marginBottom: '10px' }}>Listado Detallado de Facturas</h3>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px' }}>
+            <thead>
+              <tr style={{ borderBottom: '2px solid #e2e8f0', textAlign: 'left', color: '#64748b' }}>
+                <th style={{ padding: '6px 8px' }}>Fecha</th>
+                <th style={{ padding: '6px 8px' }}>Proveedor</th>
+                <th style={{ padding: '6px 8px' }}>Nº Factura</th>
+                <th style={{ padding: '6px 8px', textAlign: 'right' }}>Importe</th>
+              </tr>
+            </thead>
+            <tbody>
+              {facturas.length === 0 ? (
+                <tr>
+                  <td colSpan={4} style={{ padding: '12px', textAlign: 'center', color: '#94a3b8' }}>Sin facturas en este rango.</td>
+                </tr>
+              ) : (
+                [...facturas]
+                  .sort((a, b) => (b.fecha || '').localeCompare(a.fecha || ''))
+                  .map((f, idx) => (
+                    <tr key={f.id || idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                      <td style={{ padding: '6px 8px', color: '#475569' }}>{formatFecha(f.fecha)}</td>
+                      <td style={{ padding: '6px 8px', fontWeight: 600 }}>{f.laboratorio || 'Sin nombre'}</td>
+                      <td style={{ padding: '6px 8px', color: '#64748b' }}>{f.num_factura || '—'}</td>
+                      <td style={{ padding: '6px 8px', textAlign: 'right', fontWeight: 700 }}>{formatMoney(f.importe)}</td>
+                    </tr>
+                  ))
               )}
             </tbody>
           </table>
@@ -289,8 +320,8 @@ export function AnalisisReport({
             </div>
           </div>
 
-          <h3 style={{ fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '10px' }}>Desglose de Abonos por Laboratorio (Top 10)</h3>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+          <h3 style={{ fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '10px' }}>Desglose de Abonos por Laboratorio</h3>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px', marginBottom: '24px' }}>
             <thead>
               <tr style={{ borderBottom: '2px solid #e2e8f0', textAlign: 'left', color: '#64748b' }}>
                 <th style={{ padding: '6px 8px' }}>#</th>
@@ -300,12 +331,12 @@ export function AnalisisReport({
               </tr>
             </thead>
             <tbody>
-              {topAbonos10.length === 0 ? (
+              {allAbonosProviders.length === 0 ? (
                 <tr>
                   <td colSpan={4} style={{ padding: '12px', textAlign: 'center', color: '#94a3b8' }}>Sin abonos en este rango.</td>
                 </tr>
               ) : (
-                topAbonos10.map((r, i) => (
+                allAbonosProviders.map((r, i) => (
                   <tr key={r.lab} style={{ borderBottom: '1px solid #f1f5f9' }}>
                     <td style={{ padding: '6px 8px', fontWeight: 700, color: '#64748b' }}>{MEDALS[i] ?? `${i + 1}º`}</td>
                     <td style={{ padding: '6px 8px', fontWeight: 600 }}>{r.lab}</td>
@@ -315,6 +346,34 @@ export function AnalisisReport({
                     </td>
                   </tr>
                 ))
+              )}
+            </tbody>
+          </table>
+
+          <h3 style={{ fontSize: '12px', fontWeight: 700, color: '#475569', marginTop: '24px', marginBottom: '10px' }}>Listado Detallado de Abonos</h3>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px' }}>
+            <thead>
+              <tr style={{ borderBottom: '2px solid #e2e8f0', textAlign: 'left', color: '#64748b' }}>
+                <th style={{ padding: '6px 8px' }}>Fecha</th>
+                <th style={{ padding: '6px 8px' }}>Laboratorio</th>
+                <th style={{ padding: '6px 8px', textAlign: 'right' }}>Importe</th>
+              </tr>
+            </thead>
+            <tbody>
+              {abonos.length === 0 ? (
+                <tr>
+                  <td colSpan={3} style={{ padding: '12px', textAlign: 'center', color: '#94a3b8' }}>Sin abonos en este rango.</td>
+                </tr>
+              ) : (
+                [...abonos]
+                  .sort((a, b) => (b.fecha || '').localeCompare(a.fecha || ''))
+                  .map((a, idx) => (
+                    <tr key={a.id || idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                      <td style={{ padding: '6px 8px', color: '#475569' }}>{formatFecha(a.fecha)}</td>
+                      <td style={{ padding: '6px 8px', fontWeight: 600 }}>{a.laboratorio || 'Sin nombre'}</td>
+                      <td style={{ padding: '6px 8px', textAlign: 'right', fontWeight: 700, color: '#166534' }}>{formatMoney(a.importe)}</td>
+                    </tr>
+                  ))
               )}
             </tbody>
           </table>
