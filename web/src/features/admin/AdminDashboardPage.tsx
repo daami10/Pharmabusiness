@@ -224,6 +224,7 @@ export function AdminDashboardPage() {
                   const owner = org.memberships.find(m => m.role === 'titular');
                   const daysLeft = getTrialDaysLeft(org.trial_ends_at);
                   const isTrial = org.subscription_status === 'trialing';
+                  const effectivePlan = isTrial ? 'premium' : org.plan;
 
                   return (
                     <tr key={org.id} className="hover:bg-white/[0.02] transition-colors text-sm text-slate-300">
@@ -232,11 +233,11 @@ export function AdminDashboardPage() {
                       <td className="px-6 py-4">{formatDateString(org.created_at)}</td>
                       <td className="px-6 py-4">
                         <span className={`inline-flex rounded-full px-2.5 py-0.5 text-2xs font-bold uppercase tracking-wider ${
-                          org.plan === 'premium'
+                          effectivePlan === 'premium'
                             ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
                             : 'bg-slate-500/10 text-slate-300 border border-slate-500/20'
                         }`}>
-                          {org.plan}
+                          {effectivePlan}
                         </span>
                       </td>
                       <td className="px-6 py-4">

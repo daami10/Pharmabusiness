@@ -15,11 +15,31 @@ Crea un **segundo proyecto de Vercel** apuntando al mismo repo pero con la app n
 2. **Root Directory** = `web`.
 3. Framework: **Vite** (lo detecta solo). Build: `npm run build`, Output: `dist`.
 4. **Environment Variables** (entornos Production + Preview):
-   - `VITE_SUPABASE_URL` = la URL de Supabase.
-   - `VITE_SUPABASE_ANON_KEY` = la anon/publishable key.
-   - `GEMINI_KEY` = la key de Gemini (la usa `web/api/scan.js` para el OCR).
+   * **Variables del Cliente (Prefijo VITE_, públicas):**
+     - `VITE_SUPABASE_URL` = la URL de tu proyecto Supabase.
+     - `VITE_SUPABASE_ANON_KEY` = la anon/publishable key de Supabase.
+   * **Variables de Servidor (Privadas, NUNCA con prefijo VITE_):**
+     - `SUPABASE_URL` = la URL de tu proyecto Supabase (requerida por las serverless functions).
+     - `SUPABASE_SERVICE_ROLE_KEY` = la clave `service_role` de Supabase (requerida para poder actualizar planes evadiendo políticas RLS).
+     - `GEMINI_KEY` = la clave de API de Gemini (la usa `web/api/scan.js` para el OCR).
+     - `STRIPE_SECRET_KEY` = la clave secreta de Stripe (`sk_test_...` o `sk_live_...`).
+     - `STRIPE_WEBHOOK_SECRET` = el secreto de firma del Webhook de Stripe (ver sección abajo).
+     - `STRIPE_PREMIUM_PRICE_ID` = el ID de precio del plan Premium en Stripe (`price_...`).
+     - `STRIPE_BASIC_PRICE_ID` = el ID de precio del plan Básico en Stripe (`price_...`).
+
+### ⚙️ Configuración del Webhook de Stripe
+Para que el estado de suscripción del cliente se actualice automáticamente tras el pago en Stripe, debes configurar un Webhook:
+1. Ve a tu panel de **Stripe -> Developers -> Webhooks** y haz clic en **Add endpoint**.
+2. **Endpoint URL:** `https://<tu-url-de-vercel>.vercel.app/api/stripe-webhook` (cambia el host por tu URL de staging o producción real).
+3. **Select events:** Selecciona los siguientes eventos obligatorios:
+   - `checkout.session.completed` (cuando se completa la pasarela de pago inicial).
+   - `customer.subscription.updated` (cuando se renueva, cambia o modifica una suscripción).
+   - `customer.subscription.deleted` (cuando se cancela o expira una suscripción).
+4. Haz clic en **Add endpoint**.
+5. Copia el **Signing Secret** generado (empieza por `whsec_...`) y configúralo como la variable de entorno `STRIPE_WEBHOOK_SECRET` en Vercel.
+
 5. Deploy → te da una URL de staging (`...vercel.app`). Pruébala módulo a módulo contra el
-   legacy: facturas, calendario, abonos, fiscalidad, trabajadores, inicio, análisis, OCR, PDF.
+   legacy: facturas, calendario, abonos, fiscalidad, trabajadores, inicio, análisis, OCR, PDF y el pago/suscripción con tarjeta de pruebas de Stripe.
 
 > Importante: staging usa **la misma base de datos** que producción. Para probar escrituras sin
 > ensuciar datos reales, idealmente crea un proyecto Supabase de staging (ver ARQUITECTURA_V2).
