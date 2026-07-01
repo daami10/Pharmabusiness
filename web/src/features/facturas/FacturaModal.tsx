@@ -27,12 +27,16 @@ const schema = z.object({
 })
 type FormValues = z.infer<typeof schema>
 
-function emptyForm(): FormValues {
+function emptyForm(year?: number): FormValues {
+  const now = new Date()
+  const y = year ?? now.getFullYear()
+  const m = String(now.getMonth() + 1).padStart(2, '0')
+  const d = String(now.getDate()).padStart(2, '0')
   return {
     tipo: '',
     laboratorio: '',
     num_factura: '',
-    fecha: new Date().toISOString().slice(0, 10),
+    fecha: `${y}-${m}-${d}`,
     importe: '',
     fecha_vencimiento: '',
     notas: '',
@@ -61,11 +65,13 @@ export function FacturaModal({
   onClose,
   factura,
   initialFile,
+  activeYear,
 }: {
   open: boolean
   onClose: () => void
   factura: Factura | null
   initialFile?: File | null
+  activeYear: number
 }) {
   const wholesalers = useWholesalersStore((s) => s.wholesalers)
   const createFactura = useCreateFactura()
@@ -80,11 +86,14 @@ export function FacturaModal({
     reset,
     setValue,
     formState: { errors, isSubmitting },
-  } = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: emptyForm() })
+  } = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: emptyForm(activeYear),
+  })
 
   useEffect(() => {
-    if (open) reset(factura ? toForm(factura) : emptyForm())
-  }, [open, factura, reset])
+    if (open) reset(factura ? toForm(factura) : emptyForm(activeYear))
+  }, [open, factura, activeYear, reset])
 
   // Trigger OCR scan automatically if an initial file is provided
   useEffect(() => {

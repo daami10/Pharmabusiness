@@ -6,6 +6,7 @@ import { SettingsModal } from '@/features/settings/SettingsModal'
 import { PrivacyModal } from '@/features/settings/PrivacyModal'
 import { OnboardingModal } from '@/features/settings/OnboardingModal'
 import { isOnboardingPending } from '@/lib/config/wholesalers'
+import { TrialBanner } from '@/components/ui/TrialBanner'
 import { Chatbot } from './Chatbot'
 
 export function AppShell() {
@@ -31,6 +32,7 @@ export function AppShell() {
         />
         <div className="flex flex-1 flex-col lg:pl-64">
           <Header onMenu={() => setSidebarOpen((v) => !v)} />
+          <TrialBanner />
           <main className="flex-1 overflow-y-auto">
             <Outlet />
           </main>

@@ -12,14 +12,16 @@ import {
   Lock,
   Mail,
   Sparkles,
+  Store,
   TrendingUp,
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from './AuthProvider'
 
 const schema = z.object({
-  email: z.email('Introduce un email válido'),
+  email: z.string().email('Introduce un email válido'),
   password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),
+  organizationName: z.string().optional(),
 })
 type FormValues = z.infer<typeof schema>
 
@@ -49,6 +51,14 @@ export function LoginPage() {
   const [resetError, setResetError] = useState('')
   const [isSubmittingReset, setIsSubmittingReset] = useState(false)
 
+  // Un trabajador invitado llega por un enlace con un token secreto (?invite_token=...).
+  // Su presencia — no una consulta pública — es lo que marca el registro como invitado.
+  const [inviteToken] = useState(
+    () => new URLSearchParams(window.location.search).get('invite_token') || '',
+  )
+  const isInvitedWorker = inviteToken.length > 0
+  const [inviteCode, setInviteCode] = useState('')
+
   const {
     register,
     handleSubmit,
@@ -69,14 +79,44 @@ export function LoginPage() {
     }
   }, [])
 
-  const handleAuthSubmit = handleSubmit(async ({ email, password }) => {
+  const handleAuthSubmit = handleSubmit(async ({ email, password, organizationName }) => {
     setServerError('')
     setInfo('')
     if (mode === 'register') {
-      const { error } = await supabase.auth.signUp({ email, password })
-      if (error) setServerError(error.message)
-      else
-        setInfo('Cuenta creada. Revisa tu email para confirmarla y luego inicia sesión.')
+      // Comprobaciones de cliente = solo UX. La validación real ocurre en /api/register.
+      if (!isInvitedWorker) {
+        if (!organizationName || organizationName.trim().length === 0) {
+          setServerError('Introduce el nombre de tu farmacia.')
+          return
+        }
+        if (!inviteCode.trim()) {
+          setServerError('Introduce el código de invitación.')
+          return
+        }
+      }
+
+      try {
+        const res = await fetch('/api/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: email.trim(),
+            password,
+            organizationName: organizationName?.trim(),
+            inviteCode: inviteCode.trim(),
+            inviteToken: inviteToken || undefined,
+          }),
+        })
+        const data = await res.json().catch(() => ({}))
+        if (!res.ok) {
+          setServerError(data.error || 'No se pudo completar el registro.')
+          return
+        }
+        setInfo('Cuenta creada. Ya puedes iniciar sesión.')
+        setMode('login')
+      } catch {
+        setServerError('Error de red al procesar el registro.')
+      }
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) setServerError(LOGIN_ERRORS[error.message] ?? error.message)
@@ -185,7 +225,7 @@ export function LoginPage() {
       {/* Floating lateral showcase on the left (visible on large screens, does not shift the centered login card) */}
       <section className="absolute left-8 xl:left-20 top-1/2 -translate-y-1/2 max-w-[280px] xl:max-w-sm hidden lg:flex flex-col gap-6 text-left z-10 select-none">
         <h2 className="text-2xl xl:text-3xl font-black text-white leading-tight">
-          La contabilidad de tu farmacia,{' '}
+          La gestión de tu farmacia,{' '}
           <span className="bg-gradient-to-r from-[#00f2fe] via-blue-400 to-indigo-400 bg-clip-text text-transparent">
             bajo control total
           </span>
@@ -307,6 +347,24 @@ export function LoginPage() {
               </div>
 
               <form onSubmit={handleAuthSubmit} className="space-y-4" noValidate>
+                {/* Campo: Nombre de la Farmacia (solo si es registro de nueva farmacia) */}
+                {mode === 'register' && !isInvitedWorker && (
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">
+                      Nombre de la Farmacia
+                    </label>
+                    <div className="relative">
+                      <Store className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+                      <input
+                        type="text"
+                        placeholder="Ej. Farmacia Central"
+                        {...register('organizationName')}
+                        className="w-full rounded-xl border border-white/10 bg-slate-950/60 pl-10 pr-4 py-3 text-xs text-slate-100 placeholder-slate-600 focus:border-[#00f2fe]/60 focus:ring-1 focus:ring-[#00f2fe]/30 focus:shadow-[0_0_12px_rgba(0,242,254,0.25)] focus:outline-none transition-all"
+                      />
+                    </div>
+                  </div>
+                )}
+
                 {/* Campo: Correo */}
                 <div>
                   <label className="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">
@@ -366,6 +424,25 @@ export function LoginPage() {
                     </p>
                   )}
                 </div>
+
+                {/* Campo: Código de invitación (solo si es registro y no es trabajador invitado) */}
+                {mode === 'register' && !isInvitedWorker && (
+                  <div className="transition-all duration-300">
+                    <label className="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">
+                      Código de Invitación
+                    </label>
+                    <div className="relative">
+                      <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+                      <input
+                        type="text"
+                        placeholder="Introduce tu código de invitación"
+                        value={inviteCode}
+                        onChange={(e) => setInviteCode(e.target.value)}
+                        className="w-full rounded-xl border border-white/10 bg-slate-950/60 pl-10 pr-4 py-3 text-xs text-slate-100 placeholder-slate-600 focus:border-[#00f2fe]/60 focus:ring-1 focus:ring-[#00f2fe]/30 focus:shadow-[0_0_12px_rgba(0,242,254,0.25)] focus:outline-none transition-all uppercase"
+                      />
+                    </div>
+                  </div>
+                )}
 
                 {serverError && (
                   <p className="rounded-xl border border-red-500/20 bg-red-950/40 px-4 py-3 text-xs text-red-400 leading-normal">

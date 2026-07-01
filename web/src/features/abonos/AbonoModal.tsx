@@ -19,10 +19,14 @@ const schema = z.object({
 })
 type FormValues = z.infer<typeof schema>
 
-function emptyForm(): FormValues {
+function emptyForm(year?: number): FormValues {
+  const now = new Date()
+  const y = year ?? now.getFullYear()
+  const m = String(now.getMonth() + 1).padStart(2, '0')
+  const d = String(now.getDate()).padStart(2, '0')
   return {
     laboratorio: '',
-    fecha: new Date().toISOString().slice(0, 10),
+    fecha: `${y}-${m}-${d}`,
     importe: '',
     notas: '',
   }
@@ -44,10 +48,12 @@ export function AbonoModal({
   open,
   onClose,
   abono,
+  activeYear,
 }: {
   open: boolean
   onClose: () => void
   abono: Factura | null
+  activeYear: number
 }) {
   const createFactura = useCreateFactura()
   const updateFactura = useUpdateFactura()
@@ -58,11 +64,14 @@ export function AbonoModal({
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: emptyForm() })
+  } = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: emptyForm(activeYear),
+  })
 
   useEffect(() => {
-    if (open) reset(abono ? toForm(abono) : emptyForm())
-  }, [open, abono, reset])
+    if (open) reset(abono ? toForm(abono) : emptyForm(activeYear))
+  }, [open, abono, activeYear, reset])
 
   function handleClose() {
     setServerError('')

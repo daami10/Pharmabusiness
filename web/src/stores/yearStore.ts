@@ -11,6 +11,6 @@ interface YearState {
 /** Año contable activo. Sustituye al `activeYear` global del legacy (años dinámicos, no fijos). */
 export const useYearStore = create<YearState>((set) => ({
   year: currentYear,
-  availableYears: [currentYear - 1, currentYear],
+  availableYears: [currentYear - 1, currentYear, currentYear + 1],
   setYear: (year) => set({ year }),
 }))

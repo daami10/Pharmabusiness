@@ -13,6 +13,8 @@ export interface FacturaFilters {
   month?: string
   minImporte?: string
   maxImporte?: string
+  startDate?: string
+  endDate?: string
 }
 
 /** Estado de vencimiento efectivo (los abonos no vencen; sin fecha de venc. = pagada). */
@@ -49,7 +51,11 @@ export function filterFacturas(
       : null
   return facturas.filter((f) => {
     const dateVal = f.fecha ?? f.fecha_vencimiento ?? ''
-    if (dateVal.slice(0, 4) !== filters.year) return false
+    const hasDateRange = !!(filters.startDate || filters.endDate)
+    if (!hasDateRange && dateVal.slice(0, 4) !== filters.year) return false
+
+    if (filters.startDate && (!f.fecha || f.fecha < filters.startDate)) return false
+    if (filters.endDate && (!f.fecha || f.fecha > filters.endDate)) return false
     if (
       s &&
       !f.laboratorio.toLowerCase().includes(s) &&

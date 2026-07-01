@@ -180,7 +180,7 @@ body {
 }
 
 /* Estilo para los selectores de fecha nativos */
-input[type='date']::-webkit-calendar-picker-indicator {
+input::-webkit-calendar-picker-indicator {
   filter: invert(1) brightness(1.5);
   cursor: pointer;
 }

@@ -17,11 +17,13 @@ const TITLES: Record<VencStatus, string> = {
 
 export function VencListModal({
   status,
+  year,
   onClose,
   onEdit,
   onDelete,
 }: {
   status: VencStatus | null
+  year: number
   onClose: () => void
   onEdit?: (f: Factura) => void
   onDelete?: (f: Factura) => void
@@ -33,6 +35,7 @@ export function VencListModal({
   const q = search.toLowerCase().trim()
   const rows = (data ?? [])
     .filter((f) => f.tipo !== 'Abono')
+    .filter((f) => (f.fecha_vencimiento ?? f.fecha ?? '').startsWith(String(year)))
     .filter((f) => {
       if (!status) return false
       const s = getEffectiveVencStatus(f)

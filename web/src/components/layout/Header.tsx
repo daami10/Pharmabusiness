@@ -3,7 +3,7 @@ import { useAuth } from '@/features/auth/AuthProvider'
 import { useYearStore } from '@/stores/yearStore'
 
 export function Header({ onMenu }: { onMenu: () => void }) {
-  const { user } = useAuth()
+  const { user, activeOrgName } = useAuth()
   const { year, availableYears, setYear } = useYearStore()
 
   return (
@@ -26,8 +26,8 @@ export function Header({ onMenu }: { onMenu: () => void }) {
               onClick={() => setYear(y)}
               className={`rounded-lg px-3.5 py-1.5 text-xs font-black transition-all ${
                 y === year
-                  ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow'
-                  : 'text-slate-400 hover:text-slate-200'
+                  ? 'border border-accent-blue/40 bg-accent-blue/10 text-accent-blue shadow-[0_0_10px_rgba(0,242,254,0.2)]'
+                  : 'border border-transparent text-slate-400 hover:text-slate-200'
               }`}
             >
               {y}
@@ -36,7 +36,14 @@ export function Header({ onMenu }: { onMenu: () => void }) {
         </div>
       </div>
 
-      <span className="max-w-[180px] truncate text-xs text-slate-400">{user?.email}</span>
+      <div className="flex flex-col items-end text-right select-none">
+        <span className="max-w-[200px] truncate text-xs font-bold text-white">
+          {activeOrgName || 'Farmacia'}
+        </span>
+        <span className="max-w-[180px] truncate text-[10px] font-medium text-slate-400 font-mono mt-0.5">
+          {user?.email}
+        </span>
+      </div>
     </header>
   )
 }
