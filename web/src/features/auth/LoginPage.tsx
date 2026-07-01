@@ -51,14 +51,17 @@ export function LoginPage() {
   const [resetError, setResetError] = useState('')
   const [isSubmittingReset, setIsSubmittingReset] = useState(false)
 
-  // Invitation checking states
-  const [isInvitedWorker, setIsInvitedWorker] = useState(false)
+  // Un trabajador invitado llega por un enlace con un token secreto (?invite_token=...).
+  // Su presencia — no una consulta pública — es lo que marca el registro como invitado.
+  const [inviteToken] = useState(
+    () => new URLSearchParams(window.location.search).get('invite_token') || '',
+  )
+  const isInvitedWorker = inviteToken.length > 0
   const [inviteCode, setInviteCode] = useState('')
 
   const {
     register,
     handleSubmit,
-    watch,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({ resolver: zodResolver(schema) })
 
@@ -76,67 +79,44 @@ export function LoginPage() {
     }
   }, [])
 
-  // Watch email dynamically to verify if they are invited
-  const watchedEmail = watch('email')
-  useEffect(() => {
-    if (mode !== 'register' || !watchedEmail || !watchedEmail.includes('@')) {
-      setIsInvitedWorker(false)
-      return
-    }
-    const delayDebounce = setTimeout(async () => {
-      try {
-        const { data, error } = await supabase.rpc('is_email_invited', { check_email: watchedEmail.trim() })
-        if (!error && data !== null) {
-          setIsInvitedWorker(!!data)
-        } else {
-          setIsInvitedWorker(false)
-        }
-      } catch (err) {
-        console.error(err)
-        setIsInvitedWorker(false)
-      }
-    }, 400)
-    return () => clearTimeout(delayDebounce)
-  }, [watchedEmail, mode])
-
   const handleAuthSubmit = handleSubmit(async ({ email, password, organizationName }) => {
     setServerError('')
     setInfo('')
     if (mode === 'register') {
-      // Re-verify invitation on submit for security
-      let isEmailInvited = false
-      try {
-        const { data, error } = await supabase.rpc('is_email_invited', { check_email: email.trim() })
-        if (!error && data !== null) {
-          isEmailInvited = !!data
-        }
-      } catch (err) {
-        console.error(err)
-      }
-
-      if (!isEmailInvited) {
+      // Comprobaciones de cliente = solo UX. La validación real ocurre en /api/register.
+      if (!isInvitedWorker) {
         if (!organizationName || organizationName.trim().length === 0) {
           setServerError('Introduce el nombre de tu farmacia.')
           return
         }
-        if (inviteCode.trim().toUpperCase() !== 'GFARMA2026') {
-          setServerError('Código de invitación incorrecto. Introduce un código válido para registrarte.')
+        if (!inviteCode.trim()) {
+          setServerError('Introduce el código de invitación.')
           return
         }
       }
 
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            organization_name: organizationName?.trim(),
-          },
-        },
-      })
-      if (error) setServerError(error.message)
-      else
-        setInfo('Cuenta creada. Revisa tu email para confirmarla y luego inicia sesión.')
+      try {
+        const res = await fetch('/api/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: email.trim(),
+            password,
+            organizationName: organizationName?.trim(),
+            inviteCode: inviteCode.trim(),
+            inviteToken: inviteToken || undefined,
+          }),
+        })
+        const data = await res.json().catch(() => ({}))
+        if (!res.ok) {
+          setServerError(data.error || 'No se pudo completar el registro.')
+          return
+        }
+        setInfo('Cuenta creada. Ya puedes iniciar sesión.')
+        setMode('login')
+      } catch {
+        setServerError('Error de red al procesar el registro.')
+      }
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) setServerError(LOGIN_ERRORS[error.message] ?? error.message)
@@ -455,7 +435,7 @@ export function LoginPage() {
                       <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
                       <input
                         type="text"
-                        placeholder="Introduce el código GFARMA..."
+                        placeholder="Introduce tu código de invitación"
                         value={inviteCode}
                         onChange={(e) => setInviteCode(e.target.value)}
                         className="w-full rounded-xl border border-white/10 bg-slate-950/60 pl-10 pr-4 py-3 text-xs text-slate-100 placeholder-slate-600 focus:border-[#00f2fe]/60 focus:ring-1 focus:ring-[#00f2fe]/30 focus:shadow-[0_0_12px_rgba(0,242,254,0.25)] focus:outline-none transition-all uppercase"
