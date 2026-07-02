@@ -41,12 +41,12 @@ export function AbonosPage() {
         const total = items.reduce((sum, item) => sum + item.importe, 0)
         return {
           key,
-          label: key === '0000-00' ? 'Sin fecha' : monthLabel(key),
+          label: key === '0000-00' ? t('general.no_date', 'Sin fecha') : monthLabel(key),
           items,
           total,
         }
       })
-  }, [abonos])
+  }, [abonos, t])
 
   const total = abonos.reduce((sum, a) => sum + a.importe, 0)
 
@@ -57,7 +57,7 @@ export function AbonosPage() {
   }
 
   function onDelete(a: Factura) {
-    if (!confirm(`¿Eliminar el abono de ${a.laboratorio}?`)) return
+    if (!confirm(t('abonos.confirm_delete', '¿Eliminar el abono de {supplier}?').replace('{supplier}', a.laboratorio || '—'))) return
     deleteFactura.mutate(a.id)
   }
 
@@ -134,7 +134,7 @@ export function AbonosPage() {
 
           <div className="mt-4 flex items-center justify-between rounded-2xl border border-white/5 glass-card px-6 py-4">
             <span className="text-sm text-slate-400">
-              {abonos.length} abono{abonos.length !== 1 ? 's' : ''}
+              {abonos.length} {abonos.length !== 1 ? t('nav.abonos', 'abonos').toLowerCase() : t('inicio.abono_singular', 'abono')}
             </span>
             <span className="text-lg font-black text-emerald-400">
               + {formatMoney(total)}
@@ -176,6 +176,8 @@ function AbonoGroupRow({
   onEdit: (a: Factura) => void
   onDelete: (a: Factura) => void
 }) {
+  const { t } = useTranslation()
+
   return (
     <>
       <tr
@@ -190,7 +192,7 @@ function AbonoGroupRow({
               />
               <span className="text-sm font-bold capitalize text-slate-200">{label}</span>
               <span className="rounded bg-white/5 px-2 py-0.5 text-xs font-bold text-slate-500">
-                {count} abono{count !== 1 ? 's' : ''}
+                {count} {count !== 1 ? t('nav.abonos', 'abonos').toLowerCase() : t('inicio.abono_singular', 'abono')}
               </span>
             </div>
             <span className="text-sm font-extrabold text-emerald-400">

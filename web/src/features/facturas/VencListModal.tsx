@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Search, Pencil, Trash2 } from 'lucide-react'
 import { Dialog } from '@/components/ui/Dialog'
+import { useTranslation } from '@/lib/i18n'
 import { useFacturas, useSetPagada } from '@/lib/queries/facturas'
 import { formatMoney } from '@/lib/utils/money'
 import { formatDate } from '@/lib/utils/dates'
@@ -28,6 +29,7 @@ export function VencListModal({
   onEdit?: (f: Factura) => void
   onDelete?: (f: Factura) => void
 }) {
+  const { t } = useTranslation()
   const { data } = useFacturas()
   const setPagada = useSetPagada()
   const [search, setSearch] = useState('')
@@ -59,7 +61,7 @@ export function VencListModal({
     <Dialog
       open={status !== null}
       onClose={onClose}
-      title={status ? `${TITLES[status]} (${rows.length})` : ''}
+      title={status ? `${t('calendar.modal_title.' + status, TITLES[status])} (${rows.length})` : ''}
     >
       <div className="relative mb-4">
         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
@@ -67,7 +69,7 @@ export function VencListModal({
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Buscar por laboratorio o nº…"
+          placeholder={t('calendar.search_placeholder', 'Buscar por laboratorio o nº…')}
           className="w-full rounded-xl border border-white/10 bg-slate-950/40 py-2.5 pl-10 pr-4 text-sm text-slate-100 placeholder-slate-500 focus:border-accent-blue/40 focus:outline-none"
         />
       </div>
@@ -75,7 +77,7 @@ export function VencListModal({
       <div className="max-h-[50vh] space-y-2 overflow-y-auto pr-1">
         {!rows.length && (
           <p className="py-8 text-center text-sm text-slate-500">
-            No hay facturas en este estado.
+            {t('calendar.no_invoices_status', 'No hay facturas en este estado.')}
           </p>
         )}
         {rows.map((f) => {
@@ -112,7 +114,7 @@ export function VencListModal({
                 <button
                   type="button"
                   onClick={() => {
-                    if (confirm(`¿Eliminar la factura de ${f.laboratorio}?`)) {
+                    if (confirm(t('facturas.confirm_delete', '¿Eliminar la factura de {supplier}?').replace('{supplier}', f.laboratorio || '—'))) {
                       onDelete?.(f)
                     }
                   }}
@@ -140,7 +142,7 @@ export function VencListModal({
 
       <div className="mt-4 flex items-center justify-between border-t border-white/5 pt-3">
         <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-          Total
+          {t('general.total', 'Total')}
         </span>
         <span className="text-lg font-black text-accent-blue">{formatMoney(total)}</span>
       </div>

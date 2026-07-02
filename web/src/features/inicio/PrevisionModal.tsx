@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { ChevronDown, Pencil, Trash2 } from 'lucide-react'
 import { Dialog } from '@/components/ui/Dialog'
+import { useTranslation } from '@/lib/i18n'
 import { useFacturas, useDeleteFactura } from '@/lib/queries/facturas'
 import { useFiscalidad } from '@/lib/queries/fiscalidad'
 import { useNominas, useSeguros } from '@/lib/queries/trabajadores'
@@ -21,11 +22,12 @@ function InvoiceSubList({
   onEdit: (f: Factura) => void
   onDelete: (f: Factura) => void
 }) {
+  const { t } = useTranslation()
   if (!invoices.length) return null
   return (
     <div className="mb-3">
       <h4 className="mb-1.5 text-2xs font-extrabold uppercase tracking-wider text-blue-400">
-        Facturas proveedores
+        {t('analisis.facturas_proveedores', 'Facturas proveedores')}
       </h4>
       <div className="space-y-1.5">
         {invoices.map((f) => (
@@ -34,7 +36,7 @@ function InvoiceSubList({
             className="flex items-center justify-between rounded-xl border border-white/5 bg-white/5 px-3.5 py-2 text-xs"
           >
             <span className="truncate text-slate-300 flex-1 mr-2">
-              {f.laboratorio || 'Proveedor'}
+              {f.laboratorio || t('general.proveedor', 'Proveedor')}
             </span>
             <div className="flex items-center gap-1.5 shrink-0">
               <span className="font-bold text-white mr-1.5">
@@ -107,6 +109,7 @@ function MonthCard({
   onEditInvoice: (f: Factura) => void
   onDeleteInvoice: (f: Factura) => void
 }) {
+  const { t } = useTranslation()
   const [open, setOpen] = useState(defaultOpen)
   return (
     <div className="overflow-hidden rounded-2xl border border-white/5 bg-slate-900/40">
@@ -135,23 +138,23 @@ function MonthCard({
             onDelete={onDeleteInvoice}
           />
           <SubList
-            title="Impuestos y fiscalidad"
+            title={t('nav.fiscalidad', 'Impuestos y fiscalidad')}
             color="text-emerald-400"
-            rows={section.taxes.map((t) => ({ label: t.concepto, importe: t.importe }))}
+            rows={section.taxes.map((tx) => ({ label: tx.concepto, importe: tx.importe }))}
           />
           <SubList
-            title="Nóminas"
+            title={t('inicio.nominas', 'Nóminas')}
             color="text-orange-400"
             rows={section.payrolls.map((n) => ({
-              label: n.trabajador_nombre || 'Trabajador',
+              label: n.trabajador_nombre || t('general.trabajador', 'Trabajador'),
               importe: n.importe,
             }))}
           />
           <SubList
-            title="Seguros sociales"
+            title={t('trabajadores.seguros_sociales', 'Seguros sociales')}
             color="text-indigo-400"
             rows={section.seguros.map((s) => ({
-              label: 'Seguridad Social',
+              label: t('trabajadores.seguros_sociales', 'Seguridad Social'),
               importe: s.importe,
             }))}
           />
@@ -168,6 +171,7 @@ export function PrevisionModal({
   open: boolean
   onClose: () => void
 }) {
+  const { t } = useTranslation()
   const { subscriptionTier } = useAuth()
   const facturas = useFacturas()
   const fiscal = useFiscalidad()
@@ -185,7 +189,7 @@ export function PrevisionModal({
   }
 
   function handleDeleteInvoice(f: Factura) {
-    if (!confirm(`¿Eliminar la factura de ${f.laboratorio}?`)) return
+    if (!confirm(t('facturas.confirm_delete', '¿Eliminar la factura de {supplier}?').replace('{supplier}', f.laboratorio || '—'))) return
     deleteFactura.mutate(f.id)
   }
 
@@ -205,10 +209,10 @@ export function PrevisionModal({
 
   return (
     <>
-      <Dialog open={open} onClose={onClose} title="Previsión de gasto">
+      <Dialog open={open} onClose={onClose} title={t('inicio.prevision_gasto', 'Previsión de gasto')}>
         {!sections.length ? (
           <p className="py-10 text-center text-sm text-slate-400">
-            No hay gastos previstos para los próximos meses.
+            {t('inicio.no_future_dues', 'No hay gastos previstos para los próximos meses.')}
           </p>
         ) : (
           <div className="max-h-[60vh] space-y-4 overflow-y-auto pr-1">

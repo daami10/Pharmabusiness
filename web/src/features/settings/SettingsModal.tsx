@@ -219,7 +219,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
 
       if (error) {
         if (error.code === '23505') {
-          throw new Error('Ya existe una invitación pendiente para este correo.')
+          throw new Error(t('settings.team.invite_exists_error', 'Ya existe una invitación pendiente para este correo.'))
         }
         throw error
       }
@@ -233,7 +233,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
       await loadUsersData()
     } catch (err) {
       console.error(err)
-      setInviteError(err instanceof Error ? err.message : 'Error al crear la invitación.')
+      setInviteError(err instanceof Error ? err.message : t('settings.team.invite_create_error', 'Error al crear la invitación.'))
     } finally {
       setSubmittingInvite(false)
     }
@@ -241,7 +241,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
 
   // Revoke active user access
   async function handleRevokeMember(userId: string, name: string) {
-    if (!confirm(`¿Estás seguro de que deseas dar de baja a ${name || 'este trabajador'}? Perderá acceso inmediato.`)) return
+    if (!confirm(t('settings.team.confirm_revoke_member', '¿Estás seguro de que deseas dar de baja a {name}? Perderá acceso inmediato.').replace('{name}', name || t('general.trabajador', 'este trabajador').toLowerCase()))) return
     try {
       const { error } = await supabase
         .from('memberships')
@@ -258,7 +258,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
 
   // Cancel pending invitation
   async function handleCancelInvitation(invId: string, email: string) {
-    if (!confirm(`¿Cancelar la invitación enviada a ${email}?`)) return
+    if (!confirm(t('settings.team.confirm_cancel_invitation', '¿Cancelar la invitación enviada a {email}?').replace('{email}', email))) return
     try {
       const { error } = await supabase
         .from('invitations')

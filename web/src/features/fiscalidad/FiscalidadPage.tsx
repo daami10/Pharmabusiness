@@ -43,7 +43,7 @@ export function FiscalidadPage() {
   }, [year])
 
   function onDelete(f: Fiscal) {
-    if (!confirm(`¿Eliminar "${f.concepto}"?`)) return
+    if (!confirm(t('fiscalidad.confirm_delete', '¿Eliminar "{concept}"?').replace('{concept}', f.concepto))) return
     deleteFiscal.mutate(f.id)
   }
 
@@ -158,7 +158,7 @@ export function FiscalidadPage() {
       )}
       {isError && (
         <p className="py-12 text-center text-sm text-red-400">
-          Error al cargar: {error instanceof Error ? error.message : 'desconocido'}
+          {t('general.load_error', 'Error al cargar')}: {error instanceof Error ? error.message : 'desconocido'}
         </p>
       )}
       {!isLoading && !isError && !groups.length && (
