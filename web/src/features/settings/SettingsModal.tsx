@@ -486,8 +486,8 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
               {/* Header and counter */}
               <div className="flex items-center justify-between border-b border-white/5 pb-4">
                 <div>
-                  <h3 className="text-sm font-bold text-white">Usuarios y Accesos</h3>
-                  <p className="text-[10px] text-slate-400 mt-0.5">Asientos de tu suscripción: {seatsUsed} de 3 utilizados.</p>
+                  <h3 className="text-sm font-bold text-white">{t('settings.team.title', 'Usuarios y Accesos')}</h3>
+                  <p className="text-[10px] text-slate-400 mt-0.5">{t('settings.team.seats_counter', 'Asientos de tu suscripción: {used} de 3 utilizados.').replace('{used}', String(seatsUsed))}</p>
                 </div>
                 <div className="flex gap-2">
                   <button
@@ -495,7 +495,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
                     onClick={() => void loadUsersData()}
                     disabled={loadingUsers}
                     className="p-2 text-slate-400 hover:text-white rounded-xl border border-white/5 hover:bg-white/5 transition-all"
-                    aria-label="Refrescar lista"
+                    aria-label={t('settings.team.refresh_list', 'Refrescar lista')}
                   >
                     <RefreshCw className={`h-4 w-4 ${loadingUsers ? 'animate-spin' : ''}`} />
                   </button>
@@ -506,7 +506,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
                       className="flex items-center gap-1.5 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-3.5 py-1.5 text-xs font-bold hover:bg-cyan-500/20 transition-all cursor-pointer"
                     >
                       <UserPlus className="h-3.5 w-3.5" />
-                      Invitar trabajador
+                      {t('settings.team.invite_worker', 'Invitar trabajador')}
                     </button>
                   )}
                 </div>
@@ -516,7 +516,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
               {inviting && (
                 <form onSubmit={handleInviteSubmit} className="rounded-2xl border border-cyan-500/20 bg-slate-950/60 p-5 space-y-4">
                   <div className="flex justify-between items-center border-b border-white/5 pb-2">
-                    <h4 className="text-xs font-black uppercase text-cyan-400 tracking-wider">Nueva Invitación</h4>
+                    <h4 className="text-xs font-black uppercase text-cyan-400 tracking-wider">{t('settings.team.new_invitation', 'Nueva Invitación')}</h4>
                     <button type="button" onClick={() => setInviting(false)} className="text-slate-400 hover:text-white">
                       <X className="h-4 w-4" />
                     </button>
@@ -524,7 +524,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
 
                   <div className="grid gap-3 sm:grid-cols-2">
                     <div>
-                      <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Nombre</label>
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">{t('settings.team.label_name', 'Nombre')}</label>
                       <input
                         type="text"
                         placeholder="Juan Pérez"
@@ -549,7 +549,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
 
                   {/* Configurar Permisos */}
                   <div>
-                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-2">Permisos del trabajador</label>
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-2">{t('settings.team.worker_permissions', 'Permisos del trabajador')}</label>
                     <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 bg-slate-900/20 p-3 rounded-xl border border-white/5">
                       {Object.keys(DEFAULT_PERMISSIONS).map((key) => (
                         <label key={key} className="flex items-center gap-2 cursor-pointer select-none">
@@ -559,7 +559,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
                             onChange={() => handlePermissionToggle(key, false)}
                             className="rounded border-white/10 bg-slate-950 text-cyan-500 focus:ring-0 focus:ring-offset-0"
                           />
-                          <span className="text-xs text-slate-300 font-semibold">{PERMISSION_LABELS[key]}</span>
+                          <span className="text-xs text-slate-300 font-semibold">{t('settings.permission.' + key, PERMISSION_LABELS[key])}</span>
                         </label>
                       ))}
                     </div>
@@ -573,14 +573,14 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
                       onClick={() => setInviting(false)}
                       className="flex-1 rounded-xl border border-white/10 py-2.5 text-xs font-semibold text-slate-400 hover:bg-white/5"
                     >
-                      Cancelar
+                      {t('general.cancelar', 'Cancelar')}
                     </button>
                     <button
                       type="submit"
                       disabled={submittingInvite}
                       className="flex-1 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 py-2.5 text-xs font-black text-white shadow-md disabled:opacity-50"
                     >
-                      {submittingInvite ? 'Enviando...' : 'Enviar Invitación'}
+                      {submittingInvite ? t('general.enviando', 'Enviando...') : t('settings.team.send_invitation', 'Enviar Invitación')}
                     </button>
                   </div>
                 </form>
@@ -589,14 +589,14 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
               {/* Members and invitations lists */}
               <div className="space-y-3.5 max-h-[350px] overflow-y-auto pr-1">
                 {loadingUsers ? (
-                  <p className="text-xs text-slate-400 text-center py-6">Cargando lista de accesos…</p>
+                  <p className="text-xs text-slate-400 text-center py-6">{t('settings.team.loading_list', 'Cargando lista de accesos…')}</p>
                 ) : (
                   <>
                     {/* List Active Members */}
                     {members.map((m) => {
                       const isOwner = m.role === 'titular'
                       const isEditing = editingPermissionsUserId === m.user_id
-                      const displayName = isOwner ? 'Propietario (Tú)' : (m.custom_name || 'Trabajador')
+                      const displayName = isOwner ? t('settings.team.owner_you', 'Propietario (Tú)') : (m.custom_name || t('general.trabajador', 'Trabajador'))
                       
                       return (
                         <div key={m.user_id} className="rounded-2xl border border-white/5 bg-slate-950/20 p-4">
@@ -613,7 +613,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
                             
                             <div className="flex items-center gap-2">
                               {isOwner ? (
-                                <span className="bg-amber-500/10 text-amber-400 border border-amber-500/20 font-black tracking-wider text-[8px] uppercase px-2 py-0.5 rounded">Propietario</span>
+                                <span className="bg-amber-500/10 text-amber-400 border border-amber-500/20 font-black tracking-wider text-[8px] uppercase px-2 py-0.5 rounded">{t('settings.team.owner_badge', 'Propietario')}</span>
                               ) : (
                                 <>
                                   <button
@@ -627,7 +627,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
                                       }
                                     }}
                                     className="p-1.5 text-slate-400 hover:text-white rounded-xl border border-white/5 hover:bg-white/5 transition-all"
-                                    title="Editar permisos"
+                                    title={t('settings.team.edit_permissions', 'Editar permisos')}
                                   >
                                     <Edit2 className="h-3.5 w-3.5" />
                                   </button>
@@ -635,7 +635,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
                                     type="button"
                                     onClick={() => handleRevokeMember(m.user_id, displayName)}
                                     className="p-1.5 text-slate-400 hover:text-red-400 rounded-xl border border-white/5 hover:bg-white/5 transition-all"
-                                    title="Dar de baja"
+                                    title={t('settings.team.revoke_member_title', 'Dar de baja')}
                                   >
                                     <Trash2 className="h-3.5 w-3.5" />
                                   </button>
@@ -649,7 +649,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
                             <div className="mt-3.5 border-t border-white/5 pt-3">
                               {isEditing ? (
                                 <div className="space-y-3">
-                                  <span className="text-[9px] font-bold text-cyan-400 uppercase tracking-widest">Modificar Permisos</span>
+                                  <span className="text-[9px] font-bold text-cyan-400 uppercase tracking-widest">{t('settings.team.modify_permissions', 'Modificar Permisos')}</span>
                                   <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 bg-slate-900/40 p-3 rounded-xl border border-white/5">
                                     {Object.keys(DEFAULT_PERMISSIONS).map((key) => (
                                       <label key={key} className="flex items-center gap-2 cursor-pointer select-none">
@@ -659,7 +659,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
                                           onChange={() => handlePermissionToggle(key, true)}
                                           className="rounded border-white/10 bg-slate-950 text-cyan-500 focus:ring-0 focus:ring-offset-0"
                                         />
-                                        <span className="text-xs text-slate-300 font-semibold">{PERMISSION_LABELS[key]}</span>
+                                        <span className="text-xs text-slate-300 font-semibold">{t('settings.permission.' + key, PERMISSION_LABELS[key])}</span>
                                       </label>
                                     ))}
                                   </div>
@@ -669,14 +669,14 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
                                       onClick={() => setEditingPermissionsUserId(null)}
                                       className="flex-1 rounded-xl border border-white/10 py-1.5 text-[10px] font-semibold text-slate-400 hover:bg-white/5"
                                     >
-                                      Cancelar
+                                      {t('general.cancelar', 'Cancelar')}
                                     </button>
                                     <button
                                       type="button"
                                       onClick={() => handleSavePermissions(m.user_id)}
                                       className="flex-1 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 py-1.5 text-[10px] font-black text-white shadow-sm"
                                     >
-                                      Guardar Cambios
+                                      {t('general.guardar_cambios', 'Guardar Cambios')}
                                     </button>
                                   </div>
                                 </div>
@@ -686,12 +686,12 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
                                     if (!val) return null
                                     return (
                                       <span key={key} className="inline-flex items-center gap-1 rounded bg-slate-900 px-2 py-0.5 text-[8px] font-bold text-slate-400 border border-white/5 uppercase tracking-wider">
-                                        {PERMISSION_LABELS[key]}
+                                        {t('settings.permission.' + key, PERMISSION_LABELS[key])}
                                       </span>
                                     )
                                   })}
                                   {Object.values(m.permissions || {}).every(v => !v) && (
-                                    <span className="text-[10px] text-slate-500 font-semibold italic">Sin accesos configurados.</span>
+                                    <span className="text-[10px] text-slate-500 font-semibold italic">{t('settings.team.no_permissions_configured', 'Sin accesos configurados.')}</span>
                                   )}
                                 </div>
                               )}
@@ -712,7 +712,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
                             <div>
                               <div className="flex items-center gap-2">
                                 <h4 className="text-xs font-black text-white leading-normal">{i.custom_name}</h4>
-                                <span className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-black tracking-wider text-[7px] uppercase px-1.5 py-0.5 rounded">Pendiente</span>
+                                <span className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-black tracking-wider text-[7px] uppercase px-1.5 py-0.5 rounded">{t('settings.team.pending_badge', 'Pendiente')}</span>
                               </div>
                               <p className="text-[10px] text-slate-500 mt-0.5">{i.email}</p>
                             </div>
@@ -722,7 +722,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
                             type="button"
                             onClick={() => handleCancelInvitation(i.id, i.email)}
                             className="p-1.5 text-slate-400 hover:text-red-400 rounded-xl border border-white/5 hover:bg-white/5 transition-all"
-                            title="Cancelar invitación"
+                            title={t('settings.team.cancel_invitation_title', 'Cancelar invitación')}
                           >
                             <Trash2 className="h-3.5 w-3.5" />
                           </button>
@@ -734,7 +734,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
                               if (!val) return null
                               return (
                                 <span key={key} className="inline-flex items-center gap-1 rounded bg-slate-900 px-2 py-0.5 text-[8px] font-bold text-slate-500 border border-white/5 uppercase tracking-wider">
-                                  {PERMISSION_LABELS[key]}
+                                  {t('settings.permission.' + key, PERMISSION_LABELS[key])}
                                 </span>
                               )
                             })}
@@ -755,7 +755,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
               onClick={onClose}
               className="w-full sm:w-auto rounded-xl border border-white/10 px-8 py-3 text-sm font-semibold text-slate-300 transition-all hover:bg-white/5"
             >
-              Cerrar
+              {t('general.cerrar', 'Cerrar')}
             </button>
           </div>
         </div>
