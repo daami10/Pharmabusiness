@@ -7,6 +7,7 @@ import { AbonoModal } from '../abonos/AbonoModal'
 import { Calendar } from './Calendar'
 import { CsvExportModal } from './CsvExportModal'
 import { downloadFacturasCSV } from './lib/csv'
+import { downloadFacturasExcel } from './lib/excel'
 import { useFacturas, useDeleteFactura } from '@/lib/queries/facturas'
 import { useYearStore } from '@/stores/yearStore'
 import { isWholesaler } from '@/lib/config/wholesalers'
@@ -192,10 +193,11 @@ export function FacturasPage() {
     }
   }
 
-  function handleExportCsv(
+  function handleExport(
     start: string,
     end: string,
     selectedCats: { labs: boolean; wholesalers: boolean; others: boolean; abonos: boolean },
+    format: 'csv' | 'xlsx',
   ) {
     const baseExportList = filterFacturas(
       facturas,
@@ -228,7 +230,11 @@ export function FacturasPage() {
       return false
     })
 
-    downloadFacturasCSV(finalList)
+    if (format === 'xlsx') {
+      downloadFacturasExcel(finalList)
+    } else {
+      downloadFacturasCSV(finalList)
+    }
   }
 
   const total = netTotal(visible)
@@ -335,7 +341,7 @@ export function FacturasPage() {
             <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
           </div>
 
-          {/* Exportar CSV */}
+          {/* Exportar */}
           <button
             type="button"
             onClick={() => setCsvModalOpen(true)}
@@ -343,7 +349,7 @@ export function FacturasPage() {
             className="flex items-center gap-2 rounded-xl border border-white/10 px-4 py-2.5 text-sm font-bold text-slate-300 transition-all hover:bg-white/5 disabled:opacity-50"
           >
             <Download className="h-4 w-4 text-slate-400" />
-            {t('facturas.button.export_csv', 'Exportar CSV')}
+            {t('facturas.button.export', 'Exportar')}
           </button>
 
           {/* Actualizar Manual */}
@@ -525,7 +531,7 @@ export function FacturasPage() {
         <CsvExportModal
           open={csvModalOpen}
           onClose={() => setCsvModalOpen(false)}
-          onExport={handleExportCsv}
+          onExport={handleExport}
         />
       )}
     </div>

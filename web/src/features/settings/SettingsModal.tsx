@@ -14,6 +14,8 @@ import {
   ShieldAlert,
   Edit2,
   RefreshCw,
+  Link2,
+  Check,
   X
 } from 'lucide-react'
 
@@ -33,6 +35,7 @@ interface Invitation {
   role: 'titular' | 'empleado'
   permissions: Record<string, boolean>
   created_at: string
+  token: string
 }
 
 const DEFAULT_PERMISSIONS = {
@@ -80,6 +83,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
   const [invitePermissions, setInvitePermissions] = useState<Record<string, boolean>>(DEFAULT_PERMISSIONS)
   const [submittingInvite, setSubmittingInvite] = useState(false)
   const [inviteError, setInviteError] = useState('')
+  const [copiedToken, setCopiedToken] = useState<string | null>(null)
   const [editingPermissionsUserId, setEditingPermissionsUserId] = useState<string | null>(null)
   const [editPermissionsDraft, setEditPermissionsDraft] = useState<Record<string, boolean>>({})
 
@@ -115,7 +119,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
       // 2. Fetch pending invitations
       const { data: invs, error: invsError } = await supabase
         .from('invitations')
-        .select('id, email, custom_name, role, permissions, created_at')
+        .select('id, email, custom_name, role, permissions, created_at, token')
         .eq('org_id', activeOrgId)
 
       if (invsError) throw invsError
@@ -254,6 +258,14 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
     } catch (err) {
       console.error('Error revoking member access:', err)
     }
+  }
+
+  // Copy the secret invitation link (with token) to share with the invited worker.
+  function copyInviteLink(token: string) {
+    const link = `${window.location.origin}/login?invite_token=${token}`
+    navigator.clipboard?.writeText(link)
+    setCopiedToken(token)
+    setTimeout(() => setCopiedToken(null), 2000)
   }
 
   // Cancel pending invitation
@@ -718,14 +730,28 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
                             </div>
                           </div>
                           
-                          <button
-                            type="button"
-                            onClick={() => handleCancelInvitation(i.id, i.email)}
-                            className="p-1.5 text-slate-400 hover:text-red-400 rounded-xl border border-white/5 hover:bg-white/5 transition-all"
-                            title={t('settings.team.cancel_invitation_title', 'Cancelar invitación')}
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </button>
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => copyInviteLink(i.token)}
+                              className="p-1.5 text-slate-400 hover:text-cyan-400 rounded-xl border border-white/5 hover:bg-white/5 transition-all"
+                              title={t('settings.team.copy_invitation_title', 'Copiar enlace de invitación')}
+                            >
+                              {copiedToken === i.token ? (
+                                <Check className="h-3.5 w-3.5 text-emerald-400" />
+                              ) : (
+                                <Link2 className="h-3.5 w-3.5" />
+                              )}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleCancelInvitation(i.id, i.email)}
+                              className="p-1.5 text-slate-400 hover:text-red-400 rounded-xl border border-white/5 hover:bg-white/5 transition-all"
+                              title={t('settings.team.cancel_invitation_title', 'Cancelar invitación')}
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
                         </div>
 
                         <div className="mt-3.5 border-t border-white/5 pt-3">
