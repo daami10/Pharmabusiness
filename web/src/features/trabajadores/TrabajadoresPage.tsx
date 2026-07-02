@@ -90,7 +90,7 @@ export function TrabajadoresPage() {
       <td className="px-6 py-4 text-sm font-extrabold text-white">
         {n.trabajador_nombre || '—'}
       </td>
-      <td className="px-6 py-4">{badge(isFuture, 'Prevista', 'Registrada')}</td>
+      <td className="px-6 py-4">{badge(isFuture, t('trabajadores.badge.prevista', 'Prevista'), t('trabajadores.badge.registrada', 'Registrada'))}</td>
       <td className="px-6 py-4 text-right text-sm font-extrabold text-white">
         {formatMoney(n.importe)}
       </td>
@@ -110,7 +110,7 @@ export function TrabajadoresPage() {
           </button>
           <button
             type="button"
-            onClick={() => confirm('¿Eliminar esta nómina?') && deleteNomina.mutate(n.id)}
+            onClick={() => confirm(t('trabajadores.confirm_delete_nomina', '¿Eliminar esta nómina?')) && deleteNomina.mutate(n.id)}
             className={`${actionsCls} hover:text-red-400`}
             aria-label="Eliminar"
           >
@@ -123,7 +123,7 @@ export function TrabajadoresPage() {
 
   const renderSeguro = (s: Seguro, isFuture: boolean) => (
     <tr key={s.id} className="border-b border-white/5 transition-colors hover:bg-white/5">
-      <td className="px-6 py-4">{badge(isFuture, 'Previsto', 'Registrado')}</td>
+      <td className="px-6 py-4">{badge(isFuture, t('trabajadores.badge.previsto', 'Previsto'), t('trabajadores.badge.registrado', 'Registrado'))}</td>
       <td className="px-6 py-4 text-right text-sm font-extrabold text-white">
         {formatMoney(s.importe)}
       </td>
@@ -144,7 +144,7 @@ export function TrabajadoresPage() {
           <button
             type="button"
             onClick={() =>
-              confirm('¿Eliminar esta entrada?') && deleteSeguro.mutate(s.id)
+              confirm(t('trabajadores.confirm_delete_seguro', '¿Eliminar esta entrada?')) && deleteSeguro.mutate(s.id)
             }
             className={`${actionsCls} hover:text-red-400`}
             aria-label="Eliminar"

@@ -1,6 +1,7 @@
 import { isFuturePeriod, monthLabel } from '@/lib/utils/dates'
 import type { Fiscal } from '@/types/domain'
 import type { MonthSection } from '@/components/MonthGroupAccordion'
+import { useLanguageStore } from '@/lib/i18n'
 
 export interface FiscalKpis {
   total: number
@@ -39,14 +40,24 @@ export function groupFiscalByMonth(items: Fiscal[]): MonthSection<Fiscal>[] {
     .map(([key, its]) => {
       const isFuture = isFuturePeriod(`${key}-01`)
       const n = its.length
-      const noun = isFuture ? 'previsto' : 'pago'
+      const lang = useLanguageStore.getState().language
+      let countLabel = ''
+      if (lang === 'ca') {
+        const noun = isFuture 
+          ? (n === 1 ? 'previst' : 'previstos') 
+          : (n === 1 ? 'pagament' : 'pagaments')
+        countLabel = `${n} ${noun}`
+      } else {
+        const noun = isFuture ? 'previsto' : 'pago'
+        countLabel = `${n} ${noun}${n !== 1 ? 's' : ''}`
+      }
       return {
         key,
         label: monthLabel(key),
         items: its,
         total: its.reduce((s, f) => s + f.importe, 0),
         isFuture,
-        countLabel: `${n} ${noun}${n !== 1 ? 's' : ''}`,
+        countLabel,
       }
     })
 }
