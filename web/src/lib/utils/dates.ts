@@ -1,24 +1,13 @@
-export type VencStatus = 'overdue' | 'neardue' | 'pending' | 'paid'
+import { useLanguageStore } from '@/lib/i18n'
 
-const MESES = [
-  'Enero',
-  'Febrero',
-  'Marzo',
-  'Abril',
-  'Mayo',
-  'Junio',
-  'Julio',
-  'Agosto',
-  'Septiembre',
-  'Octubre',
-  'Noviembre',
-  'Diciembre',
-]
+export type VencStatus = 'overdue' | 'neardue' | 'pending' | 'paid'
 
 /** Formatea una fecha ISO (`YYYY-MM-DD`) como `dd/mm/aaaa`. Devuelve `—` si está vacía. */
 export function formatDate(iso: string | null | undefined): string {
   if (!iso) return '—'
-  return new Date(`${iso}T00:00:00`).toLocaleDateString('es-ES', {
+  const lang = useLanguageStore.getState().language
+  const locale = lang === 'ca' ? 'ca-ES' : 'es-ES'
+  return new Date(`${iso}T00:00:00`).toLocaleDateString(locale, {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
@@ -29,8 +18,14 @@ export function formatDate(iso: string | null | undefined): string {
 export function monthLabel(monthKey: string): string {
   const [y, m] = monthKey.split('-')
   const idx = parseInt(m, 10) - 1
-  if (Number.isNaN(idx) || idx < 0 || idx > 11) return 'Sin fecha'
-  return `${MESES[idx]} ${y}`
+  const lang = useLanguageStore.getState().language
+  if (Number.isNaN(idx) || idx < 0 || idx > 11) return lang === 'ca' ? 'Sense data' : 'Sin fecha'
+  
+  const date = new Date(parseInt(y, 10), idx, 1)
+  const locale = lang === 'ca' ? 'ca-ES' : 'es-ES'
+  const monthName = date.toLocaleDateString(locale, { month: 'long' })
+  const capitalized = monthName.charAt(0).toUpperCase() + monthName.slice(1)
+  return `${capitalized} ${y}`
 }
 
 /** Estado de vencimiento de una factura según su fecha y si está pagada. */
