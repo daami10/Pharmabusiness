@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Search } from 'lucide-react'
 import { Dialog } from '@/components/ui/Dialog'
 import { formatMoney } from '@/lib/utils/money'
+import { useTranslation } from '@/lib/i18n'
 
 export interface RankingItem {
   lab: string
@@ -19,27 +20,28 @@ export function RankingModal({
   onClose: () => void
   items: RankingItem[]
 }) {
+  const { t } = useTranslation()
   const [search, setSearch] = useState('')
   const q = search.toLowerCase().trim()
   const total = items.reduce((s, r) => s + r.amount, 0)
   const filtered = items.filter((r) => !q || r.lab.toLowerCase().includes(q))
 
   return (
-    <Dialog open={open} onClose={onClose} title="Ranking de gasto por proveedor">
+    <Dialog open={open} onClose={onClose} title={t('analisis.ranking_title', 'Ranking de gasto por proveedor')}>
       <div className="relative mb-4">
         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
         <input
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Buscar proveedor…"
+          placeholder={t('analisis.ranking_placeholder', 'Buscar proveedor…')}
           className="w-full rounded-xl border border-white/10 bg-slate-950/40 py-2.5 pl-10 pr-4 text-sm text-slate-100 placeholder-slate-500 focus:border-accent-blue/40 focus:outline-none"
         />
       </div>
 
       <div className="max-h-[55vh] space-y-1.5 overflow-y-auto pr-1">
         {!filtered.length && (
-          <p className="py-8 text-center text-sm text-slate-500">Sin resultados.</p>
+          <p className="py-8 text-center text-sm text-slate-500">{t('general.no_results', 'Sin resultados.')}</p>
         )}
         {filtered.map((r) => {
           const rank = items.indexOf(r)
@@ -80,7 +82,7 @@ export function RankingModal({
 
       <div className="mt-4 flex items-center justify-between border-t border-white/5 pt-3">
         <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-          Total
+          {t('general.total', 'Total')}
         </span>
         <span className="text-lg font-black text-accent-blue">{formatMoney(total)}</span>
       </div>
