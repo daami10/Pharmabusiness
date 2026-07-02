@@ -265,7 +265,7 @@ export function FacturaModal({
             className={inputCls}
           >
             <option value="">{t('facturas.placeholder.select_category', 'Seleccionar categoría…')}</option>
-            <option value="Laboratorio">{t('settings.tab.wholesalers_singular', 'Laboratorio')}</option>
+            <option value="Laboratorio">{t('general.laboratorio', 'Laboratorio')}</option>
             {wholesalers.map((w) => (
               <option key={w} value={w}>
                 {w}
