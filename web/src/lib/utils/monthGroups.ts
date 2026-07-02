@@ -26,23 +26,15 @@ export function buildMonthSections<T>(items: T[], opts: BuildOpts<T>): MonthSect
       const isFuture = isFuturePeriod(`${key}-01`)
       const n = its.length
       const lang = useLanguageStore.getState().language
-      let countLabel = ''
-      if (lang === 'ca') {
-        if (opts.nounPast === 'nómina') {
-          const noun = isFuture 
-            ? (n === 1 ? 'prevista' : 'previstes') 
-            : (n === 1 ? 'nòmina' : 'nòmines')
-          countLabel = `${n} ${noun}`
-        } else {
-          const noun = isFuture 
-            ? (n === 1 ? 'previst' : 'previstos') 
-            : (n === 1 ? 'entrada' : 'entrades')
-          countLabel = `${n} ${noun}`
-        }
-      } else {
-        const noun = isFuture ? opts.nounFuture : opts.nounPast
-        countLabel = `${n} ${noun}${n !== 1 ? 's' : ''}`
-      }
+      const countLabel = lang === 'ca'
+        ? (opts.nounPast === 'nómina'
+            ? `${n} ${isFuture 
+                ? (n === 1 ? 'prevista' : 'previstes') 
+                : (n === 1 ? 'nòmina' : 'nòmines')}`
+            : `${n} ${isFuture 
+                ? (n === 1 ? 'previst' : 'previstos') 
+                : (n === 1 ? 'entrada' : 'entrades')}`)
+        : `${n} ${isFuture ? opts.nounFuture : opts.nounPast}${n !== 1 ? 's' : ''}`
       return {
         key,
         label: monthLabel(key),

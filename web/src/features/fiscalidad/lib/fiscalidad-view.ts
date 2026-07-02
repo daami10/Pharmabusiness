@@ -41,16 +41,11 @@ export function groupFiscalByMonth(items: Fiscal[]): MonthSection<Fiscal>[] {
       const isFuture = isFuturePeriod(`${key}-01`)
       const n = its.length
       const lang = useLanguageStore.getState().language
-      let countLabel = ''
-      if (lang === 'ca') {
-        const noun = isFuture 
-          ? (n === 1 ? 'previst' : 'previstos') 
-          : (n === 1 ? 'pagament' : 'pagaments')
-        countLabel = `${n} ${noun}`
-      } else {
-        const noun = isFuture ? 'previsto' : 'pago'
-        countLabel = `${n} ${noun}${n !== 1 ? 's' : ''}`
-      }
+      const countLabel = lang === 'ca'
+        ? `${n} ${isFuture 
+            ? (n === 1 ? 'previst' : 'previstos') 
+            : (n === 1 ? 'pagament' : 'pagaments')}`
+        : `${n} ${isFuture ? 'previsto' : 'pago'}${n !== 1 ? 's' : ''}`
       return {
         key,
         label: monthLabel(key),
