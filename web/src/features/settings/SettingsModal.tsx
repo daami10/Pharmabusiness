@@ -789,3 +789,4 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
     </Dialog>
   )
 }
+
