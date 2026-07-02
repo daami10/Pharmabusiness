@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import type { ChangeEvent } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -9,6 +9,7 @@ import { useWholesalersStore } from '@/stores/wholesalersStore'
 import { useCreateFactura, useUpdateFactura } from '@/lib/queries/facturas'
 import { scanInvoice } from './lib/ocr'
 import type { Factura, FacturaInput } from '@/types/domain'
+import { supabase } from '@/lib/supabase'
 
 const schema = z.object({
   tipo: z.string().min(1, 'Selecciona una categoría'),
@@ -85,11 +86,57 @@ export function FacturaModal({
     handleSubmit,
     reset,
     setValue,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: emptyForm(activeYear),
   })
+
+  const [suggestions, setSuggestions] = useState<string[]>([])
+  const [showDropdown, setShowDropdown] = useState(false)
+
+  useEffect(() => {
+    if (open) {
+      const loadSuggestions = async () => {
+        try {
+          const [factRes, abonoRes] = await Promise.all([
+            supabase.from('facturas').select('laboratorio'),
+            supabase.from('abonos').select('laboratorio'),
+          ])
+
+          const unique = new Set<string>()
+          wholesalers.forEach((w) => unique.add(w))
+
+          if (factRes.data) {
+            factRes.data.forEach((f) => {
+              if (f.laboratorio) unique.add(f.laboratorio.trim())
+            })
+          }
+          if (abonoRes.data) {
+            abonoRes.data.forEach((a) => {
+              if (a.laboratorio) unique.add(a.laboratorio.trim())
+            })
+          }
+
+          setSuggestions(Array.from(unique).sort())
+        } catch (err) {
+          console.error('Error loading suggestions:', err)
+        }
+      }
+      loadSuggestions()
+    }
+  }, [open, wholesalers])
+
+  const watchLaboratorio = watch('laboratorio') || ''
+
+  const filteredSuggestions = useMemo(() => {
+    const val = watchLaboratorio.trim().toLowerCase()
+    if (!val) return suggestions
+    return suggestions.filter(
+      (s) => s.toLowerCase().includes(val) && s.toLowerCase() !== val,
+    )
+  }, [watchLaboratorio, suggestions])
 
   useEffect(() => {
     if (open) reset(factura ? toForm(factura) : emptyForm(activeYear))
@@ -229,11 +276,38 @@ export function FacturaModal({
           )}
         </div>
 
-        <div>
+        <div className="relative">
           <label className="mb-1 block text-xs font-semibold text-slate-400">
             Laboratorio / Proveedor
           </label>
-          <input type="text" {...register('laboratorio')} className={inputCls} />
+          <input
+            type="text"
+            {...register('laboratorio')}
+            className={inputCls}
+            onFocus={() => setShowDropdown(true)}
+            onBlur={() => {
+              // Timeout to allow onMouseDown event to trigger on option items
+              setTimeout(() => setShowDropdown(false), 200)
+            }}
+            autoComplete="off"
+          />
+          {showDropdown && filteredSuggestions.length > 0 && (
+            <div className="absolute left-0 right-0 top-full z-50 mt-1 max-h-40 overflow-y-auto rounded-xl border border-white/10 bg-slate-950/95 py-1.5 shadow-2xl backdrop-blur-md">
+              {filteredSuggestions.map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  onMouseDown={() => {
+                    setValue('laboratorio', item, { shouldValidate: true })
+                    setShowDropdown(false)
+                  }}
+                  className="w-full px-4 py-2 text-left text-xs font-semibold text-slate-300 hover:bg-white/5 hover:text-white"
+                >
+                  {item}
+                </button>
+              ))}
+            </div>
+          )}
           {errors.laboratorio && (
             <p className="mt-1 text-xs text-red-400">{errors.laboratorio.message}</p>
           )}
