@@ -6,8 +6,10 @@ import { formatMoney } from '@/lib/utils/money'
 import { formatDate, monthLabel } from '@/lib/utils/dates'
 import type { Factura } from '@/types/domain'
 import { AbonoModal } from './AbonoModal'
+import { useTranslation } from '@/lib/i18n'
 
 export function AbonosPage() {
+  const { t } = useTranslation()
   const { data, isLoading, isError, error, refetch } = useFacturas()
   const deleteFactura = useDeleteFactura()
   const year = useYearStore((s) => s.year)
@@ -63,8 +65,8 @@ export function AbonosPage() {
     <div className="mx-auto max-w-7xl px-6 py-8">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-white">Abonos</h1>
-          <p className="mt-1 text-sm text-slate-400">Devoluciones y abonos de {year}.</p>
+          <h1 className="text-3xl font-extrabold tracking-tight text-white">{t('abonos.title', 'Abonos y Devoluciones')}</h1>
+          <p className="mt-1 text-sm text-slate-400">{t('abonos.subtitle', 'Monitorización y control de abonos pendientes de distribuidores')}</p>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -74,7 +76,7 @@ export function AbonosPage() {
           >
             <span className="w-1.5 h-1.5 rounded-full bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.8)] shrink-0 animate-pulse"></span>
             <RefreshCw className="h-4 w-4 text-purple-400" />
-            Actualizar
+            {t('general.actualizar', 'Actualizar')}
           </button>
           <button
             type="button"
@@ -85,13 +87,13 @@ export function AbonosPage() {
             className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 px-5 py-2.5 text-sm font-bold text-slate-950 shadow-lg transition-all hover:opacity-90"
           >
             <Plus className="h-4 w-4" strokeWidth={2.5} />
-            Nuevo abono
+            {t('abonos.button.nuevo', 'Nuevo abono')}
           </button>
         </div>
       </div>
 
       {isLoading && (
-        <p className="py-12 text-center text-sm text-slate-400">Cargando abonos…</p>
+        <p className="py-12 text-center text-sm text-slate-400">{t('general.cargando', 'Cargando...')}</p>
       )}
       {isError && (
         <p className="py-12 text-center text-sm text-red-400">
@@ -100,7 +102,7 @@ export function AbonosPage() {
       )}
       {!isLoading && !isError && !abonos.length && (
         <p className="py-12 text-center text-sm text-slate-400">
-          No hay abonos registrados en {year}.
+          {t('abonos.no_records', 'No se encontraron abonos en este periodo.')}
         </p>
       )}
 

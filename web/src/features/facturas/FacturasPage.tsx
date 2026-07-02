@@ -1,6 +1,7 @@
 import { useMemo, useState, useEffect } from 'react'
 import { ChevronDown, Download, Pencil, Plus, Search, Trash2 } from 'lucide-react'
 import { useLocation } from 'react-router-dom'
+import { useTranslation } from '@/lib/i18n'
 import { FacturaModal } from './FacturaModal'
 import { AbonoModal } from '../abonos/AbonoModal'
 import { Calendar } from './Calendar'
@@ -53,6 +54,7 @@ function tipoBadgeClass(tipo: string, wholesalers: string[]): string {
 }
 
 export function FacturasPage() {
+  const { t } = useTranslation()
   const { data, isLoading, isError, error, refetch } = useFacturas()
   const deleteFactura = useDeleteFactura()
   const year = useYearStore((s) => s.year)
@@ -248,10 +250,10 @@ export function FacturasPage() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-extrabold tracking-tight text-white">
-            Facturas de Laboratorios
+            {t('facturas.title', 'Facturas de Laboratorios')}
           </h1>
           <p className="mt-1 text-sm text-slate-400">
-            Registro centralizado por proveedor farmacéutico
+            {t('facturas.subtitle', 'Registro centralizado por proveedor farmacéutico')}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -261,7 +263,7 @@ export function FacturasPage() {
             className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-accent-blue px-5 py-2.5 text-sm font-bold text-slate-950 shadow-lg transition-all hover:opacity-90"
           >
             <Plus className="h-4 w-4" strokeWidth={2.5} />
-            Nueva factura
+            {t('facturas.button.nueva', 'Nueva factura')}
           </button>
         </div>
       </div>
@@ -309,7 +311,7 @@ export function FacturasPage() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Buscar por laboratorio o nº de factura…"
+              placeholder={t('facturas.filter.placeholder', 'Buscar por laboratorio o nº de factura…')}
               className="w-full rounded-xl border border-white/5 bg-slate-950/40 py-2.5 pl-10 pr-4 text-sm text-slate-100 placeholder-slate-500 focus:border-accent-blue/40 focus:outline-none"
             />
           </div>

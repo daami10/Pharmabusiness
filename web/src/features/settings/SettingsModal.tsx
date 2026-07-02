@@ -4,6 +4,7 @@ import { WholesalersEditor } from '@/components/WholesalersEditor'
 import { useWholesalersStore } from '@/stores/wholesalersStore'
 import { useAuth } from '@/features/auth/AuthProvider'
 import { supabase } from '@/lib/supabase'
+import { useTranslation } from '@/lib/i18n'
 import {
   Users,
   UserPlus,
@@ -55,6 +56,7 @@ const PERMISSION_LABELS: Record<string, string> = {
 }
 
 export function SettingsModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const { t, language, setLanguage } = useTranslation()
   const wholesalers = useWholesalersStore((s) => s.wholesalers)
   const setWholesalers = useWholesalersStore((s) => s.setWholesalers)
   const { subscriptionTier, activeOrgId, activeOrgName, userRole, session, updateActiveOrgName } = useAuth()
@@ -297,7 +299,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
   }
 
   return (
-    <Dialog open={open} onClose={onClose} title="Configuración" size="2xl">
+    <Dialog open={open} onClose={onClose} title={t('settings.title', 'Configuración')} size="2xl">
       {/* Tab Navigation headers */}
       <div className="flex border-b border-white/5 mb-5 gap-4">
         <button
@@ -309,7 +311,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
               : 'border-transparent text-slate-400 hover:text-slate-200'
           }`}
         >
-          General
+          {t('settings.tab.wholesalers', 'General y Mayoristas')}
         </button>
         <button
           type="button"
@@ -320,33 +322,32 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
               : 'border-transparent text-slate-400 hover:text-slate-200'
           }`}
         >
-          Gestión de Usuarios
+          {t('settings.tab.users', 'Equipo y Permisos')}
         </button>
       </div>
 
       {activeTab === 'wholesalers' ? (
-        // General Tab Panel
         <>
           {/* Nombre de la Farmacia */}
           <div className="mb-6">
             <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-              Nombre de la Farmacia
+              {t('settings.farmacia_name', 'Nombre de la Farmacia')}
             </label>
             <input
               type="text"
               value={orgName}
               onChange={(e) => setOrgName(e.target.value)}
-              placeholder="Ej. Farmacia Central"
+              placeholder={t('settings.farmacia_name_placeholder', 'Ej. Farmacia Central')}
               className="w-full rounded-xl border border-white/10 bg-slate-950/40 px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:border-[#00f2fe]/40 focus:outline-none"
             />
           </div>
 
           <div className="border-t border-white/5 my-5 pt-4">
             <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
-              Distribución / Mayoristas
+              {t('settings.mayoristas_selected', 'Distribución / Mayoristas')}
             </label>
             <p className="mb-3 text-2xs text-slate-500">
-              Mayoristas que utilizas. Se usan en filtros, categorías y análisis.
+              {t('settings.mayoristas_desc', 'Mayoristas que utilizas. Se usan en filtros, categorías y análisis.')}
             </p>
             <WholesalersEditor value={draft} onChange={setDraft} />
           </div>
@@ -354,14 +355,20 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
 
           {/* Licenciamiento y Planes (Stripe panel) */}
           <div className="mt-6 border-t border-white/10 pt-5">
-            <h3 className="text-sm font-semibold text-slate-200">Suscripción y Licencia</h3>
+            <h3 className="text-sm font-semibold text-slate-200">
+              {t('settings.stripe_section_title', 'Suscripción y Licencia')}
+            </h3>
             <p className="mt-1 mb-3 text-xs text-slate-400">
-              Gestiona el nivel de acceso asignado a esta farmacia.
+              {t('settings.stripe_section_desc', 'Gestiona el nivel de acceso asignado a esta farmacia.')}
             </p>
             <div className="flex items-center justify-between rounded-xl bg-slate-900/50 p-4 border border-white/5">
               <div className="flex flex-col">
-                <span className="text-xs font-bold text-slate-300">Plan de Acceso</span>
-                <span className="text-[10px] text-slate-500 mt-0.5">Control de módulos de GFarma</span>
+                <span className="text-xs font-bold text-slate-300">
+                  {t('settings.stripe_plan_label', 'Plan de Acceso')}
+                </span>
+                <span className="text-[10px] text-slate-500 mt-0.5">
+                  {t('settings.stripe_plan_desc', 'Control de módulos de GFarma')}
+                </span>
               </div>
               <span
                 className={`font-black uppercase tracking-wider px-2.5 py-1 rounded-md text-[9px] ${
@@ -370,7 +377,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
                     : 'bg-slate-500/10 text-slate-300 border border-slate-500/20'
                 }`}
               >
-                {subscriptionTier === 'premium' ? '✨ Premium' : 'Básico'}
+                {subscriptionTier === 'premium' ? `✨ ${t('settings.stripe_premium', 'Premium')}` : t('settings.stripe_basic', 'Básico')}
               </span>
             </div>
             {userRole === 'titular' && (
@@ -380,12 +387,48 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
                 onClick={handleManageBilling}
                 className="mt-3 w-full rounded-xl bg-slate-900 py-2.5 text-xs font-bold text-slate-200 border border-white/10 hover:bg-slate-800 transition-all cursor-pointer uppercase tracking-wider disabled:opacity-50"
               >
-                {billingLoading ? 'Cargando portal...' : 'Gestión del Plan (Stripe)'}
+                {billingLoading ? t('settings.stripe_portal_loading', 'Cargando portal...') : t('settings.stripe_portal_btn', 'Gestión del Plan (Stripe)')}
               </button>
             )}
             {billingError && (
               <p className="mt-2 text-center text-[10px] text-red-400 font-semibold">{billingError}</p>
             )}
+          </div>
+
+          {/* Idioma de la aplicación (Language Selector) */}
+          <div className="mt-6 border-t border-white/10 pt-5">
+            <h3 className="text-sm font-semibold text-slate-200">
+              {t('settings.language_section', 'Idioma de la aplicación')}
+            </h3>
+            <p className="mt-1 mb-3 text-xs text-slate-400">
+              {t('settings.language_desc', 'Selecciona el idioma de la interfaz del panel.')}
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setLanguage('es')}
+                className={`flex items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-bold border transition-all cursor-pointer ${
+                  language === 'es'
+                    ? 'bg-[#10b981]/10 text-[#10b981] border-[#10b981]/30 shadow-[0_0_10px_rgba(16,185,129,0.1)]'
+                    : 'bg-slate-900/50 text-slate-400 border-white/5 hover:bg-slate-800'
+                }`}
+              >
+                <span className="text-sm">🇪🇸</span>
+                {t('settings.language_spanish', 'Español')}
+              </button>
+              <button
+                type="button"
+                onClick={() => setLanguage('ca')}
+                className={`flex items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-bold border transition-all cursor-pointer ${
+                  language === 'ca'
+                    ? 'bg-[#00f2fe]/10 text-[#00f2fe] border-[#00f2fe]/30 shadow-[0_0_10px_rgba(0,242,254,0.1)]'
+                    : 'bg-slate-900/50 text-slate-400 border-white/5 hover:bg-slate-800'
+                }`}
+              >
+                <span className="text-sm">🚩</span>
+                {t('settings.language_catalan', 'Català')}
+              </button>
+            </div>
           </div>
 
           {/* Action buttons for Wholesalers save */}
@@ -395,14 +438,14 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
               onClick={onClose}
               className="flex-1 rounded-xl border border-white/10 py-3 text-sm font-semibold text-slate-300 transition-all hover:bg-white/5"
             >
-              Cancelar
+              {t('general.cancelar', 'Cancelar')}
             </button>
             <button
               type="button"
               onClick={saveSettings}
               className="flex-1 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 py-3 text-sm font-semibold text-white shadow-lg hover:from-blue-400 hover:to-indigo-500"
             >
-              Guardar
+              {t('settings.guardar_cambios', 'Guardar ajustes')}
             </button>
           </div>
         </>

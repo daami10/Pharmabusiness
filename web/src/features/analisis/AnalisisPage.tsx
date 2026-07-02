@@ -15,6 +15,7 @@ import { isWholesaler } from '@/lib/config/wholesalers'
 import { RankingModal } from './RankingModal'
 import { ExportPdfModal } from './ExportPdfModal'
 import { stackedByWholesaler } from './lib/analisis-view'
+import { useTranslation } from '@/lib/i18n'
 
 const eur = (v: string | number) => `${Number(v).toLocaleString('es-ES')} €`
 
@@ -63,6 +64,7 @@ function formatMonthLabel(key: string): string {
 }
 
 export function AnalisisPage() {
+  const { t } = useTranslation()
   const year = useYearStore((s) => s.year)
   const yearStr = String(year)
   const facturas = useFacturas()
@@ -548,10 +550,10 @@ export function AnalisisPage() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-extrabold tracking-tight text-white">
-            Análisis de Inversiones
+            {t('analisis.title', 'Análisis de Inversiones')}
           </h1>
           <p className="mt-1 text-sm text-slate-400">
-            Gasto acumulado por laboratorio y evolución temporal
+            {t('analisis.subtitle', 'Gasto acumulado por laboratorio y evolución temporal')}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -622,7 +624,7 @@ export function AnalisisPage() {
       <div className="mt-6 grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="glass-card rounded-2xl p-5 shadow-2xl border border-white/5">
           <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-            Total Invertido
+            {t('analisis.kpi.total', 'Total Invertido')}
           </p>
           <p className="text-2xl font-black text-white leading-none">
             {formatMoney(topKpis.total)}
@@ -631,10 +633,10 @@ export function AnalisisPage() {
         <div className="glass-card rounded-2xl p-5 shadow-2xl border border-white/5">
           <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
             {category === 'Fiscalidad'
-              ? 'Nº Pagos'
+              ? t('analisis.kpi.num_pagos', 'Nº Pagos')
               : category === 'Trabajadores'
-                ? 'Nº Entradas'
-                : 'Nº Facturas'}
+                ? t('analisis.kpi.num_entradas', 'Nº Entradas')
+                : t('analisis.kpi.num_facturas', 'Nº Facturas')}
           </p>
           <p className="text-2xl font-black text-white leading-none">{topKpis.count}</p>
         </div>
@@ -658,10 +660,10 @@ export function AnalisisPage() {
         >
           <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
             {category === 'Fiscalidad'
-              ? 'Mayor Impuesto'
+              ? t('analisis.kpi.max_impuesto', 'Mayor Impuesto')
               : category === 'Trabajadores'
-                ? 'Mayor Gasto'
-                : 'Top Proveedor'}
+                ? t('analisis.kpi.max_gasto', 'Mayor Gasto')
+                : t('analisis.kpi.top_proveedor', 'Top Proveedor')}
           </p>
           <p className="text-2xl font-black text-white leading-none truncate">
             {topKpis.top}
@@ -670,10 +672,10 @@ export function AnalisisPage() {
         <div className="glass-card rounded-2xl p-5 shadow-2xl border border-white/5">
           <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
             {category === 'Fiscalidad'
-              ? 'Promedio / Pago'
+              ? t('analisis.kpi.avg_pago', 'Promedio / Pago')
               : category === 'Trabajadores'
-                ? 'Promedio / Entrada'
-                : 'Promedio / Factura'}
+                ? t('analisis.kpi.avg_entrada', 'Promedio / Entrada')
+                : t('analisis.kpi.promedio', 'Promedio / Factura')}
           </p>
           <p className="text-2xl font-black text-white leading-none">
             {formatMoney(topKpis.avg)}
