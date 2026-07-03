@@ -231,9 +231,9 @@ export function FacturasPage() {
     })
 
     if (format === 'xlsx') {
-      downloadFacturasExcel(finalList)
+      downloadFacturasExcel(finalList, t)
     } else {
-      downloadFacturasCSV(finalList)
+      downloadFacturasCSV(finalList, t)
     }
   }
 
