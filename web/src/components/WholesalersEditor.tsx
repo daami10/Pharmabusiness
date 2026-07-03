@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Check, Plus, X } from 'lucide-react'
 import { PREDEFINED_WHOLESALERS } from '@/lib/config/wholesalers'
+import { useTranslation } from '@/lib/i18n'
 
 /** Editor de la lista de mayoristas: chips predefinidos + añadir personalizados. */
 export function WholesalersEditor({
@@ -10,6 +11,7 @@ export function WholesalersEditor({
   value: string[]
   onChange: (list: string[]) => void
 }) {
+  const { t } = useTranslation()
   const [custom, setCustom] = useState('')
 
   const toggle = (w: string) =>
@@ -59,14 +61,14 @@ export function WholesalersEditor({
               addCustom()
             }
           }}
-          placeholder="Añadir otro mayorista…"
+          placeholder={t('settings.add_custom_wholesaler', 'Añadir otro mayorista…')}
           className="w-full rounded-xl border border-white/10 bg-slate-950/40 px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:border-accent-blue/40 focus:outline-none"
         />
         <button
           type="button"
           onClick={addCustom}
           className="shrink-0 rounded-xl border border-white/10 px-3 text-slate-300 hover:bg-white/5"
-          aria-label="Añadir"
+          aria-label={t('general.add', 'Añadir')}
         >
           <Plus className="h-4 w-4" />
         </button>
@@ -74,7 +76,7 @@ export function WholesalersEditor({
 
       <div className="flex flex-wrap gap-2">
         {value.length === 0 && (
-          <span className="text-2xs text-slate-500">Ninguno seleccionado.</span>
+          <span className="text-2xs text-slate-500">{t('settings.none_selected', 'Ninguno seleccionado.')}</span>
         )}
         {value.map((w) => (
           <span
