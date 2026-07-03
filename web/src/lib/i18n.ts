@@ -255,11 +255,20 @@ export const translations: Record<Language, Record<string, string>> = {
     'fiscalidad.concept.impuesto_de_los_trabajadores': 'IMPUESTO DE LOS TRABAJADORES',
     'fiscalidad.concept.primer_trimestre': 'PRIMER TRIMESTRE',
     'fiscalidad.concept.cuota_de_autonomos': 'Cuota de Autónomos',
+    'fiscalidad.concept.pago_fraccionado_is': 'Pago fraccionado IS',
+    'fiscalidad.concept.retenciones_trabajadores_y_profesionales': 'Retenciones trabajadores y profesionales',
     'general.tipo': 'Tipo',
     'pdf.due_date_col': 'Fecha Vencimiento',
     'pdf.paid_col': 'Pagada',
     'general.si': 'Sí',
     'general.no': 'No',
+    'general.abono_singular': 'Abono',
+    'general.otro_singular': 'Otro',
+    'facturas.status.overdue': 'Vencida',
+    'facturas.status.neardue': 'Próxima',
+    'facturas.status.pending': 'Pendiente',
+    'facturas.status.paid': 'Pagada',
+    'db.text.devolucion_de_material_caducado_o_roto': 'Devolución de material caducado o roto',
     'fiscalidad.placeholder.concept': 'Ej. IVA, IRPF, Autónomos...',
     'general.sin_nombre': 'Sin nombre',
     'trabajadores.nomina.de_trabajador': 'Nómina de Trabajador',
@@ -304,6 +313,12 @@ export const translations: Record<Language, Record<string, string>> = {
     'facturas.confirm_delete': '¿Eliminar la factura de {supplier}?',
     'fiscalidad.confirm_delete': '¿Eliminar "{concept}"?',
     'settings.team.invite_exists_error': 'Ya existe una invitación pendiente para este correo.',
+    'calendar.modal_title.overdue': 'Facturas vencidas (impagadas)',
+    'calendar.modal_title.neardue': 'Facturas próximas a vencer (7 días)',
+    'calendar.modal_title.pending': 'Facturas pendientes de pago',
+    'calendar.modal_title.paid': 'Facturas pagadas',
+    'calendar.search_placeholder': 'Buscar por laboratorio o nº…',
+    'calendar.no_invoices_status': 'No hay facturas en este estado.',
     'settings.team.invite_create_error': 'Error al crear la invitación.',
     'settings.team.confirm_revoke_member': '¿Estás seguro de que deseas dar de baja a {name}? Perderá acceso inmediato.',
     'settings.team.confirm_cancel_invitation': '¿Cancelar la invitación enviada a {email}?',
@@ -554,11 +569,20 @@ export const translations: Record<Language, Record<string, string>> = {
     'fiscalidad.concept.impuesto_de_los_trabajadores': 'IMPOST DELS TREBALLADORS',
     'fiscalidad.concept.primer_trimestre': 'PRIMER TRIMESTRE',
     'fiscalidad.concept.cuota_de_autonomos': "Quota d'Autònoms",
+    'fiscalidad.concept.pago_fraccionado_is': 'Pagament fraccionat IS',
+    'fiscalidad.concept.retenciones_trabajadores_y_profesionales': 'Retencions treballadors i professionals',
     'general.tipo': 'Tipus',
     'pdf.due_date_col': 'Data Venciment',
     'pdf.paid_col': 'Pagada',
     'general.si': 'Sí',
     'general.no': 'No',
+    'general.abono_singular': 'Abonament',
+    'general.otro_singular': 'Altre',
+    'facturas.status.overdue': 'Vençuda',
+    'facturas.status.neardue': 'Propera',
+    'facturas.status.pending': 'Pendent',
+    'facturas.status.paid': 'Pagada',
+    'db.text.devolucion_de_material_caducado_o_roto': 'Devolució de material caducat o trencat',
     'fiscalidad.placeholder.concept': 'Ex. IVA, IRPF, Autònoms...',
     'general.sin_nombre': 'Sense nom',
     'trabajadores.nomina.de_trabajador': 'Nòmina de Treballador',
@@ -603,6 +627,12 @@ export const translations: Record<Language, Record<string, string>> = {
     'facturas.confirm_delete': 'Voleu eliminar la factura de {supplier}?',
     'fiscalidad.confirm_delete': 'Voleu eliminar "{concept}"?',
     'settings.team.invite_exists_error': 'Ja existeix una invitació pendent per a aquest correu.',
+    'calendar.modal_title.overdue': 'Factures vençudes (impagades)',
+    'calendar.modal_title.neardue': 'Factures properes a vèncer (7 dies)',
+    'calendar.modal_title.pending': 'Factures pendents de pagament',
+    'calendar.modal_title.paid': 'Factures pagades',
+    'calendar.search_placeholder': 'Cercar per laboratori o nº…',
+    'calendar.no_invoices_status': 'No hi ha factures en aquest estat.',
     'settings.team.invite_create_error': 'Error en crear la invitació.',
     'settings.team.confirm_revoke_member': 'Esteu segur que voleu donar de baixa a {name}? Perdrà l\'accés immediat.',
     'settings.team.confirm_cancel_invitation': 'Voleu cancel·lar la invitació enviada a {email}?',
@@ -636,5 +666,17 @@ export function translateConcept(concept: string, t: (key: string, fallback: str
     .trim()
   const key = `fiscalidad.concept.${normalized}`
   return t(key, concept)
+}
+
+export function translateText(text: string, t: (key: string, fallback: string) => string): string {
+  if (!text) return text
+  const normalized = text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // remove accents
+    .replace(/[^a-z0-9]+/g, '_')     // replace spaces/symbols with _
+    .trim()
+  const key = `db.text.${normalized}`
+  return t(key, text)
 }
 

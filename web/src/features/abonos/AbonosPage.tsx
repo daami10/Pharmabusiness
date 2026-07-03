@@ -6,7 +6,7 @@ import { formatMoney } from '@/lib/utils/money'
 import { formatDate, monthLabel } from '@/lib/utils/dates'
 import type { Factura } from '@/types/domain'
 import { AbonoModal } from './AbonoModal'
-import { useTranslation } from '@/lib/i18n'
+import { useTranslation, translateText } from '@/lib/i18n'
 
 export function AbonosPage() {
   const { t } = useTranslation()
@@ -217,7 +217,7 @@ function AbonoGroupRow({
               + {formatMoney(a.importe)}
             </td>
             <td className="hidden max-w-xs truncate px-6 py-4 text-sm text-slate-500 lg:table-cell">
-              {a.notas ?? ''}
+              {a.notas ? translateText(a.notas, t) : ''}
             </td>
             <td className="px-6 py-4 text-right">
               <span className="flex items-center justify-end gap-1.5">
