@@ -5,6 +5,7 @@ import { useTranslation } from '@/lib/i18n'
 import { useFacturas } from '@/lib/queries/facturas'
 import { useFiscalidad } from '@/lib/queries/fiscalidad'
 import { useNominas, useSeguros } from '@/lib/queries/trabajadores'
+import { useAuth } from '@/features/auth/AuthProvider'
 import { AnalisisReport } from './AnalisisReport'
 
 interface ExportPdfModalProps {
@@ -27,6 +28,11 @@ export function ExportPdfModal({
   defaultHasta,
 }: ExportPdfModalProps) {
   const { t, language } = useTranslation()
+  // Un empleado sin 'trabajadores_read' no puede leer nóminas/seguros (bloqueado por RLS),
+  // así que no le ofrecemos incluir esa sección en el PDF (evita una opción que no da nada).
+  const { permissions, userRole } = useAuth()
+  const canSeeTrabajadores =
+    userRole === 'titular' || permissions?.trabajadores_read === true
   const [desde, setDesde] = useState(defaultDesde || '')
   const [hasta, setHasta] = useState(defaultHasta || '')
 
@@ -170,15 +176,17 @@ export function ExportPdfModal({
               activeBorderClass="border-teal-500/40"
               activeBgClass="bg-teal-500/5"
             />
-            <CheckboxOption
-              label={t('pdf.trabajadores_personal', 'Trabajadores y Personal')}
-              description={t('pdf.trabajadores_desc', 'Incluye nóminas y seguros sociales')}
-              checked={includeTrabajadores}
-              onChange={setIncludeTrabajadores}
-              colorClass="bg-orange-600 border-orange-500 text-orange-400"
-              activeBorderClass="border-orange-500/40"
-              activeBgClass="bg-orange-500/5"
-            />
+            {canSeeTrabajadores && (
+              <CheckboxOption
+                label={t('pdf.trabajadores_personal', 'Trabajadores y Personal')}
+                description={t('pdf.trabajadores_desc', 'Incluye nóminas y seguros sociales')}
+                checked={includeTrabajadores}
+                onChange={setIncludeTrabajadores}
+                colorClass="bg-orange-600 border-orange-500 text-orange-400"
+                activeBorderClass="border-orange-500/40"
+                activeBgClass="bg-orange-500/5"
+              />
+            )}
           </div>
         </div>
 
@@ -224,7 +232,7 @@ export function ExportPdfModal({
             includeFacturas={includeFacturas}
             includeAbonos={includeAbonos}
             includeFiscalidad={includeFiscalidad}
-            includeTrabajadores={includeTrabajadores}
+            includeTrabajadores={includeTrabajadores && canSeeTrabajadores}
             facturas={filteredFacturas}
             abonos={filteredAbonos}
             fiscal={filteredFiscal}
