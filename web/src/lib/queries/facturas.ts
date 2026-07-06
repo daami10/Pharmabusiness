@@ -71,3 +71,24 @@ export function useDeleteFactura() {
     onSuccess: () => qc.invalidateQueries({ queryKey: FACTURAS_KEY }),
   })
 }
+
+export function useCreateFacturas() {
+  const qc = useQueryClient()
+  const { activeOrgId } = useAuth()
+  return useMutation({
+    mutationFn: async (inputs: FacturaInput[]) => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+      if (!user) throw new Error('No hay sesión activa.')
+      if (!activeOrgId) throw new Error('No hay organización activa.')
+      const { error } = await supabase
+        .from('facturas')
+        .insert(
+          inputs.map((input) => ({ ...input, user_id: user.id, org_id: activeOrgId })),
+        )
+      if (error) throw new Error(error.message)
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: FACTURAS_KEY }),
+  })
+}
