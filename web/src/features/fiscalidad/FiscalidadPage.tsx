@@ -8,7 +8,7 @@ import { MonthGroupAccordion } from '@/components/MonthGroupAccordion'
 import type { Fiscal } from '@/types/domain'
 import { fiscalKpis, groupFiscalByMonth } from './lib/fiscalidad-view'
 import { FiscalModal } from './FiscalModal'
-import { useTranslation } from '@/lib/i18n'
+import { useTranslation, translateConcept } from '@/lib/i18n'
 
 const KPI_COLORS = [
   'text-purple-400',
@@ -43,7 +43,7 @@ export function FiscalidadPage() {
   }, [year])
 
   function onDelete(f: Fiscal) {
-    if (!confirm(t('fiscalidad.confirm_delete', '¿Eliminar "{concept}"?').replace('{concept}', f.concepto))) return
+    if (!confirm(t('fiscalidad.confirm_delete', '¿Eliminar "{concept}"?').replace('{concept}', translateConcept(f.concepto, t)))) return
     deleteFiscal.mutate(f.id)
   }
 
@@ -51,7 +51,7 @@ export function FiscalidadPage() {
     <tr key={f.id} className="border-b border-white/5 transition-colors hover:bg-white/5">
       <td className="px-6 py-4 text-sm font-semibold text-slate-200">
         <span className="flex items-center gap-2">
-          <span className="truncate">{f.concepto}</span>
+          <span className="truncate">{translateConcept(f.concepto, t)}</span>
           <span
             className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] font-extrabold uppercase ${
               isFuture
@@ -144,9 +144,9 @@ export function FiscalidadPage() {
               </p>
               <p
                 className="mt-1 text-xs font-semibold text-slate-400 truncate"
-                title={item.concepto}
+                title={translateConcept(item.concepto, t)}
               >
-                {item.concepto}
+                {translateConcept(item.concepto, t)}
               </p>
             </div>
           )

@@ -15,7 +15,7 @@ import { isWholesaler } from '@/lib/config/wholesalers'
 import { RankingModal } from './RankingModal'
 import { ExportPdfModal } from './ExportPdfModal'
 import { stackedByWholesaler } from './lib/analisis-view'
-import { useTranslation } from '@/lib/i18n'
+import { useTranslation, translateConcept } from '@/lib/i18n'
 
 const eur = (v: string | number) => `${Number(v).toLocaleString('es-ES')} €`
 
@@ -56,15 +56,16 @@ export type AnalisisCategory =
   | 'Fiscalidad'
   | 'Trabajadores'
 
-function formatMonthLabel(key: string): string {
-  if (!key || key === '0000-00') return 'Sin fecha'
+function formatMonthLabel(key: string, lang: string): string {
+  if (!key || key === '0000-00') return lang === 'ca' ? 'Sense data' : 'Sin fecha'
   const [y, m] = key.split('-')
   const date = new Date(parseInt(y, 10), parseInt(m, 10) - 1, 1)
-  return date.toLocaleDateString('es-ES', { month: 'short', year: '2-digit' })
+  const locale = lang === 'ca' ? 'ca-ES' : 'es-ES'
+  return date.toLocaleDateString(locale, { month: 'short', year: '2-digit' })
 }
 
 export function AnalisisPage() {
-  const { t } = useTranslation()
+  const { t, language } = useTranslation()
   const year = useYearStore((s) => s.year)
   const yearStr = String(year)
   const facturas = useFacturas()
@@ -182,7 +183,7 @@ export function AnalisisPage() {
       return {
         total: fiscalStats.total,
         count: fiscalStats.count,
-        top: topConcept,
+        top: topConcept === '—' ? '—' : translateConcept(topConcept, t),
         avg,
       }
     }
@@ -190,7 +191,7 @@ export function AnalisisPage() {
     if (category === 'Trabajadores') {
       const segTotal = trabStats.seg.reduce((sum, s) => sum + s.importe, 0)
       const nomTotal = trabStats.nom.reduce((sum, n) => sum + n.importe, 0)
-      const top = segTotal >= nomTotal ? 'Seg. Sociales' : 'Nóminas'
+      const top = segTotal >= nomTotal ? t('trabajadores.seguros_sociales', 'Seguros Sociales') : t('fiscalidad.concept.nominas', 'Nóminas')
       const avg = trabStats.count ? trabStats.total / trabStats.count : 0
       return {
         total: trabStats.total,
@@ -236,7 +237,7 @@ export function AnalisisPage() {
             : 0
           : avg,
     }
-  }, [category, facturasOnly, fiscalStats, trabStats, wholesalers])
+  }, [category, facturasOnly, fiscalStats, trabStats, wholesalers, t])
 
   // Chart calculation data
   const chartsData = useMemo(() => {
@@ -267,13 +268,13 @@ export function AnalisisPage() {
       ]
 
       return {
-        labsLabels: bEntries.map(([l]) => l),
+        labsLabels: bEntries.map(([l]) => translateConcept(l, t)),
         labsData: bEntries.map(([, v]) => v),
         labsColor: 'rgba(16,185,129,0.8)' as string | string[],
         donutColors: palette(bEntries.length),
-        monthlyLabels: mEntries.map(([k]) => formatMonthLabel(k)),
+        monthlyLabels: mEntries.map(([k]) => formatMonthLabel(k, language)),
         monthlyDatasets,
-        byLab: bEntries.map(([lab, amount]) => ({ lab, amount })),
+        byLab: bEntries.map(([lab, amount]) => ({ lab: translateConcept(lab, t), amount })),
       }
     }
 
@@ -313,13 +314,13 @@ export function AnalisisPage() {
       ]
 
       return {
-        labsLabels: bEntries.map(([l]) => l),
+        labsLabels: bEntries.map(([l]) => l === 'Seg. Sociales' ? t('trabajadores.seguros_sociales', 'Seguros Sociales') : l),
         labsData: bEntries.map(([, v]) => v),
         labsColor: 'rgba(249,115,22,0.8)' as string | string[],
         donutColors: palette(bEntries.length),
-        monthlyLabels: mEntries.map(([k]) => formatMonthLabel(k)),
+        monthlyLabels: mEntries.map(([k]) => formatMonthLabel(k, language)),
         monthlyDatasets,
-        byLab: bEntries.map(([lab, amount]) => ({ lab, amount })),
+        byLab: bEntries.map(([lab, amount]) => ({ lab: lab === 'Seg. Sociales' ? t('trabajadores.seguros_sociales', 'Seguros Sociales') : lab, amount })),
       }
     }
 
@@ -402,7 +403,7 @@ export function AnalisisPage() {
         labsData: bEntries.slice(0, 15).map(([, v]) => v),
         labsColor: labsColors,
         donutColors,
-        monthlyLabels: sortedMonths.map((k) => formatMonthLabel(k)),
+        monthlyLabels: sortedMonths.map((k) => formatMonthLabel(k, language)),
         monthlyDatasets,
         byLab: bEntries.map(([lab, amount]) => ({ lab, amount })),
       }
@@ -446,11 +447,11 @@ export function AnalisisPage() {
       labsData: bEntries.slice(0, 15).map(([, v]) => v),
       labsColor,
       donutColors: palette(Math.min(bEntries.length, 10)),
-      monthlyLabels: mEntries.map(([k]) => formatMonthLabel(k)),
+      monthlyLabels: mEntries.map(([k]) => formatMonthLabel(k, language)),
       monthlyDatasets,
       byLab: bEntries.map(([lab, amount]) => ({ lab, amount })),
     }
-  }, [category, facturasOnly, fiscalStats, trabStats, wholesalers])
+  }, [category, facturasOnly, fiscalStats, trabStats, wholesalers, t, language])
 
   // Evolución mensual apilada por mayorista (solo categoría "Mayorista").
   const stackedData = useMemo(
@@ -573,7 +574,7 @@ export function AnalisisPage() {
           >
             <span className="w-1.5 h-1.5 rounded-full bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.8)] shrink-0 animate-pulse"></span>
             <RefreshCw className="h-4 w-4 text-purple-400" />
-            Actualizar
+            {t('general.actualizar', 'Actualizar')}
           </button>
         </div>
       </div>
@@ -582,7 +583,7 @@ export function AnalisisPage() {
       <div className="mt-6 flex flex-wrap items-center gap-3 bg-slate-900/30 border border-white/5 rounded-2xl px-5 py-4 shadow-2xl">
         <Landmark className="w-4 h-4 text-[#00f2fe] shrink-0" />
         <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-          Rango:
+          {t('general.rango', 'Rango')}:
         </span>
         <input
           type="date"

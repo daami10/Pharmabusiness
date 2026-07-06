@@ -231,9 +231,9 @@ export function FacturasPage() {
     })
 
     if (format === 'xlsx') {
-      downloadFacturasExcel(finalList)
+      downloadFacturasExcel(finalList, t)
     } else {
-      downloadFacturasCSV(finalList)
+      downloadFacturasCSV(finalList, t)
     }
   }
 
@@ -609,7 +609,15 @@ function FragmentGroup({
                     <span
                       className={`w-fit rounded-full border px-2 py-0.5 text-[10px] font-bold ${tipoBadgeClass(f.tipo, wholesalers)}`}
                     >
-                      {f.tipo}
+                      {isWholesaler(f.tipo, wholesalers)
+                        ? f.tipo
+                        : f.tipo === 'Laboratorio'
+                          ? t('general.laboratorio', 'Laboratorio')
+                          : f.tipo === 'Abono'
+                            ? t('general.abono_singular', 'Abono')
+                            : f.tipo === 'Otro'
+                              ? t('general.otro_singular', 'Otro')
+                              : f.tipo}
                     </span>
                   )}
                 </div>
