@@ -7,9 +7,10 @@ import { Sparkles } from 'lucide-react'
 import { Dialog } from '@/components/ui/Dialog'
 import { useTranslation } from '@/lib/i18n'
 import { useWholesalersStore } from '@/stores/wholesalersStore'
-import { useCreateFactura, useUpdateFactura } from '@/lib/queries/facturas'
+import { useUpdateFactura, useCreateFacturas } from '@/lib/queries/facturas'
 import { scanInvoice } from './lib/ocr'
 import type { Factura, FacturaInput } from '@/types/domain'
+import { getRemainingDatesForDate } from '@/lib/utils/dates'
 import { supabase } from '@/lib/supabase'
 
 const schema = z.object({
@@ -26,6 +27,7 @@ const schema = z.object({
   fecha_vencimiento: z.string(),
   notas: z.string(),
   pagada: z.boolean(),
+  repetir: z.boolean(),
 })
 type FormValues = z.infer<typeof schema>
 
@@ -43,6 +45,7 @@ function emptyForm(year?: number): FormValues {
     fecha_vencimiento: '',
     notas: '',
     pagada: false,
+    repetir: false,
   }
 }
 
@@ -56,6 +59,7 @@ function toForm(f: Factura): FormValues {
     fecha_vencimiento: f.fecha_vencimiento ?? '',
     notas: f.notas ?? '',
     pagada: f.pagada,
+    repetir: false,
   }
 }
 
@@ -77,7 +81,7 @@ export function FacturaModal({
 }) {
   const { t } = useTranslation()
   const wholesalers = useWholesalersStore((s) => s.wholesalers)
-  const createFactura = useCreateFactura()
+  const createFacturas = useCreateFacturas()
   const updateFactura = useUpdateFactura()
   const [serverError, setServerError] = useState('')
   const [ocrStatus, setOcrStatus] = useState<'idle' | 'loading' | 'ok'>('idle')
@@ -198,19 +202,56 @@ export function FacturaModal({
 
   const onSubmit = handleSubmit(async (v) => {
     setServerError('')
-    const input: FacturaInput = {
-      tipo: v.tipo,
-      laboratorio: v.laboratorio.trim(),
-      num_factura: v.num_factura.trim() || null,
-      fecha: v.fecha || null,
-      importe: Number(v.importe.replace(',', '.')),
-      fecha_vencimiento: v.fecha_vencimiento || null,
-      notas: v.notas.trim(),
-      pagada: v.pagada,
-    }
     try {
-      if (factura) await updateFactura.mutateAsync({ id: factura.id, input })
-      else await createFactura.mutateAsync(input)
+      if (factura) {
+        const input: FacturaInput = {
+          tipo: v.tipo,
+          laboratorio: v.laboratorio.trim(),
+          num_factura: v.num_factura.trim() || null,
+          fecha: v.fecha || null,
+          importe: Number(v.importe.replace(',', '.')),
+          fecha_vencimiento: v.fecha_vencimiento || null,
+          notas: v.notas.trim(),
+          pagada: v.pagada,
+        }
+        await updateFactura.mutateAsync({ id: factura.id, input })
+      } else {
+        const fechas = v.repetir
+          ? getRemainingDatesForDate(v.fecha)
+          : [v.fecha]
+
+        let offsetDays: number | null = null
+        if (v.fecha && v.fecha_vencimiento) {
+          const d1 = new Date(`${v.fecha}T00:00:00`)
+          const d2 = new Date(`${v.fecha_vencimiento}T00:00:00`)
+          offsetDays = Math.round((d2.getTime() - d1.getTime()) / 86_400_000)
+        }
+
+        const inputs: FacturaInput[] = fechas.map((fecha) => {
+          let fecha_vencimiento: string | null = null
+          if (offsetDays !== null) {
+            const base = new Date(`${fecha}T00:00:00`)
+            base.setDate(base.getDate() + offsetDays)
+            const y = base.getFullYear()
+            const m = String(base.getMonth() + 1).padStart(2, '0')
+            const d = String(base.getDate()).padStart(2, '0')
+            fecha_vencimiento = `${y}-${m}-${d}`
+          }
+
+          return {
+            tipo: v.tipo,
+            laboratorio: v.laboratorio.trim(),
+            num_factura: v.num_factura.trim() || null,
+            fecha,
+            importe: Number(v.importe.replace(',', '.')),
+            fecha_vencimiento,
+            notas: v.notas.trim(),
+            pagada: v.pagada,
+          }
+        })
+
+        await createFacturas.mutateAsync(inputs)
+      }
       handleClose()
     } catch (e) {
       setServerError(e instanceof Error ? e.message : t('general.save_error', 'Error al guardar'))
@@ -365,6 +406,13 @@ export function FacturaModal({
           <input type="checkbox" {...register('pagada')} className="h-4 w-4 rounded" />
           {t('facturas.label.mark_as_paid', 'Marcar como pagada')}
         </label>
+
+        {!factura && (
+          <label className="flex items-center gap-2 text-sm text-slate-300">
+            <input type="checkbox" {...register('repetir')} className="h-4 w-4 rounded" />
+            {t('general.repeat_monthly', 'Repetir mensualmente hasta fin de año')}
+          </label>
+        )}
 
         {serverError && (
           <p className="rounded-xl border border-red-500/20 bg-red-950/40 px-4 py-3 text-sm text-red-400">
