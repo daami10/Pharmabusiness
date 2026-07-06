@@ -1,25 +1,27 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import type { ChangeEvent } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Sparkles } from 'lucide-react'
 import { Dialog } from '@/components/ui/Dialog'
+import { useTranslation } from '@/lib/i18n'
 import { useWholesalersStore } from '@/stores/wholesalersStore'
 import { useCreateFactura, useUpdateFactura } from '@/lib/queries/facturas'
 import { scanInvoice } from './lib/ocr'
 import type { Factura, FacturaInput } from '@/types/domain'
+import { supabase } from '@/lib/supabase'
 
 const schema = z.object({
-  tipo: z.string().min(1, 'Selecciona una categoría'),
-  laboratorio: z.string().trim().min(1, 'Indica el laboratorio o proveedor'),
+  tipo: z.string().min(1, 'facturas.error.select_category'),
+  laboratorio: z.string().trim().min(1, 'facturas.error.select_lab'),
   num_factura: z.string(),
-  fecha: z.string().min(1, 'Indica la fecha'),
+  fecha: z.string().min(1, 'facturas.error.select_date'),
   importe: z
     .string()
     .refine(
       (v) => v.trim() !== '' && Number(v.replace(',', '.')) > 0,
-      'Importe mayor que 0',
+      'trabajadores.error.min_importe',
     ),
   fecha_vencimiento: z.string(),
   notas: z.string(),
@@ -73,6 +75,7 @@ export function FacturaModal({
   initialFile?: File | null
   activeYear: number
 }) {
+  const { t } = useTranslation()
   const wholesalers = useWholesalersStore((s) => s.wholesalers)
   const createFactura = useCreateFactura()
   const updateFactura = useUpdateFactura()
@@ -85,11 +88,57 @@ export function FacturaModal({
     handleSubmit,
     reset,
     setValue,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: emptyForm(activeYear),
   })
+
+  const [suggestions, setSuggestions] = useState<string[]>([])
+  const [showDropdown, setShowDropdown] = useState(false)
+
+  useEffect(() => {
+    if (open) {
+      const loadSuggestions = async () => {
+        try {
+          const [factRes, abonoRes] = await Promise.all([
+            supabase.from('facturas').select('laboratorio'),
+            supabase.from('abonos').select('laboratorio'),
+          ])
+
+          const unique = new Set<string>()
+          wholesalers.forEach((w) => unique.add(w))
+
+          if (factRes.data) {
+            factRes.data.forEach((f) => {
+              if (f.laboratorio) unique.add(f.laboratorio.trim())
+            })
+          }
+          if (abonoRes.data) {
+            abonoRes.data.forEach((a) => {
+              if (a.laboratorio) unique.add(a.laboratorio.trim())
+            })
+          }
+
+          setSuggestions(Array.from(unique).sort())
+        } catch (err) {
+          console.error('Error loading suggestions:', err)
+        }
+      }
+      loadSuggestions()
+    }
+  }, [open, wholesalers])
+
+  const watchLaboratorio = watch('laboratorio') || ''
+
+  const filteredSuggestions = useMemo(() => {
+    const val = watchLaboratorio.trim().toLowerCase()
+    if (!val) return suggestions
+    return suggestions.filter(
+      (s) => s.toLowerCase().includes(val) && s.toLowerCase() !== val,
+    )
+  }, [watchLaboratorio, suggestions])
 
   useEffect(() => {
     if (open) reset(factura ? toForm(factura) : emptyForm(activeYear))
@@ -112,12 +161,12 @@ export function FacturaModal({
           setOcrStatus('ok')
         } catch (err) {
           setOcrStatus('idle')
-          setOcrError(err instanceof Error ? err.message : 'Error al analizar la imagen')
+          setOcrError(err instanceof Error ? err.message : t('facturas.ocr.error_message', 'Error al analizar la imagen'))
         }
       }
       runScan()
     }
-  }, [open, initialFile, factura, setValue])
+  }, [open, initialFile, factura, setValue, t])
 
   function handleClose() {
     setServerError('')
@@ -143,7 +192,7 @@ export function FacturaModal({
       setOcrStatus('ok')
     } catch (err) {
       setOcrStatus('idle')
-      setOcrError(err instanceof Error ? err.message : 'Error al analizar la imagen')
+      setOcrError(err instanceof Error ? err.message : t('facturas.ocr.error_message', 'Error al analizar la imagen'))
     }
   }
 
@@ -164,7 +213,7 @@ export function FacturaModal({
       else await createFactura.mutateAsync(input)
       handleClose()
     } catch (e) {
-      setServerError(e instanceof Error ? e.message : 'Error al guardar')
+      setServerError(e instanceof Error ? e.message : t('general.save_error', 'Error al guardar'))
     }
   })
 
@@ -172,7 +221,7 @@ export function FacturaModal({
     <Dialog
       open={open}
       onClose={handleClose}
-      title={factura ? 'Editar factura' : 'Nueva factura'}
+      title={factura ? t('facturas.edit_title', 'Editar factura') : t('facturas.new_title', 'Nueva factura')}
     >
       <form onSubmit={onSubmit} className="space-y-4" noValidate>
         {/* Escaneo con IA (OCR) */}
@@ -183,7 +232,7 @@ export function FacturaModal({
             }`}
           >
             <Sparkles className="h-4 w-4" />
-            {ocrStatus === 'loading' ? 'Analizando imagen…' : 'Escanear factura con IA'}
+            {ocrStatus === 'loading' ? t('facturas.ocr.scanning', 'Analizando imagen…') : t('facturas.ocr.scan_button', 'Escanear factura con IA')}
             <input
               type="file"
               accept="image/*"
@@ -194,7 +243,7 @@ export function FacturaModal({
           </label>
           {ocrStatus === 'ok' && (
             <p className="mt-2 text-center text-xs text-emerald-400">
-              ✓ Datos extraídos. Revísalos antes de guardar.
+              {t('facturas.ocr.ok_message', '✓ Datos extraídos. Revísalos antes de guardar.')}
             </p>
           )}
           {ocrError && (
@@ -204,7 +253,7 @@ export function FacturaModal({
 
         <div>
           <label className="mb-1 block text-xs font-semibold text-slate-400">
-            Categoría
+            {t('facturas.filter.category', 'Categoría')}
           </label>
           <select
             {...register('tipo', {
@@ -215,40 +264,67 @@ export function FacturaModal({
             })}
             className={inputCls}
           >
-            <option value="">Seleccionar categoría…</option>
-            <option value="Laboratorio">Laboratorio</option>
+            <option value="">{t('facturas.placeholder.select_category', 'Seleccionar categoría…')}</option>
+            <option value="Laboratorio">{t('general.laboratorio', 'Laboratorio')}</option>
             {wholesalers.map((w) => (
               <option key={w} value={w}>
                 {w}
               </option>
             ))}
-            <option value="Otro">Otro</option>
+            <option value="Otro">{t('general.otro', 'Otro')}</option>
           </select>
           {errors.tipo && (
-            <p className="mt-1 text-xs text-red-400">{errors.tipo.message}</p>
+            <p className="mt-1 text-xs text-red-400">{t(errors.tipo.message || '', 'Selecciona una categoría')}</p>
           )}
         </div>
 
-        <div>
+        <div className="relative">
           <label className="mb-1 block text-xs font-semibold text-slate-400">
-            Laboratorio / Proveedor
+            {t('facturas.label.lab_supplier', 'Laboratorio / Proveedor')}
           </label>
-          <input type="text" {...register('laboratorio')} className={inputCls} />
+          <input
+            type="text"
+            {...register('laboratorio')}
+            className={inputCls}
+            onFocus={() => setShowDropdown(true)}
+            onBlur={() => {
+              // Timeout to allow onMouseDown event to trigger on option items
+              setTimeout(() => setShowDropdown(false), 200)
+            }}
+            autoComplete="off"
+          />
+          {showDropdown && filteredSuggestions.length > 0 && (
+            <div className="absolute left-0 right-0 top-full z-50 mt-1 max-h-40 overflow-y-auto rounded-xl border border-white/10 bg-slate-950/95 py-1.5 shadow-2xl backdrop-blur-md">
+              {filteredSuggestions.map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  onMouseDown={() => {
+                    setValue('laboratorio', item, { shouldValidate: true })
+                    setShowDropdown(false)
+                  }}
+                  className="w-full px-4 py-2 text-left text-xs font-semibold text-slate-300 hover:bg-white/5 hover:text-white"
+                >
+                  {item}
+                </button>
+              ))}
+            </div>
+          )}
           {errors.laboratorio && (
-            <p className="mt-1 text-xs text-red-400">{errors.laboratorio.message}</p>
+            <p className="mt-1 text-xs text-red-400">{t(errors.laboratorio.message || '', 'Indica el laboratorio o proveedor')}</p>
           )}
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="mb-1 block text-xs font-semibold text-slate-400">
-              Nº factura
+              {t('facturas.label.invoice_number', 'Nº factura')}
             </label>
             <input type="text" {...register('num_factura')} className={inputCls} />
           </div>
           <div>
             <label className="mb-1 block text-xs font-semibold text-slate-400">
-              Importe (€)
+              {t('general.importe', 'Importe')} (€)
             </label>
             <input
               type="text"
@@ -257,7 +333,7 @@ export function FacturaModal({
               className={inputCls}
             />
             {errors.importe && (
-              <p className="mt-1 text-xs text-red-400">{errors.importe.message}</p>
+              <p className="mt-1 text-xs text-red-400">{t(errors.importe.message || '', 'Importe mayor que 0')}</p>
             )}
           </div>
         </div>
@@ -265,29 +341,29 @@ export function FacturaModal({
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="mb-1 block text-xs font-semibold text-slate-400">
-              Fecha
+              {t('general.fecha', 'Fecha')}
             </label>
             <input type="date" {...register('fecha')} className={inputCls} />
             {errors.fecha && (
-              <p className="mt-1 text-xs text-red-400">{errors.fecha.message}</p>
+              <p className="mt-1 text-xs text-red-400">{t(errors.fecha.message || '', 'Indica la fecha')}</p>
             )}
           </div>
           <div>
             <label className="mb-1 block text-xs font-semibold text-slate-400">
-              Vencimiento
+              {t('facturas.label.vencimiento', 'Vencimiento')}
             </label>
             <input type="date" {...register('fecha_vencimiento')} className={inputCls} />
           </div>
         </div>
 
         <div>
-          <label className="mb-1 block text-xs font-semibold text-slate-400">Notas</label>
+          <label className="mb-1 block text-xs font-semibold text-slate-400">{t('general.notes', 'Notas')}</label>
           <input type="text" {...register('notas')} className={inputCls} />
         </div>
 
         <label className="flex items-center gap-2 text-sm text-slate-300">
           <input type="checkbox" {...register('pagada')} className="h-4 w-4 rounded" />
-          Marcar como pagada
+          {t('facturas.label.mark_as_paid', 'Marcar como pagada')}
         </label>
 
         {serverError && (
@@ -302,14 +378,14 @@ export function FacturaModal({
             onClick={handleClose}
             className="flex-1 rounded-xl border border-white/10 py-3 text-sm font-semibold text-slate-300 transition-all hover:bg-white/5"
           >
-            Cancelar
+            {t('general.cancelar', 'Cancelar')}
           </button>
           <button
             type="submit"
             disabled={isSubmitting}
             className="flex-1 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:from-blue-400 hover:to-indigo-500 disabled:opacity-60"
           >
-            {isSubmitting ? 'Guardando…' : factura ? 'Guardar cambios' : 'Crear factura'}
+            {isSubmitting ? t('general.guardando', 'Guardando…') : factura ? t('general.guardar_cambios', 'Guardar cambios') : t('facturas.create_button', 'Crear factura')}
           </button>
         </div>
       </form>

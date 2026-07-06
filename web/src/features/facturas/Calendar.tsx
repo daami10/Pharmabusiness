@@ -9,6 +9,7 @@ import { getEffectiveVencStatus } from './lib/facturas-view'
 import { buildCalendarGrid, getMonthVencimientos, vencStats } from './lib/calendar'
 import { VencListModal } from './VencListModal'
 import type { Factura } from '@/types/domain'
+import { useTranslation } from '@/lib/i18n'
 
 const STATUS_ORDER: VencStatus[] = ['overdue', 'neardue', 'pending', 'paid']
 const DOT: Record<VencStatus, string> = {
@@ -31,7 +32,6 @@ const CARD_CLASSES: Record<VencStatus, string> = {
   paid: 'glow-emerald glow-emerald-hover',
 }
 
-const WEEKDAYS = ['L', 'M', 'X', 'J', 'V', 'S', 'D']
 type ListFilter = 'total' | 'pending' | 'overdue' | 'paid'
 
 /** Estados de vencimiento presentes en un día, ordenados por severidad. */
@@ -50,6 +50,7 @@ export function Calendar({
   vencStatus?: string
   setVencStatus?: (s: '' | VencStatus) => void
 }) {
+  const { t, language } = useTranslation()
   const now = new Date()
   const { data } = useFacturas()
   const setPagada = useSetPagada()
@@ -130,10 +131,14 @@ export function Calendar({
     }
   }
 
+  const translatedWeekdays = language === 'ca'
+    ? ['Dl', 'Dt', 'Dc', 'Dj', 'Dv', 'Ds', 'Dg']
+    : ['L', 'M', 'X', 'J', 'V', 'S', 'D']
+
   return (
     <section className="mt-10">
       <h2 className="text-xl font-extrabold tracking-tight text-white">
-        Calendario de Vencimientos
+        {t('calendar.title', 'Calendario de Vencimientos')}
       </h2>
 
       {/* Stats */}
@@ -151,7 +156,9 @@ export function Calendar({
             <p className={`text-3xl font-black leading-none ${c.color}`}>
               {stats[c.status]}
             </p>
-            <p className="mt-1 text-xs font-semibold text-slate-400">{c.label}</p>
+            <p className="mt-1 text-xs font-semibold text-slate-400">
+              {t('calendar.stat.' + c.status, c.label)}
+            </p>
           </button>
         ))}
       </div>
@@ -181,7 +188,7 @@ export function Calendar({
             </button>
           </div>
           <div className="grid grid-cols-7 gap-0.5">
-            {WEEKDAYS.map((w) => (
+            {translatedWeekdays.map((w) => (
               <div key={w} className="py-1 text-center text-xs font-bold text-slate-500">
                 {w}
               </div>
@@ -248,7 +255,7 @@ export function Calendar({
           {selectedDay ? (
             <div className="mb-3 flex items-center justify-between rounded-lg border border-accent-blue/30 bg-accent-blue/10 px-3 py-1.5">
               <span className="text-xs font-bold text-accent-blue">
-                Vencimientos del {formatDate(selectedDay)}
+                {t('calendar.due_dates_of', 'Vencimientos del')} {formatDate(selectedDay)}
               </span>
               <button
                 type="button"
@@ -273,12 +280,12 @@ export function Calendar({
                   }`}
                 >
                   {f === 'total'
-                    ? 'Todas'
+                    ? t('facturas.tab.todas', 'Todas')
                     : f === 'pending'
-                      ? 'Pendientes'
+                      ? t('facturas.tab.pendientes', 'Pendientes')
                       : f === 'overdue'
-                        ? 'Vencidas'
-                        : 'Pagadas'}
+                        ? t('facturas.tab.vencidas', 'Vencidas')
+                        : t('facturas.tab.pagadas', 'Pagadas')}
                 </button>
               ))}
             </div>
@@ -286,7 +293,7 @@ export function Calendar({
           <div className="max-h-[360px] flex-1 space-y-2 overflow-y-auto pr-1">
             {!listItems.length && (
               <p className="py-8 text-center text-sm text-slate-500">
-                {selectedDay ? 'Sin vencimientos ese día.' : 'Sin vencimientos este mes.'}
+                {selectedDay ? t('calendar.no_dues_day', 'Sin vencimientos ese día.') : t('calendar.no_dues_month', 'Sin vencimientos este mes.')}
               </p>
             )}
             {listItems.map((f) => {
@@ -361,7 +368,7 @@ export function Calendar({
           {listItems.length > 0 && (
             <div className="mt-3 flex items-center justify-between border-t border-white/5 pt-3">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                Total
+                {t('general.total', 'Total')}
               </span>
               <span className="text-base font-black text-accent-blue">
                 {formatMoney(listTotal)}

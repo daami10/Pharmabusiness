@@ -1,6 +1,7 @@
 import { useMemo, useState, useEffect } from 'react'
 import { ChevronDown, Download, Pencil, Plus, Search, Trash2 } from 'lucide-react'
 import { useLocation } from 'react-router-dom'
+import { useTranslation } from '@/lib/i18n'
 import { FacturaModal } from './FacturaModal'
 import { AbonoModal } from '../abonos/AbonoModal'
 import { Calendar } from './Calendar'
@@ -24,22 +25,6 @@ import {
 } from './lib/facturas-view'
 import type { FacturaCategory } from './lib/facturas-view'
 
-const MESES = [
-  { value: '', label: 'Todos los meses' },
-  { value: '01', label: 'Enero' },
-  { value: '02', label: 'Febrero' },
-  { value: '03', label: 'Marzo' },
-  { value: '04', label: 'Abril' },
-  { value: '05', label: 'Mayo' },
-  { value: '06', label: 'Junio' },
-  { value: '07', label: 'Julio' },
-  { value: '08', label: 'Agosto' },
-  { value: '09', label: 'Septiembre' },
-  { value: '10', label: 'Octubre' },
-  { value: '11', label: 'Noviembre' },
-  { value: '12', label: 'Diciembre' },
-]
-
 const TIPO_BADGE: Record<string, string> = {
   Laboratorio: 'bg-blue-500/10 border-blue-500/20 text-blue-400',
   Mayorista: 'bg-purple-500/10 border-purple-500/20 text-purple-400',
@@ -54,6 +39,22 @@ function tipoBadgeClass(tipo: string, wholesalers: string[]): string {
 }
 
 export function FacturasPage() {
+  const { t } = useTranslation()
+  const translatedMeses = useMemo(() => [
+    { value: '', label: t('facturas.filter.all_months', 'Todos los meses') },
+    { value: '01', label: t('months.january', 'Enero') },
+    { value: '02', label: t('months.february', 'Febrero') },
+    { value: '03', label: t('months.march', 'Marzo') },
+    { value: '04', label: t('months.april', 'Abril') },
+    { value: '05', label: t('months.may', 'Mayo') },
+    { value: '06', label: t('months.june', 'Junio') },
+    { value: '07', label: t('months.july', 'Julio') },
+    { value: '08', label: t('months.august', 'Agosto') },
+    { value: '09', label: t('months.september', 'Septiembre') },
+    { value: '10', label: t('months.october', 'Octubre') },
+    { value: '11', label: t('months.november', 'Noviembre') },
+    { value: '12', label: t('months.december', 'Diciembre') },
+  ], [t])
   const { data, isLoading, isError, error, refetch } = useFacturas()
   const deleteFactura = useDeleteFactura()
   const year = useYearStore((s) => s.year)
@@ -174,7 +175,7 @@ export function FacturasPage() {
   }
 
   function onDelete(f: Factura) {
-    if (!confirm(`¿Eliminar la factura de ${f.laboratorio}?`)) return
+    if (!confirm(t('facturas.confirm_delete', '¿Eliminar la factura de {supplier}?').replace('{supplier}', f.laboratorio || '—'))) return
     deleteFactura.mutate(f.id)
   }
 
@@ -230,9 +231,9 @@ export function FacturasPage() {
     })
 
     if (format === 'xlsx') {
-      downloadFacturasExcel(finalList)
+      downloadFacturasExcel(finalList, t)
     } else {
-      downloadFacturasCSV(finalList)
+      downloadFacturasCSV(finalList, t)
     }
   }
 
@@ -240,13 +241,13 @@ export function FacturasPage() {
   const nFacturas = visible.filter((f) => f.tipo !== 'Abono').length
   const nAbonos = visible.filter((f) => f.tipo === 'Abono').length
 
-  const mayoristaLabel = wholesalers.length > 1 ? 'Mayoristas' : 'Mayorista'
+  const mayoristaLabel = wholesalers.length > 1 ? t('settings.tab.wholesalers_plural', 'Mayoristas') : t('settings.tab.wholesalers_singular', 'Mayorista')
   const categories: { value: FacturaCategory; label: string }[] = [
-    { value: '', label: `Todos (${counts.all})` },
-    { value: 'Laboratorio', label: `Laboratorios (${counts.Laboratorio})` },
+    { value: '', label: `${t('facturas.tab.todas', 'Todos')} (${counts.all})` },
+    { value: 'Laboratorio', label: `${t('facturas.tab.laboratorios', 'Laboratorios')} (${counts.Laboratorio})` },
     { value: 'Mayorista', label: `${mayoristaLabel} (${counts.Mayorista})` },
-    { value: 'Otro', label: `Otros (${counts.Otro})` },
-    { value: 'Abono', label: `Abonos (${counts.Abono})` },
+    { value: 'Otro', label: `${t('general.otros', 'Otros')} (${counts.Otro})` },
+    { value: 'Abono', label: `${t('nav.abonos', 'Abonos')} (${counts.Abono})` },
   ]
 
   return (
@@ -254,10 +255,10 @@ export function FacturasPage() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-extrabold tracking-tight text-white">
-            Facturas de Laboratorios
+            {t('facturas.title', 'Facturas de Laboratorios')}
           </h1>
           <p className="mt-1 text-sm text-slate-400">
-            Registro centralizado por proveedor farmacéutico
+            {t('facturas.subtitle', 'Registro centralizado por proveedor farmacéutico')}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -267,7 +268,7 @@ export function FacturasPage() {
             className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-accent-blue px-5 py-2.5 text-sm font-bold text-slate-950 shadow-lg transition-all hover:opacity-90"
           >
             <Plus className="h-4 w-4" strokeWidth={2.5} />
-            Nueva factura
+            {t('facturas.button.nueva', 'Nueva factura')}
           </button>
         </div>
       </div>
@@ -315,7 +316,7 @@ export function FacturasPage() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Buscar por laboratorio o nº de factura…"
+              placeholder={t('facturas.filter.placeholder', 'Buscar por laboratorio o nº de factura…')}
               className="w-full rounded-xl border border-white/5 bg-slate-950/40 py-2.5 pl-10 pr-4 text-sm text-slate-100 placeholder-slate-500 focus:border-accent-blue/40 focus:outline-none"
             />
           </div>
@@ -327,7 +328,7 @@ export function FacturasPage() {
               onChange={(e) => setMonth(e.target.value)}
               className="w-full appearance-none rounded-xl border border-white/5 bg-slate-950/40 py-2.5 pl-4 pr-10 text-sm text-slate-200 focus:border-accent-blue/40 focus:outline-none"
             >
-              {MESES.map((m) => (
+              {translatedMeses.map((m) => (
                 <option
                   key={m.value}
                   value={m.value}
@@ -347,8 +348,8 @@ export function FacturasPage() {
             disabled={!facturas.length}
             className="flex items-center gap-2 rounded-xl border border-white/10 px-4 py-2.5 text-sm font-bold text-slate-300 transition-all hover:bg-white/5 disabled:opacity-50"
           >
-            <Download className="h-4 w-4" />
-            Exportar
+            <Download className="h-4 w-4 text-slate-400" />
+            {t('facturas.button.export', 'Exportar')}
           </button>
 
           {/* Actualizar Manual */}
@@ -357,7 +358,7 @@ export function FacturasPage() {
             onClick={() => refetch()}
             className="rounded-xl border border-white/10 px-4 py-2.5 text-sm font-bold text-slate-300 transition-all hover:bg-white/5"
           >
-            Actualizar
+            {t('general.actualizar', 'Actualizar')}
           </button>
         </div>
 
@@ -366,13 +367,13 @@ export function FacturasPage() {
           {/* Rango de Importe */}
           <div className="flex items-center gap-2">
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-              IMPORTE:
+              {t('general.importe', 'Importe').toUpperCase()}:
             </span>
             <input
               type="text"
               value={minImporte}
               onChange={(e) => setMinImporte(e.target.value)}
-              placeholder="Desde €"
+              placeholder={t('facturas.filter.min_amount', 'Desde €')}
               className="w-24 rounded-xl border border-white/5 bg-slate-950/40 py-2.5 px-3 text-sm text-slate-100 placeholder-slate-500 focus:border-accent-blue/40 focus:outline-none"
             />
             <span className="text-slate-500">—</span>
@@ -380,7 +381,7 @@ export function FacturasPage() {
               type="text"
               value={maxImporte}
               onChange={(e) => setMaxImporte(e.target.value)}
-              placeholder="Hasta €"
+              placeholder={t('facturas.filter.max_amount', 'Hasta €')}
               className="w-24 rounded-xl border border-white/5 bg-slate-950/40 py-2.5 px-3 text-sm text-slate-100 placeholder-slate-500 focus:border-accent-blue/40 focus:outline-none"
             />
             {(minImporte || maxImporte) && (
@@ -400,7 +401,7 @@ export function FacturasPage() {
           {/* Rango de Fecha */}
           <div className="flex items-center gap-2 border-l border-white/5 pl-6">
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-              FECHA EMISIÓN:
+              {t('facturas.filter.issue_date', 'FECHA EMISIÓN')}:
             </span>
             <input
               type="date"
@@ -423,7 +424,7 @@ export function FacturasPage() {
                   setEndDate('')
                 }}
                 className="text-xs font-bold text-red-400 hover:text-red-300 px-2 py-1"
-                title="Limpiar rango de fechas"
+                title={t('facturas.filter.clear_dates', 'Limpiar rango de fechas')}
               >
                 ✕
               </button>
@@ -433,7 +434,7 @@ export function FacturasPage() {
           {/* Categorías */}
           <div className="flex flex-wrap items-center gap-3 flex-1 min-w-[280px]">
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-              CATEGORÍA:
+              {t('facturas.filter.category', 'CATEGORÍA')}:
             </span>
             <div className="flex flex-wrap gap-2">
               {categories.map((c) => (
@@ -457,16 +458,16 @@ export function FacturasPage() {
 
       {/* Estados */}
       {isLoading && (
-        <p className="py-12 text-center text-sm text-slate-400">Cargando facturas…</p>
+        <p className="py-12 text-center text-sm text-slate-400">{t('general.cargando', 'Cargando...')}</p>
       )}
       {isError && (
         <p className="py-12 text-center text-sm text-red-400">
-          Error al cargar: {error instanceof Error ? error.message : 'desconocido'}
+          {t('general.load_error', 'Error al cargar')}: {error instanceof Error ? error.message : 'desconocido'}
         </p>
       )}
       {!isLoading && !isError && !groups.length && (
         <p className="py-12 text-center text-sm text-slate-400">
-          No hay facturas que coincidan con los filtros.
+          {t('facturas.filter.no_matches', 'No hay facturas que coincidan con los filtros.')}
         </p>
       )}
 
@@ -499,8 +500,8 @@ export function FacturasPage() {
       {!isLoading && !isError && groups.length > 0 && (
         <div className="mt-4 flex items-center justify-between rounded-2xl border border-white/5 glass-card px-6 py-4">
           <span className="text-sm text-slate-400">
-            {nFacturas} factura{nFacturas !== 1 ? 's' : ''}
-            {nAbonos > 0 && ` · ${nAbonos} abono${nAbonos !== 1 ? 's' : ''}`}
+            {nFacturas} {nFacturas !== 1 ? t('nav.facturas', 'facturas').toLowerCase() : t('inicio.factura_singular', 'factura')}
+            {nAbonos > 0 && ` · ${nAbonos} ${nAbonos !== 1 ? t('nav.abonos', 'abonos').toLowerCase() : t('inicio.abono_singular', 'abono')}`}
           </span>
           <span className="text-lg font-black text-white">{formatMoney(total)}</span>
         </div>
@@ -560,6 +561,8 @@ function FragmentGroup({
   onEdit: (f: Factura) => void
   onDelete: (f: Factura) => void
 }) {
+  const { t } = useTranslation()
+
   return (
     <>
       <tr
@@ -574,7 +577,7 @@ function FragmentGroup({
               />
               <span className="text-sm font-bold capitalize text-slate-200">{label}</span>
               <span className="rounded bg-white/5 px-2 py-0.5 text-xs font-bold text-slate-500">
-                {count} registro{count !== 1 ? 's' : ''}
+                {count} {count !== 1 ? t('general.registros', 'registros') : t('general.registro', 'registro')}
               </span>
             </div>
             <span
@@ -606,7 +609,15 @@ function FragmentGroup({
                     <span
                       className={`w-fit rounded-full border px-2 py-0.5 text-[10px] font-bold ${tipoBadgeClass(f.tipo, wholesalers)}`}
                     >
-                      {f.tipo}
+                      {isWholesaler(f.tipo, wholesalers)
+                        ? f.tipo
+                        : f.tipo === 'Laboratorio'
+                          ? t('general.laboratorio', 'Laboratorio')
+                          : f.tipo === 'Abono'
+                            ? t('general.abono_singular', 'Abono')
+                            : f.tipo === 'Otro'
+                              ? t('general.otro_singular', 'Otro')
+                              : f.tipo}
                     </span>
                   )}
                 </div>
@@ -657,3 +668,4 @@ function FragmentGroup({
     </>
   )
 }
+

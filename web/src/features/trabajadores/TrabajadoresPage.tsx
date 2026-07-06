@@ -15,6 +15,7 @@ import type { Nomina, Seguro } from '@/types/domain'
 import { NominaModal } from './NominaModal'
 import { SeguroModal } from './SeguroModal'
 import { TrabajadorModal } from './TrabajadorModal'
+import { useTranslation } from '@/lib/i18n'
 
 function badge(isFuture: boolean, future: string, past: string) {
   return (
@@ -31,6 +32,7 @@ function badge(isFuture: boolean, future: string, past: string) {
 const actionsCls = 'rounded-xl p-1.5 text-slate-400 transition-all hover:bg-white/5'
 
 export function TrabajadoresPage() {
+  const { t } = useTranslation()
   const location = useLocation()
   const showCurrentMonth = location.state?.fromHome
   const year = useYearStore((s) => s.year)
@@ -88,7 +90,7 @@ export function TrabajadoresPage() {
       <td className="px-6 py-4 text-sm font-extrabold text-white">
         {n.trabajador_nombre || '—'}
       </td>
-      <td className="px-6 py-4">{badge(isFuture, 'Prevista', 'Registrada')}</td>
+      <td className="px-6 py-4">{badge(isFuture, t('trabajadores.badge.prevista', 'Prevista'), t('trabajadores.badge.registrada', 'Registrada'))}</td>
       <td className="px-6 py-4 text-right text-sm font-extrabold text-white">
         {formatMoney(n.importe)}
       </td>
@@ -108,7 +110,7 @@ export function TrabajadoresPage() {
           </button>
           <button
             type="button"
-            onClick={() => confirm('¿Eliminar esta nómina?') && deleteNomina.mutate(n.id)}
+            onClick={() => confirm(t('trabajadores.confirm_delete_nomina', '¿Eliminar esta nómina?')) && deleteNomina.mutate(n.id)}
             className={`${actionsCls} hover:text-red-400`}
             aria-label="Eliminar"
           >
@@ -121,7 +123,7 @@ export function TrabajadoresPage() {
 
   const renderSeguro = (s: Seguro, isFuture: boolean) => (
     <tr key={s.id} className="border-b border-white/5 transition-colors hover:bg-white/5">
-      <td className="px-6 py-4">{badge(isFuture, 'Previsto', 'Registrado')}</td>
+      <td className="px-6 py-4">{badge(isFuture, t('trabajadores.badge.previsto', 'Previsto'), t('trabajadores.badge.registrado', 'Registrado'))}</td>
       <td className="px-6 py-4 text-right text-sm font-extrabold text-white">
         {formatMoney(s.importe)}
       </td>
@@ -142,7 +144,7 @@ export function TrabajadoresPage() {
           <button
             type="button"
             onClick={() =>
-              confirm('¿Eliminar esta entrada?') && deleteSeguro.mutate(s.id)
+              confirm(t('trabajadores.confirm_delete_seguro', '¿Eliminar esta entrada?')) && deleteSeguro.mutate(s.id)
             }
             className={`${actionsCls} hover:text-red-400`}
             aria-label="Eliminar"
@@ -159,10 +161,10 @@ export function TrabajadoresPage() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-extrabold tracking-tight text-white">
-            Trabajadores
+            {t('trabajadores.title', 'Gestión de Trabajadores')}
           </h1>
           <p className="mt-1 text-sm text-slate-400">
-            Nóminas y seguros sociales de {year}.
+            {t('trabajadores.subtitle', 'Control de nóminas, cotizaciones y permisos de acceso del equipo')}
           </p>
         </div>
         <button
@@ -171,14 +173,14 @@ export function TrabajadoresPage() {
           className="flex items-center gap-2 rounded-xl border border-white/10 px-4 py-2.5 text-sm font-bold text-slate-300 transition-all hover:bg-white/5"
         >
           <Users className="h-4 w-4" />
-          Gestionar plantilla
+          {t('trabajadores.button.nuevo', 'Nuevo trabajador')}
         </button>
       </div>
 
       {/* Nóminas */}
       <section className="mt-8">
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-lg font-extrabold text-white">Nóminas</h2>
+          <h2 className="text-lg font-extrabold text-white">{t('inicio.nominas', 'Nóminas')}</h2>
           <button
             type="button"
             onClick={() => {
@@ -188,7 +190,7 @@ export function TrabajadoresPage() {
             className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-blue-500 to-accent-blue px-4 py-2 text-xs font-bold text-slate-950 transition-all hover:opacity-90"
           >
             <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
-            Nueva nómina
+            {t('trabajadores.new_nomina', 'Nueva nómina')}
           </button>
         </div>
         {nominaGroups.length ? (
@@ -201,7 +203,7 @@ export function TrabajadoresPage() {
             />
             <div className="mt-3 flex items-center justify-between rounded-2xl border border-white/5 bg-white/5 px-6 py-3">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                Total nóminas {year}
+                {t('trabajadores.total_nominas', 'Total nóminas')} {year}
               </span>
               <span className="text-base font-black text-accent-blue">
                 {formatMoney(nominaTotal)}
@@ -210,7 +212,7 @@ export function TrabajadoresPage() {
           </>
         ) : (
           <p className="py-8 text-center text-sm text-slate-500">
-            Sin nóminas en {year}.
+            {t('trabajadores.no_nominas', 'No hay nóminas registradas en este periodo.')}
           </p>
         )}
       </section>
@@ -218,7 +220,7 @@ export function TrabajadoresPage() {
       {/* Seguros */}
       <section className="mt-10">
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-lg font-extrabold text-white">Seguros Sociales</h2>
+          <h2 className="text-lg font-extrabold text-white">{t('trabajadores.seguros_sociales', 'Seguros Sociales')}</h2>
           <button
             type="button"
             onClick={() => {
@@ -228,7 +230,7 @@ export function TrabajadoresPage() {
             className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-blue-500 to-accent-blue px-4 py-2 text-xs font-bold text-slate-950 transition-all hover:opacity-90"
           >
             <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
-            Nuevo seguro
+            {t('trabajadores.button.nuevo_seguro', 'Nuevo seguro')}
           </button>
         </div>
         {seguroGroups.length ? (
@@ -241,7 +243,7 @@ export function TrabajadoresPage() {
             />
             <div className="mt-3 flex items-center justify-between rounded-2xl border border-white/5 bg-white/5 px-6 py-3">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                Total seguros {year}
+                {t('trabajadores.total_seguros', 'Total seguros')} {year}
               </span>
               <span className="text-base font-black text-accent-blue">
                 {formatMoney(seguroTotal)}
@@ -250,7 +252,7 @@ export function TrabajadoresPage() {
           </>
         ) : (
           <p className="py-8 text-center text-sm text-slate-500">
-            Sin seguros en {year}.
+            {t('trabajadores.no_seguros', 'No hay seguros sociales registrados en este periodo.')}
           </p>
         )}
       </section>

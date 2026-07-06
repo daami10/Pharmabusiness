@@ -4,6 +4,7 @@ import { WholesalersEditor } from '@/components/WholesalersEditor'
 import { useWholesalersStore } from '@/stores/wholesalersStore'
 import { useAuth } from '@/features/auth/AuthProvider'
 import { supabase } from '@/lib/supabase'
+import { useTranslation } from '@/lib/i18n'
 import {
   Users,
   UserPlus,
@@ -58,6 +59,7 @@ const PERMISSION_LABELS: Record<string, string> = {
 }
 
 export function SettingsModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const { t, language, setLanguage } = useTranslation()
   const wholesalers = useWholesalersStore((s) => s.wholesalers)
   const setWholesalers = useWholesalersStore((s) => s.setWholesalers)
   const { subscriptionTier, activeOrgId, activeOrgName, userRole, session, updateActiveOrgName } = useAuth()
@@ -221,7 +223,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
 
       if (error) {
         if (error.code === '23505') {
-          throw new Error('Ya existe una invitación pendiente para este correo.')
+          throw new Error(t('settings.team.invite_exists_error', 'Ya existe una invitación pendiente para este correo.'))
         }
         throw error
       }
@@ -235,7 +237,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
       await loadUsersData()
     } catch (err) {
       console.error(err)
-      setInviteError(err instanceof Error ? err.message : 'Error al crear la invitación.')
+      setInviteError(err instanceof Error ? err.message : t('settings.team.invite_create_error', 'Error al crear la invitación.'))
     } finally {
       setSubmittingInvite(false)
     }
@@ -243,7 +245,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
 
   // Revoke active user access
   async function handleRevokeMember(userId: string, name: string) {
-    if (!confirm(`¿Estás seguro de que deseas dar de baja a ${name || 'este trabajador'}? Perderá acceso inmediato.`)) return
+    if (!confirm(t('settings.team.confirm_revoke_member', '¿Estás seguro de que deseas dar de baja a {name}? Perderá acceso inmediato.').replace('{name}', name || t('general.trabajador', 'este trabajador').toLowerCase()))) return
     try {
       const { error } = await supabase
         .from('memberships')
@@ -268,7 +270,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
 
   // Cancel pending invitation
   async function handleCancelInvitation(invId: string, email: string) {
-    if (!confirm(`¿Cancelar la invitación enviada a ${email}?`)) return
+    if (!confirm(t('settings.team.confirm_cancel_invitation', '¿Cancelar la invitación enviada a {email}?').replace('{email}', email))) return
     try {
       const { error } = await supabase
         .from('invitations')
@@ -309,7 +311,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
   }
 
   return (
-    <Dialog open={open} onClose={onClose} title="Configuración" size="2xl">
+    <Dialog open={open} onClose={onClose} title={t('settings.title', 'Configuración')} size="2xl">
       {/* Tab Navigation headers */}
       <div className="flex border-b border-white/5 mb-5 gap-4">
         <button
@@ -321,7 +323,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
               : 'border-transparent text-slate-400 hover:text-slate-200'
           }`}
         >
-          General
+          {t('settings.tab.wholesalers', 'General y Mayoristas')}
         </button>
         <button
           type="button"
@@ -332,33 +334,32 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
               : 'border-transparent text-slate-400 hover:text-slate-200'
           }`}
         >
-          Gestión de Usuarios
+          {t('settings.tab.users', 'Equipo y Permisos')}
         </button>
       </div>
 
       {activeTab === 'wholesalers' ? (
-        // General Tab Panel
         <>
           {/* Nombre de la Farmacia */}
           <div className="mb-6">
             <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-              Nombre de la Farmacia
+              {t('settings.farmacia_name', 'Nombre de la Farmacia')}
             </label>
             <input
               type="text"
               value={orgName}
               onChange={(e) => setOrgName(e.target.value)}
-              placeholder="Ej. Farmacia Central"
+              placeholder={t('settings.farmacia_name_placeholder', 'Ej. Farmacia Central')}
               className="w-full rounded-xl border border-white/10 bg-slate-950/40 px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:border-[#00f2fe]/40 focus:outline-none"
             />
           </div>
 
           <div className="border-t border-white/5 my-5 pt-4">
             <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
-              Distribución / Mayoristas
+              {t('settings.mayoristas_selected', 'Distribución / Mayoristas')}
             </label>
             <p className="mb-3 text-2xs text-slate-500">
-              Mayoristas que utilizas. Se usan en filtros, categorías y análisis.
+              {t('settings.mayoristas_desc', 'Mayoristas que utilizas. Se usan en filtros, categorías y análisis.')}
             </p>
             <WholesalersEditor value={draft} onChange={setDraft} />
           </div>
@@ -366,14 +367,20 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
 
           {/* Licenciamiento y Planes (Stripe panel) */}
           <div className="mt-6 border-t border-white/10 pt-5">
-            <h3 className="text-sm font-semibold text-slate-200">Suscripción y Licencia</h3>
+            <h3 className="text-sm font-semibold text-slate-200">
+              {t('settings.stripe_section_title', 'Suscripción y Licencia')}
+            </h3>
             <p className="mt-1 mb-3 text-xs text-slate-400">
-              Gestiona el nivel de acceso asignado a esta farmacia.
+              {t('settings.stripe_section_desc', 'Gestiona el nivel de acceso asignado a esta farmacia.')}
             </p>
             <div className="flex items-center justify-between rounded-xl bg-slate-900/50 p-4 border border-white/5">
               <div className="flex flex-col">
-                <span className="text-xs font-bold text-slate-300">Plan de Acceso</span>
-                <span className="text-[10px] text-slate-500 mt-0.5">Control de módulos de GFarma</span>
+                <span className="text-xs font-bold text-slate-300">
+                  {t('settings.stripe_plan_label', 'Plan de Acceso')}
+                </span>
+                <span className="text-[10px] text-slate-500 mt-0.5">
+                  {t('settings.stripe_plan_desc', 'Control de módulos de GFarma')}
+                </span>
               </div>
               <span
                 className={`font-black uppercase tracking-wider px-2.5 py-1 rounded-md text-[9px] ${
@@ -382,7 +389,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
                     : 'bg-slate-500/10 text-slate-300 border border-slate-500/20'
                 }`}
               >
-                {subscriptionTier === 'premium' ? '✨ Premium' : 'Básico'}
+                {subscriptionTier === 'premium' ? `✨ ${t('settings.stripe_premium', 'Premium')}` : t('settings.stripe_basic', 'Básico')}
               </span>
             </div>
             {userRole === 'titular' && (
@@ -392,12 +399,48 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
                 onClick={handleManageBilling}
                 className="mt-3 w-full rounded-xl bg-slate-900 py-2.5 text-xs font-bold text-slate-200 border border-white/10 hover:bg-slate-800 transition-all cursor-pointer uppercase tracking-wider disabled:opacity-50"
               >
-                {billingLoading ? 'Cargando portal...' : 'Gestión del Plan (Stripe)'}
+                {billingLoading ? t('settings.stripe_portal_loading', 'Cargando portal...') : t('settings.stripe_portal_btn', 'Gestión del Plan (Stripe)')}
               </button>
             )}
             {billingError && (
               <p className="mt-2 text-center text-[10px] text-red-400 font-semibold">{billingError}</p>
             )}
+          </div>
+
+          {/* Idioma de la aplicación (Language Selector) */}
+          <div className="mt-6 border-t border-white/10 pt-5">
+            <h3 className="text-sm font-semibold text-slate-200">
+              {t('settings.language_section', 'Idioma de la aplicación')}
+            </h3>
+            <p className="mt-1 mb-3 text-xs text-slate-400">
+              {t('settings.language_desc', 'Selecciona el idioma de la interfaz del panel.')}
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setLanguage('es')}
+                className={`flex items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-bold border transition-all cursor-pointer ${
+                  language === 'es'
+                    ? 'bg-[#10b981]/10 text-[#10b981] border-[#10b981]/30 shadow-[0_0_10px_rgba(16,185,129,0.1)]'
+                    : 'bg-slate-900/50 text-slate-400 border-white/5 hover:bg-slate-800'
+                }`}
+              >
+                <span className="text-sm">🇪🇸</span>
+                {t('settings.language_spanish', 'Español')}
+              </button>
+              <button
+                type="button"
+                onClick={() => setLanguage('ca')}
+                className={`flex items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-bold border transition-all cursor-pointer ${
+                  language === 'ca'
+                    ? 'bg-[#00f2fe]/10 text-[#00f2fe] border-[#00f2fe]/30 shadow-[0_0_10px_rgba(0,242,254,0.1)]'
+                    : 'bg-slate-900/50 text-slate-400 border-white/5 hover:bg-slate-800'
+                }`}
+              >
+                <span className="text-sm">🚩</span>
+                {t('settings.language_catalan', 'Català')}
+              </button>
+            </div>
           </div>
 
           {/* Action buttons for Wholesalers save */}
@@ -407,14 +450,14 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
               onClick={onClose}
               className="flex-1 rounded-xl border border-white/10 py-3 text-sm font-semibold text-slate-300 transition-all hover:bg-white/5"
             >
-              Cancelar
+              {t('general.cancelar', 'Cancelar')}
             </button>
             <button
               type="button"
               onClick={saveSettings}
               className="flex-1 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 py-3 text-sm font-semibold text-white shadow-lg hover:from-blue-400 hover:to-indigo-500"
             >
-              Guardar
+              {t('settings.guardar_cambios', 'Guardar ajustes')}
             </button>
           </div>
         </>
@@ -455,8 +498,8 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
               {/* Header and counter */}
               <div className="flex items-center justify-between border-b border-white/5 pb-4">
                 <div>
-                  <h3 className="text-sm font-bold text-white">Usuarios y Accesos</h3>
-                  <p className="text-[10px] text-slate-400 mt-0.5">Asientos de tu suscripción: {seatsUsed} de 3 utilizados.</p>
+                  <h3 className="text-sm font-bold text-white">{t('settings.team.title', 'Usuarios y Accesos')}</h3>
+                  <p className="text-[10px] text-slate-400 mt-0.5">{t('settings.team.seats_counter', 'Asientos de tu suscripción: {used} de 3 utilizados.').replace('{used}', String(seatsUsed))}</p>
                 </div>
                 <div className="flex gap-2">
                   <button
@@ -464,7 +507,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
                     onClick={() => void loadUsersData()}
                     disabled={loadingUsers}
                     className="p-2 text-slate-400 hover:text-white rounded-xl border border-white/5 hover:bg-white/5 transition-all"
-                    aria-label="Refrescar lista"
+                    aria-label={t('settings.team.refresh_list', 'Refrescar lista')}
                   >
                     <RefreshCw className={`h-4 w-4 ${loadingUsers ? 'animate-spin' : ''}`} />
                   </button>
@@ -475,7 +518,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
                       className="flex items-center gap-1.5 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-3.5 py-1.5 text-xs font-bold hover:bg-cyan-500/20 transition-all cursor-pointer"
                     >
                       <UserPlus className="h-3.5 w-3.5" />
-                      Invitar trabajador
+                      {t('settings.team.invite_worker', 'Invitar trabajador')}
                     </button>
                   )}
                 </div>
@@ -485,7 +528,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
               {inviting && (
                 <form onSubmit={handleInviteSubmit} className="rounded-2xl border border-cyan-500/20 bg-slate-950/60 p-5 space-y-4">
                   <div className="flex justify-between items-center border-b border-white/5 pb-2">
-                    <h4 className="text-xs font-black uppercase text-cyan-400 tracking-wider">Nueva Invitación</h4>
+                    <h4 className="text-xs font-black uppercase text-cyan-400 tracking-wider">{t('settings.team.new_invitation', 'Nueva Invitación')}</h4>
                     <button type="button" onClick={() => setInviting(false)} className="text-slate-400 hover:text-white">
                       <X className="h-4 w-4" />
                     </button>
@@ -493,7 +536,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
 
                   <div className="grid gap-3 sm:grid-cols-2">
                     <div>
-                      <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Nombre</label>
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">{t('settings.team.label_name', 'Nombre')}</label>
                       <input
                         type="text"
                         placeholder="Juan Pérez"
@@ -518,7 +561,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
 
                   {/* Configurar Permisos */}
                   <div>
-                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-2">Permisos del trabajador</label>
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-2">{t('settings.team.worker_permissions', 'Permisos del trabajador')}</label>
                     <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 bg-slate-900/20 p-3 rounded-xl border border-white/5">
                       {Object.keys(DEFAULT_PERMISSIONS).map((key) => (
                         <label key={key} className="flex items-center gap-2 cursor-pointer select-none">
@@ -528,7 +571,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
                             onChange={() => handlePermissionToggle(key, false)}
                             className="rounded border-white/10 bg-slate-950 text-cyan-500 focus:ring-0 focus:ring-offset-0"
                           />
-                          <span className="text-xs text-slate-300 font-semibold">{PERMISSION_LABELS[key]}</span>
+                          <span className="text-xs text-slate-300 font-semibold">{t('settings.permission.' + key, PERMISSION_LABELS[key])}</span>
                         </label>
                       ))}
                     </div>
@@ -542,14 +585,14 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
                       onClick={() => setInviting(false)}
                       className="flex-1 rounded-xl border border-white/10 py-2.5 text-xs font-semibold text-slate-400 hover:bg-white/5"
                     >
-                      Cancelar
+                      {t('general.cancelar', 'Cancelar')}
                     </button>
                     <button
                       type="submit"
                       disabled={submittingInvite}
                       className="flex-1 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 py-2.5 text-xs font-black text-white shadow-md disabled:opacity-50"
                     >
-                      {submittingInvite ? 'Enviando...' : 'Enviar Invitación'}
+                      {submittingInvite ? t('general.enviando', 'Enviando...') : t('settings.team.send_invitation', 'Enviar Invitación')}
                     </button>
                   </div>
                 </form>
@@ -558,14 +601,14 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
               {/* Members and invitations lists */}
               <div className="space-y-3.5 max-h-[350px] overflow-y-auto pr-1">
                 {loadingUsers ? (
-                  <p className="text-xs text-slate-400 text-center py-6">Cargando lista de accesos…</p>
+                  <p className="text-xs text-slate-400 text-center py-6">{t('settings.team.loading_list', 'Cargando lista de accesos…')}</p>
                 ) : (
                   <>
                     {/* List Active Members */}
                     {members.map((m) => {
                       const isOwner = m.role === 'titular'
                       const isEditing = editingPermissionsUserId === m.user_id
-                      const displayName = isOwner ? 'Propietario (Tú)' : (m.custom_name || 'Trabajador')
+                      const displayName = isOwner ? t('settings.team.owner_you', 'Propietario (Tú)') : (m.custom_name || t('general.trabajador', 'Trabajador'))
                       
                       return (
                         <div key={m.user_id} className="rounded-2xl border border-white/5 bg-slate-950/20 p-4">
@@ -582,7 +625,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
                             
                             <div className="flex items-center gap-2">
                               {isOwner ? (
-                                <span className="bg-amber-500/10 text-amber-400 border border-amber-500/20 font-black tracking-wider text-[8px] uppercase px-2 py-0.5 rounded">Propietario</span>
+                                <span className="bg-amber-500/10 text-amber-400 border border-amber-500/20 font-black tracking-wider text-[8px] uppercase px-2 py-0.5 rounded">{t('settings.team.owner_badge', 'Propietario')}</span>
                               ) : (
                                 <>
                                   <button
@@ -596,7 +639,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
                                       }
                                     }}
                                     className="p-1.5 text-slate-400 hover:text-white rounded-xl border border-white/5 hover:bg-white/5 transition-all"
-                                    title="Editar permisos"
+                                    title={t('settings.team.edit_permissions', 'Editar permisos')}
                                   >
                                     <Edit2 className="h-3.5 w-3.5" />
                                   </button>
@@ -604,7 +647,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
                                     type="button"
                                     onClick={() => handleRevokeMember(m.user_id, displayName)}
                                     className="p-1.5 text-slate-400 hover:text-red-400 rounded-xl border border-white/5 hover:bg-white/5 transition-all"
-                                    title="Dar de baja"
+                                    title={t('settings.team.revoke_member_title', 'Dar de baja')}
                                   >
                                     <Trash2 className="h-3.5 w-3.5" />
                                   </button>
@@ -618,7 +661,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
                             <div className="mt-3.5 border-t border-white/5 pt-3">
                               {isEditing ? (
                                 <div className="space-y-3">
-                                  <span className="text-[9px] font-bold text-cyan-400 uppercase tracking-widest">Modificar Permisos</span>
+                                  <span className="text-[9px] font-bold text-cyan-400 uppercase tracking-widest">{t('settings.team.modify_permissions', 'Modificar Permisos')}</span>
                                   <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 bg-slate-900/40 p-3 rounded-xl border border-white/5">
                                     {Object.keys(DEFAULT_PERMISSIONS).map((key) => (
                                       <label key={key} className="flex items-center gap-2 cursor-pointer select-none">
@@ -628,7 +671,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
                                           onChange={() => handlePermissionToggle(key, true)}
                                           className="rounded border-white/10 bg-slate-950 text-cyan-500 focus:ring-0 focus:ring-offset-0"
                                         />
-                                        <span className="text-xs text-slate-300 font-semibold">{PERMISSION_LABELS[key]}</span>
+                                        <span className="text-xs text-slate-300 font-semibold">{t('settings.permission.' + key, PERMISSION_LABELS[key])}</span>
                                       </label>
                                     ))}
                                   </div>
@@ -638,14 +681,14 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
                                       onClick={() => setEditingPermissionsUserId(null)}
                                       className="flex-1 rounded-xl border border-white/10 py-1.5 text-[10px] font-semibold text-slate-400 hover:bg-white/5"
                                     >
-                                      Cancelar
+                                      {t('general.cancelar', 'Cancelar')}
                                     </button>
                                     <button
                                       type="button"
                                       onClick={() => handleSavePermissions(m.user_id)}
                                       className="flex-1 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 py-1.5 text-[10px] font-black text-white shadow-sm"
                                     >
-                                      Guardar Cambios
+                                      {t('general.guardar_cambios', 'Guardar Cambios')}
                                     </button>
                                   </div>
                                 </div>
@@ -655,12 +698,12 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
                                     if (!val) return null
                                     return (
                                       <span key={key} className="inline-flex items-center gap-1 rounded bg-slate-900 px-2 py-0.5 text-[8px] font-bold text-slate-400 border border-white/5 uppercase tracking-wider">
-                                        {PERMISSION_LABELS[key]}
+                                        {t('settings.permission.' + key, PERMISSION_LABELS[key])}
                                       </span>
                                     )
                                   })}
                                   {Object.values(m.permissions || {}).every(v => !v) && (
-                                    <span className="text-[10px] text-slate-500 font-semibold italic">Sin accesos configurados.</span>
+                                    <span className="text-[10px] text-slate-500 font-semibold italic">{t('settings.team.no_permissions_configured', 'Sin accesos configurados.')}</span>
                                   )}
                                 </div>
                               )}
@@ -681,7 +724,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
                             <div>
                               <div className="flex items-center gap-2">
                                 <h4 className="text-xs font-black text-white leading-normal">{i.custom_name}</h4>
-                                <span className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-black tracking-wider text-[7px] uppercase px-1.5 py-0.5 rounded">Pendiente</span>
+                                <span className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-black tracking-wider text-[7px] uppercase px-1.5 py-0.5 rounded">{t('settings.team.pending_badge', 'Pendiente')}</span>
                               </div>
                               <p className="text-[10px] text-slate-500 mt-0.5">{i.email}</p>
                             </div>
@@ -692,7 +735,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
                               type="button"
                               onClick={() => copyInviteLink(i.token)}
                               className="p-1.5 text-slate-400 hover:text-cyan-400 rounded-xl border border-white/5 hover:bg-white/5 transition-all"
-                              title="Copiar enlace de invitación"
+                              title={t('settings.team.copy_invitation_title', 'Copiar enlace de invitación')}
                             >
                               {copiedToken === i.token ? (
                                 <Check className="h-3.5 w-3.5 text-emerald-400" />
@@ -704,7 +747,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
                               type="button"
                               onClick={() => handleCancelInvitation(i.id, i.email)}
                               className="p-1.5 text-slate-400 hover:text-red-400 rounded-xl border border-white/5 hover:bg-white/5 transition-all"
-                              title="Cancelar invitación"
+                              title={t('settings.team.cancel_invitation_title', 'Cancelar invitación')}
                             >
                               <Trash2 className="h-3.5 w-3.5" />
                             </button>
@@ -717,7 +760,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
                               if (!val) return null
                               return (
                                 <span key={key} className="inline-flex items-center gap-1 rounded bg-slate-900 px-2 py-0.5 text-[8px] font-bold text-slate-500 border border-white/5 uppercase tracking-wider">
-                                  {PERMISSION_LABELS[key]}
+                                  {t('settings.permission.' + key, PERMISSION_LABELS[key])}
                                 </span>
                               )
                             })}
@@ -738,7 +781,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
               onClick={onClose}
               className="w-full sm:w-auto rounded-xl border border-white/10 px-8 py-3 text-sm font-semibold text-slate-300 transition-all hover:bg-white/5"
             >
-              Cerrar
+              {t('general.cerrar', 'Cerrar')}
             </button>
           </div>
         </div>
@@ -746,3 +789,4 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
     </Dialog>
   )
 }
+

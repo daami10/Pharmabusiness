@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from 'react'
 import { Download, Calendar, Info } from 'lucide-react'
 import { Dialog } from '@/components/ui/Dialog'
+import { useTranslation } from '@/lib/i18n'
 import { useFacturas } from '@/lib/queries/facturas'
 import { useFiscalidad } from '@/lib/queries/fiscalidad'
 import { useNominas, useSeguros } from '@/lib/queries/trabajadores'
@@ -25,6 +26,7 @@ export function ExportPdfModal({
   defaultDesde,
   defaultHasta,
 }: ExportPdfModalProps) {
+  const { t, language } = useTranslation()
   const [desde, setDesde] = useState(defaultDesde || '')
   const [hasta, setHasta] = useState(defaultHasta || '')
 
@@ -96,22 +98,22 @@ export function ExportPdfModal({
 
   const periodText =
     desde || hasta
-      ? `${desde ? formatFechaLabel(desde) : 'inicio'} – ${hasta ? formatFechaLabel(hasta) : 'actual'}`
-      : 'Histórico Completo'
+      ? `${desde ? formatFechaLabel(desde) : t('general.inicio', 'inicio')} – ${hasta ? formatFechaLabel(hasta) : t('general.actual', 'actual')}`
+      : t('pdf.historic_complete', 'Histórico Completo')
 
   return (
-    <Dialog open={open} onClose={onClose} title="Personalizar Exportación PDF" size="lg">
+    <Dialog open={open} onClose={onClose} title={t('pdf.modal_title', 'Personalizar Exportación PDF')} size="lg">
       <div className="space-y-6">
         {/* Step 1: Date Range */}
         <div>
           <h3 className="mb-3 text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
             <Calendar className="h-4 w-4 text-[#00f2fe]" />
-            1. Seleccionar rango de fechas
+            {t('pdf.step1', '1. Seleccionar rango de fechas')}
           </h3>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-2xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
-                Desde
+                {t('general.desde', 'Desde')}
               </label>
               <input
                 type="date"
@@ -122,7 +124,7 @@ export function ExportPdfModal({
             </div>
             <div>
               <label className="block text-2xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
-                Hasta
+                {t('general.hasta', 'Hasta')}
               </label>
               <input
                 type="date"
@@ -138,12 +140,12 @@ export function ExportPdfModal({
         <div>
           <h3 className="mb-3 text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
             <Info className="h-4 w-4 text-[#00f2fe]" />
-            2. Seleccionar secciones a incluir
+            {t('pdf.step2', '2. Seleccionar secciones a incluir')}
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <CheckboxOption
-              label="Facturas Proveedores"
-              description="Incluye resumen e informe de laboratorios"
+              label={t('analisis.facturas_proveedores', 'Facturas Proveedores')}
+              description={t('pdf.facturas_desc', 'Incluye resumen e informe de laboratorios')}
               checked={includeFacturas}
               onChange={setIncludeFacturas}
               colorClass="bg-blue-600 border-blue-500 text-blue-400"
@@ -151,8 +153,8 @@ export function ExportPdfModal({
               activeBgClass="bg-blue-500/5"
             />
             <CheckboxOption
-              label="Abonos Recibidos"
-              description="Incluye devoluciones y balance neto"
+              label={t('pdf.abonos_recibidos', 'Abonos Recibidos')}
+              description={t('pdf.abonos_desc', 'Incluye devoluciones y balance neto')}
               checked={includeAbonos}
               onChange={setIncludeAbonos}
               colorClass="bg-emerald-600 border-emerald-500 text-emerald-400"
@@ -160,8 +162,8 @@ export function ExportPdfModal({
               activeBgClass="bg-emerald-500/5"
             />
             <CheckboxOption
-              label="Impuestos y Fiscalidad"
-              description="Incluye desglose de tasas y liquidaciones"
+              label={t('nav.fiscalidad', 'Impuestos y Fiscalidad')}
+              description={t('pdf.fiscalidad_desc', 'Incluye desglose de tasas y liquidaciones')}
               checked={includeFiscalidad}
               onChange={setIncludeFiscalidad}
               colorClass="bg-teal-600 border-teal-500 text-teal-400"
@@ -169,8 +171,8 @@ export function ExportPdfModal({
               activeBgClass="bg-teal-500/5"
             />
             <CheckboxOption
-              label="Trabajadores y Personal"
-              description="Incluye nóminas y seguros sociales"
+              label={t('pdf.trabajadores_personal', 'Trabajadores y Personal')}
+              description={t('pdf.trabajadores_desc', 'Incluye nóminas y seguros sociales')}
               checked={includeTrabajadores}
               onChange={setIncludeTrabajadores}
               colorClass="bg-orange-600 border-orange-500 text-orange-400"
@@ -187,7 +189,7 @@ export function ExportPdfModal({
             onClick={onClose}
             className="rounded-xl px-4 py-2 text-sm font-semibold text-slate-400 hover:bg-white/5 hover:text-slate-200 transition-colors"
           >
-            Cancelar
+            {t('general.cancelar', 'Cancelar')}
           </button>
           <button
             type="button"
@@ -196,7 +198,7 @@ export function ExportPdfModal({
             className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-blue-500/10 hover:shadow-blue-500/20 hover:from-blue-400 hover:to-indigo-500 transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
           >
             <Download className="h-4 w-4" />
-            {exporting ? 'Generando PDF...' : 'Exportar PDF'}
+            {exporting ? t('pdf.generando', 'Generando PDF...') : t('pdf.exportar', 'Exportar PDF')}
           </button>
         </div>
       </div>
@@ -218,7 +220,7 @@ export function ExportPdfModal({
         <div ref={reportRef}>
           <AnalisisReport
             period={periodText}
-            generatedAt={new Date().toLocaleString('es-ES')}
+            generatedAt={new Date().toLocaleString(language === 'ca' ? 'ca-ES' : 'es-ES')}
             includeFacturas={includeFacturas}
             includeAbonos={includeAbonos}
             includeFiscalidad={includeFiscalidad}

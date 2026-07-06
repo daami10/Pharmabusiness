@@ -8,6 +8,7 @@ import { MonthGroupAccordion } from '@/components/MonthGroupAccordion'
 import type { Fiscal } from '@/types/domain'
 import { fiscalKpis, groupFiscalByMonth } from './lib/fiscalidad-view'
 import { FiscalModal } from './FiscalModal'
+import { useTranslation, translateConcept } from '@/lib/i18n'
 
 const KPI_COLORS = [
   'text-purple-400',
@@ -20,6 +21,7 @@ const KPI_COLORS = [
 ]
 
 export function FiscalidadPage() {
+  const { t } = useTranslation()
   const { data, isLoading, isError, error } = useFiscalidad()
   const deleteFiscal = useDeleteFiscal()
   const location = useLocation()
@@ -41,7 +43,7 @@ export function FiscalidadPage() {
   }, [year])
 
   function onDelete(f: Fiscal) {
-    if (!confirm(`¿Eliminar "${f.concepto}"?`)) return
+    if (!confirm(t('fiscalidad.confirm_delete', '¿Eliminar "{concept}"?').replace('{concept}', translateConcept(f.concepto, t)))) return
     deleteFiscal.mutate(f.id)
   }
 
@@ -49,7 +51,7 @@ export function FiscalidadPage() {
     <tr key={f.id} className="border-b border-white/5 transition-colors hover:bg-white/5">
       <td className="px-6 py-4 text-sm font-semibold text-slate-200">
         <span className="flex items-center gap-2">
-          <span className="truncate">{f.concepto}</span>
+          <span className="truncate">{translateConcept(f.concepto, t)}</span>
           <span
             className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] font-extrabold uppercase ${
               isFuture
@@ -57,7 +59,7 @@ export function FiscalidadPage() {
                 : 'bg-emerald-500/10 text-emerald-400'
             }`}
           >
-            {isFuture ? 'Previsto' : 'Pagado'}
+            {isFuture ? t('fiscalidad.badge.future', 'Previsto') : t('fiscalidad.badge.paid', 'Pagado')}
           </span>
         </span>
       </td>
@@ -96,9 +98,11 @@ export function FiscalidadPage() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-extrabold tracking-tight text-white">
-            Fiscalidad
+            {t('fiscalidad.title', 'Estimación Fiscal')}
           </h1>
-          <p className="mt-1 text-sm text-slate-400">Impuestos y tasas de {year}.</p>
+          <p className="mt-1 text-sm text-slate-400">
+            {t('fiscalidad.subtitle', 'Previsualización en tiempo real de impuestos y declaraciones trimestrales')}
+          </p>
         </div>
         <button
           type="button"
@@ -109,14 +113,14 @@ export function FiscalidadPage() {
           className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-accent-blue px-5 py-2.5 text-sm font-bold text-slate-950 shadow-lg transition-all hover:opacity-90"
         >
           <Plus className="h-4 w-4" strokeWidth={2.5} />
-          Añadir impuesto
+          {t('fiscalidad.button.nuevo', 'Nuevo impuesto')}
         </button>
       </div>
 
       <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         <div className="glass-card rounded-2xl p-5 glow-white">
           <p className="text-3xl font-black text-white">{formatMoney(kpis.total)}</p>
-          <p className="mt-1 text-xs font-semibold text-slate-400">Total fiscal {year}</p>
+          <p className="mt-1 text-xs font-semibold text-slate-400">{t('fiscalidad.kpi.total', 'Total fiscal')} {year}</p>
         </div>
         {kpis.byConcept.map((item, idx) => {
           const colorClass = KPI_COLORS[idx % KPI_COLORS.length]
@@ -140,9 +144,9 @@ export function FiscalidadPage() {
               </p>
               <p
                 className="mt-1 text-xs font-semibold text-slate-400 truncate"
-                title={item.concepto}
+                title={translateConcept(item.concepto, t)}
               >
-                {item.concepto}
+                {translateConcept(item.concepto, t)}
               </p>
             </div>
           )
@@ -150,16 +154,16 @@ export function FiscalidadPage() {
       </div>
 
       {isLoading && (
-        <p className="py-12 text-center text-sm text-slate-400">Cargando fiscalidad…</p>
+        <p className="py-12 text-center text-sm text-slate-400">{t('general.cargando', 'Cargando...')}</p>
       )}
       {isError && (
         <p className="py-12 text-center text-sm text-red-400">
-          Error al cargar: {error instanceof Error ? error.message : 'desconocido'}
+          {t('general.load_error', 'Error al cargar')}: {error instanceof Error ? error.message : 'desconocido'}
         </p>
       )}
       {!isLoading && !isError && !groups.length && (
         <p className="py-12 text-center text-sm text-slate-400">
-          Sin impuestos registrados en {year}.
+          {t('fiscalidad.no_records', 'No hay impuestos registrados en la organización.')}
         </p>
       )}
 

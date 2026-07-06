@@ -16,7 +16,8 @@ const factura: Factura = {
 }
 
 describe('buildFacturasCSV', () => {
-  const csv = buildFacturasCSV([factura])
+  const dummyT = (_key: string, fallback: string) => fallback
+  const csv = buildFacturasCSV([factura], dummyT)
 
   it('empieza con BOM y la directiva sep=', () => {
     expect(csv.charCodeAt(0)).toBe(0xfeff)
@@ -24,7 +25,7 @@ describe('buildFacturasCSV', () => {
   })
   it('incluye la fila de cabeceras', () => {
     expect(csv).toContain(
-      'Fecha,Laboratorio,Tipo,Nº Factura,Importe,FechaVencimiento,Pagada,Notas',
+      'Fecha,Laboratorio,Tipo,Nº Factura,Importe,Fecha Vencimiento,Pagada,Notas',
     )
   })
   it('escapa las comillas dobles y formatea el booleano pagada', () => {

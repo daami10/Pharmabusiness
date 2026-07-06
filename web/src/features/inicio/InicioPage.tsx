@@ -1,6 +1,7 @@
 import { useMemo, useState, useRef } from 'react'
 import type { ChangeEvent, DragEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from '@/lib/i18n'
 import {
   BarChart3,
   FileText,
@@ -23,6 +24,7 @@ import { computeInicioKpis } from './lib/inicio-view'
 import { PrevisionModal } from './PrevisionModal'
 
 export function InicioPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { subscriptionTier } = useAuth()
   const year = useYearStore((s) => s.year)
@@ -59,9 +61,9 @@ export function InicioPage() {
       icon: FileText,
       color: 'text-blue-400',
       bgIcon: 'bg-blue-500/10 hover:bg-blue-500/20',
-      label: 'Facturas',
+      label: t('nav.facturas', 'Facturas'),
       amount: kpis.facturas.total,
-      desc: `${kpis.facturas.count} factura${kpis.facturas.count !== 1 ? 's' : ''} este mes`,
+      desc: `${kpis.facturas.count} ${kpis.facturas.count !== 1 ? t('nav.facturas', 'Facturas').toLowerCase() : t('inicio.factura_singular', 'factura')} ${t('inicio.this_month', 'este mes')}`,
       hoverCls: 'glow-blue glow-blue-hover',
       hoverColor: 'group-hover:text-blue-400',
     },
@@ -70,9 +72,9 @@ export function InicioPage() {
       icon: BarChart3,
       color: 'text-emerald-400',
       bgIcon: 'bg-emerald-500/10 hover:bg-emerald-500/20',
-      label: 'Abonos',
+      label: t('nav.abonos', 'Abonos'),
       amount: kpis.abonos.total,
-      desc: `${kpis.abonos.count} abono${kpis.abonos.count !== 1 ? 's' : ''} recibido${kpis.abonos.count !== 1 ? 's' : ''}`,
+      desc: `${kpis.abonos.count} ${kpis.abonos.count !== 1 ? t('nav.abonos', 'Abonos').toLowerCase() : t('inicio.abono_singular', 'abono')} ${t('inicio.this_month', 'este mes')}`,
       hoverCls: 'glow-emerald glow-emerald-hover',
       hoverColor: 'group-hover:text-emerald-400',
     },
@@ -83,9 +85,9 @@ export function InicioPage() {
             icon: Landmark,
             color: 'text-purple-400',
             bgIcon: 'bg-purple-500/10 hover:bg-purple-500/20',
-            label: 'Fiscalidad',
+            label: t('nav.fiscalidad', 'Fiscalidad'),
             amount: kpis.fiscal.total,
-            desc: `${kpis.fiscal.count} impuesto${kpis.fiscal.count !== 1 ? 's' : ''} / tasa${kpis.fiscal.count !== 1 ? 's' : ''}`,
+            desc: `${kpis.fiscal.count} ${kpis.fiscal.count !== 1 ? t('inicio.impuestos', 'impuestos') : t('inicio.impuesto', 'impuesto')} ${t('inicio.this_month', 'este mes')}`,
             hoverCls: 'glow-purple glow-purple-hover',
             hoverColor: 'group-hover:text-purple-400',
           },
@@ -94,9 +96,9 @@ export function InicioPage() {
             icon: Users,
             color: 'text-teal-400',
             bgIcon: 'bg-teal-500/10 hover:bg-teal-500/20',
-            label: 'Personal',
+            label: t('nav.trabajadores', 'Personal'),
             amount: kpis.trabajadores.total,
-            desc: `${kpis.trabajadores.nominas} nómina${kpis.trabajadores.nominas !== 1 ? 's' : ''} y ${kpis.trabajadores.seguros} seguro${kpis.trabajadores.seguros !== 1 ? 's' : ''}`,
+            desc: `${kpis.trabajadores.nominas} ${kpis.trabajadores.nominas !== 1 ? t('inicio.nominas', 'nóminas') : t('inicio.nomina', 'nómina')} ${t('inicio.this_month', 'este mes')}`,
             hoverCls: 'glow-teal glow-teal-hover',
             hoverColor: 'group-hover:text-teal-400',
           },
@@ -155,9 +157,9 @@ export function InicioPage() {
     >
       <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-white">Inicio</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight text-white">{t('inicio.title', 'Inicio')}</h1>
           <p className="mt-1 text-sm text-slate-400">
-            Resumen general de tu farmacia para{' '}
+            {t('inicio.welcome_sub', 'Resumen general de tu farmacia para')}{' '}
             <span className="font-semibold text-slate-200 capitalize">
               {monthLabel(monthKey)}
             </span>
@@ -170,7 +172,7 @@ export function InicioPage() {
             className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 px-6 py-3 text-sm font-bold text-slate-950 shadow-lg shadow-emerald-500/20 transition-all hover:scale-[1.02]"
           >
             <TrendingUp className="h-4.5 w-4.5 text-slate-950" strokeWidth={2.5} />
-            Previsión de gasto
+            {t('inicio.prevision_gasto', 'Previsión de gasto')}
           </button>
 
           {/* Nuevo Registro Dropdown */}
@@ -184,7 +186,7 @@ export function InicioPage() {
               className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-[#00f2fe] px-6 py-3 text-sm font-bold text-slate-950 shadow-lg shadow-blue-500/20 transition-all hover:scale-[1.02]"
             >
               <Plus className="h-4 w-4 text-slate-950" strokeWidth={2.5} />
-              Nuevo Registro
+              {t('inicio.new_record', 'Nuevo Registro')}
             </button>
             {fastActionOpen && (
               <>
@@ -199,7 +201,7 @@ export function InicioPage() {
                     className="w-full text-left px-4 py-2.5 text-xs hover:text-white hover:bg-white/5 transition-colors flex items-center gap-2"
                   >
                     <Sparkles className="h-4.5 w-4.5 text-[#00f2fe]" />
-                    Escanear Factura con IA
+                    {t('inicio.scan_factura_ia', 'Escanear Factura con IA')}
                   </button>
                   <button
                     type="button"
@@ -207,7 +209,7 @@ export function InicioPage() {
                     className="w-full text-left px-4 py-2.5 text-xs hover:text-white hover:bg-white/5 transition-colors flex items-center gap-2"
                   >
                     <FileText className="h-4.5 w-4.5 text-blue-400" />
-                    Nueva Factura (Manual)
+                    {t('inicio.new_invoice_manual_short', 'Nueva Factura (Manual)')}
                   </button>
                   {subscriptionTier === 'premium' && (
                     <>
@@ -217,7 +219,7 @@ export function InicioPage() {
                         className="w-full text-left px-4 py-2.5 text-xs hover:text-white hover:bg-white/5 transition-colors flex items-center gap-2"
                       >
                         <Users className="h-4.5 w-4.5 text-teal-400" />
-                        Registrar Nómina
+                        {t('inicio.register_nomina', 'Registrar Nómina')}
                       </button>
                       <button
                         type="button"
@@ -225,7 +227,7 @@ export function InicioPage() {
                         className="w-full text-left px-4 py-2.5 text-xs hover:text-white hover:bg-white/5 transition-colors flex items-center gap-2"
                       >
                         <Landmark className="h-4.5 w-4.5 text-orange-400" />
-                        Registrar Seguro Social
+                        {t('inicio.register_seguro', 'Registrar Seguro Social')}
                       </button>
                       <button
                         type="button"
@@ -233,7 +235,7 @@ export function InicioPage() {
                         className="w-full text-left px-4 py-2.5 text-xs hover:text-white hover:bg-white/5 transition-colors flex items-center gap-2"
                       >
                         <Landmark className="h-4.5 w-4.5 text-purple-400" />
-                        Añadir Impuesto / Tasa
+                        {t('inicio.add_tax', 'Añadir Impuesto / Tasa')}
                       </button>
                     </>
                   )}
@@ -283,13 +285,11 @@ export function InicioPage() {
             <div className="flex items-center gap-2 mb-3">
               <span className="w-2 h-6 bg-gradient-to-b from-[#00f2fe] to-blue-500 rounded-full"></span>
               <h3 className="text-lg font-extrabold text-slate-100 tracking-tight">
-                Carga Rápida con IA
+                {t('inicio.scan_title', 'Carga Rápida con IA')}
               </h3>
             </div>
             <p className="text-sm text-slate-400 leading-relaxed mb-4">
-              ¿Tienes una factura a mano? Arrástrala directamente aquí o haz clic abajo
-              para subir una foto. Gemini leerá el importe, el laboratorio y el
-              vencimiento automáticamente por ti.
+              {t('inicio.scan_desc', '¿Tienes una factura a mano? Arrástrala directamente aquí o haz clic abajo para subir una foto. Gemini leerá el importe, el laboratorio y el vencimiento automáticamente por ti.')}
             </p>
           </div>
 
@@ -308,11 +308,11 @@ export function InicioPage() {
             />
             <span className="text-xs text-slate-300 group-hover:text-white transition-colors font-bold">
               {dragging
-                ? 'Suelta la factura para escanearla'
-                : 'Arrastra o haz clic para escanear factura'}
+                ? t('inicio.drop_release', 'Suelta la factura para escanearla')
+                : t('inicio.drop_default', 'Arrastra o haz clic para escanear factura')}
             </span>
             <span className="text-3xs text-slate-500">
-              Soporta imágenes de facturas (Gemini IA)
+              {t('inicio.drop_supported', 'Soporta imágenes de facturas (Gemini IA)')}
             </span>
             <input
               type="file"
@@ -330,7 +330,7 @@ export function InicioPage() {
             <div className="flex items-center gap-2 mb-4">
               <span className="w-2 h-6 bg-gradient-to-b from-purple-500 to-indigo-600 rounded-full"></span>
               <h3 className="text-lg font-extrabold text-slate-100 tracking-tight">
-                Acciones Rápidas
+                {t('inicio.quick_actions', 'Acciones Rápidas')}
               </h3>
             </div>
             <div className="space-y-2.5">
@@ -341,9 +341,9 @@ export function InicioPage() {
               >
                 <span className="flex items-center gap-2.5">
                   <Sparkles className="h-4.5 w-4.5 text-[#00f2fe]" />
-                  Escanear Factura con IA
+                  {t('inicio.scan_factura_ia', 'Escanear Factura con IA')}
                 </span>
-                <ChevronRight className="h-4 w-4 text-slate-500 group-hover:text-white transition-colors" />
+                <ChevronRight className="h-4.5 w-4.5 text-slate-500 group-hover:text-white transition-colors" />
               </button>
 
               <button
@@ -353,9 +353,9 @@ export function InicioPage() {
               >
                 <span className="flex items-center gap-2.5">
                   <FileText className="h-4.5 w-4.5 text-blue-400" />
-                  Nueva Factura Manual
+                  {t('inicio.new_invoice_manual', 'Nueva Factura Manual')}
                 </span>
-                <ChevronRight className="h-4 w-4 text-slate-500 group-hover:text-white transition-colors" />
+                <ChevronRight className="h-4.5 w-4.5 text-slate-500 group-hover:text-white transition-colors" />
               </button>
 
               {subscriptionTier === 'premium' && (
@@ -367,9 +367,9 @@ export function InicioPage() {
                   >
                     <span className="flex items-center gap-2.5">
                       <Users className="h-4.5 w-4.5 text-teal-400" />
-                      Registrar Nómina
+                      {t('inicio.register_nomina', 'Registrar Nómina')}
                     </span>
-                    <ChevronRight className="h-4 w-4 text-slate-500 group-hover:text-white transition-colors" />
+                    <ChevronRight className="h-4.5 w-4.5 text-slate-500 group-hover:text-white transition-colors" />
                   </button>
 
                   <button
@@ -379,9 +379,9 @@ export function InicioPage() {
                   >
                     <span className="flex items-center gap-2.5">
                       <Landmark className="h-4.5 w-4.5 text-orange-400" />
-                      Registrar Seguro Social
+                      {t('inicio.register_seguro', 'Registrar Seguro Social')}
                     </span>
-                    <ChevronRight className="h-4 w-4 text-slate-500 group-hover:text-white transition-colors" />
+                    <ChevronRight className="h-4.5 w-4.5 text-slate-500 group-hover:text-white transition-colors" />
                   </button>
 
                   <button
@@ -391,16 +391,16 @@ export function InicioPage() {
                   >
                     <span className="flex items-center gap-2.5">
                       <Landmark className="h-4.5 w-4.5 text-purple-400" />
-                      Añadir Impuesto / Tasa
+                      {t('inicio.add_tax', 'Añadir Impuesto / Tasa')}
                     </span>
-                    <ChevronRight className="h-4 w-4 text-slate-500 group-hover:text-white transition-colors" />
+                    <ChevronRight className="h-4.5 w-4.5 text-slate-500 group-hover:text-white transition-colors" />
                   </button>
                 </>
               )}
             </div>
           </div>
           <p className="text-3xs text-slate-500 text-center mt-4">
-            Usa el menú superior o estos enlaces para añadir información.
+            {t('inicio.quick_actions_help', 'Usa el menú superior o estos enlaces para añadir información.')}
           </p>
         </div>
       </div>

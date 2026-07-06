@@ -15,6 +15,7 @@ import { isWholesaler } from '@/lib/config/wholesalers'
 import { RankingModal } from './RankingModal'
 import { ExportPdfModal } from './ExportPdfModal'
 import { stackedByWholesaler } from './lib/analisis-view'
+import { useTranslation, translateConcept } from '@/lib/i18n'
 
 const eur = (v: string | number) => `${Number(v).toLocaleString('es-ES')} €`
 
@@ -55,14 +56,16 @@ export type AnalisisCategory =
   | 'Fiscalidad'
   | 'Trabajadores'
 
-function formatMonthLabel(key: string): string {
-  if (!key || key === '0000-00') return 'Sin fecha'
+function formatMonthLabel(key: string, lang: string): string {
+  if (!key || key === '0000-00') return lang === 'ca' ? 'Sense data' : 'Sin fecha'
   const [y, m] = key.split('-')
   const date = new Date(parseInt(y, 10), parseInt(m, 10) - 1, 1)
-  return date.toLocaleDateString('es-ES', { month: 'short', year: '2-digit' })
+  const locale = lang === 'ca' ? 'ca-ES' : 'es-ES'
+  return date.toLocaleDateString(locale, { month: 'short', year: '2-digit' })
 }
 
 export function AnalisisPage() {
+  const { t, language } = useTranslation()
   const year = useYearStore((s) => s.year)
   const yearStr = String(year)
   const facturas = useFacturas()
@@ -180,7 +183,7 @@ export function AnalisisPage() {
       return {
         total: fiscalStats.total,
         count: fiscalStats.count,
-        top: topConcept,
+        top: topConcept === '—' ? '—' : translateConcept(topConcept, t),
         avg,
       }
     }
@@ -188,7 +191,7 @@ export function AnalisisPage() {
     if (category === 'Trabajadores') {
       const segTotal = trabStats.seg.reduce((sum, s) => sum + s.importe, 0)
       const nomTotal = trabStats.nom.reduce((sum, n) => sum + n.importe, 0)
-      const top = segTotal >= nomTotal ? 'Seg. Sociales' : 'Nóminas'
+      const top = segTotal >= nomTotal ? t('trabajadores.seguros_sociales', 'Seguros Sociales') : t('fiscalidad.concept.nominas', 'Nóminas')
       const avg = trabStats.count ? trabStats.total / trabStats.count : 0
       return {
         total: trabStats.total,
@@ -234,7 +237,7 @@ export function AnalisisPage() {
             : 0
           : avg,
     }
-  }, [category, facturasOnly, fiscalStats, trabStats, wholesalers])
+  }, [category, facturasOnly, fiscalStats, trabStats, wholesalers, t])
 
   // Chart calculation data
   const chartsData = useMemo(() => {
@@ -265,13 +268,13 @@ export function AnalisisPage() {
       ]
 
       return {
-        labsLabels: bEntries.map(([l]) => l),
+        labsLabels: bEntries.map(([l]) => translateConcept(l, t)),
         labsData: bEntries.map(([, v]) => v),
         labsColor: 'rgba(16,185,129,0.8)' as string | string[],
         donutColors: palette(bEntries.length),
-        monthlyLabels: mEntries.map(([k]) => formatMonthLabel(k)),
+        monthlyLabels: mEntries.map(([k]) => formatMonthLabel(k, language)),
         monthlyDatasets,
-        byLab: bEntries.map(([lab, amount]) => ({ lab, amount })),
+        byLab: bEntries.map(([lab, amount]) => ({ lab: translateConcept(lab, t), amount })),
       }
     }
 
@@ -311,13 +314,13 @@ export function AnalisisPage() {
       ]
 
       return {
-        labsLabels: bEntries.map(([l]) => l),
+        labsLabels: bEntries.map(([l]) => l === 'Seg. Sociales' ? t('trabajadores.seguros_sociales', 'Seguros Sociales') : l),
         labsData: bEntries.map(([, v]) => v),
         labsColor: 'rgba(249,115,22,0.8)' as string | string[],
         donutColors: palette(bEntries.length),
-        monthlyLabels: mEntries.map(([k]) => formatMonthLabel(k)),
+        monthlyLabels: mEntries.map(([k]) => formatMonthLabel(k, language)),
         monthlyDatasets,
-        byLab: bEntries.map(([lab, amount]) => ({ lab, amount })),
+        byLab: bEntries.map(([lab, amount]) => ({ lab: lab === 'Seg. Sociales' ? t('trabajadores.seguros_sociales', 'Seguros Sociales') : lab, amount })),
       }
     }
 
@@ -400,7 +403,7 @@ export function AnalisisPage() {
         labsData: bEntries.slice(0, 15).map(([, v]) => v),
         labsColor: labsColors,
         donutColors,
-        monthlyLabels: sortedMonths.map((k) => formatMonthLabel(k)),
+        monthlyLabels: sortedMonths.map((k) => formatMonthLabel(k, language)),
         monthlyDatasets,
         byLab: bEntries.map(([lab, amount]) => ({ lab, amount })),
       }
@@ -444,11 +447,11 @@ export function AnalisisPage() {
       labsData: bEntries.slice(0, 15).map(([, v]) => v),
       labsColor,
       donutColors: palette(Math.min(bEntries.length, 10)),
-      monthlyLabels: mEntries.map(([k]) => formatMonthLabel(k)),
+      monthlyLabels: mEntries.map(([k]) => formatMonthLabel(k, language)),
       monthlyDatasets,
       byLab: bEntries.map(([lab, amount]) => ({ lab, amount })),
     }
-  }, [category, facturasOnly, fiscalStats, trabStats, wholesalers])
+  }, [category, facturasOnly, fiscalStats, trabStats, wholesalers, t, language])
 
   // Evolución mensual apilada por mayorista (solo categoría "Mayorista").
   const stackedData = useMemo(
@@ -527,12 +530,12 @@ export function AnalisisPage() {
     abonosOnly.length > 0 && category !== 'Fiscalidad' && category !== 'Trabajadores'
 
   const categoriesList: { value: AnalisisCategory; label: string }[] = [
-    { value: '', label: 'Total' },
-    { value: 'Laboratorio', label: 'Laboratorios' },
-    { value: 'Mayorista', label: wholesalers.length > 1 ? 'Mayoristas' : 'Mayorista' },
-    { value: 'Otro', label: 'Otros' },
-    { value: 'Fiscalidad', label: 'Fiscalidad' },
-    { value: 'Trabajadores', label: 'Trabajadores' },
+    { value: '', label: t('general.total', 'Total') },
+    { value: 'Laboratorio', label: t('facturas.tab.laboratorios', 'Laboratorios') },
+    { value: 'Mayorista', label: wholesalers.length > 1 ? t('settings.tab.wholesalers_plural', 'Mayoristas') : t('settings.tab.wholesalers_singular', 'Mayorista') },
+    { value: 'Otro', label: t('general.otros', 'Otros') },
+    { value: 'Fiscalidad', label: t('nav.fiscalidad', 'Fiscalidad') },
+    { value: 'Trabajadores', label: t('nav.trabajadores', 'Trabajadores') },
   ]
 
   const refetchAll = () => {
@@ -548,10 +551,10 @@ export function AnalisisPage() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-extrabold tracking-tight text-white">
-            Análisis de Inversiones
+            {t('analisis.title', 'Análisis de Inversiones')}
           </h1>
           <p className="mt-1 text-sm text-slate-400">
-            Gasto acumulado por laboratorio y evolución temporal
+            {t('analisis.subtitle', 'Gasto acumulado por laboratorio y evolución temporal')}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -571,7 +574,7 @@ export function AnalisisPage() {
           >
             <span className="w-1.5 h-1.5 rounded-full bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.8)] shrink-0 animate-pulse"></span>
             <RefreshCw className="h-4 w-4 text-purple-400" />
-            Actualizar
+            {t('general.actualizar', 'Actualizar')}
           </button>
         </div>
       </div>
@@ -580,7 +583,7 @@ export function AnalisisPage() {
       <div className="mt-6 flex flex-wrap items-center gap-3 bg-slate-900/30 border border-white/5 rounded-2xl px-5 py-4 shadow-2xl">
         <Landmark className="w-4 h-4 text-[#00f2fe] shrink-0" />
         <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-          Rango:
+          {t('general.rango', 'Rango')}:
         </span>
         <input
           type="date"
@@ -622,7 +625,7 @@ export function AnalisisPage() {
       <div className="mt-6 grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="glass-card rounded-2xl p-5 shadow-2xl border border-white/5">
           <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-            Total Invertido
+            {t('analisis.kpi.total', 'Total Invertido')}
           </p>
           <p className="text-2xl font-black text-white leading-none">
             {formatMoney(topKpis.total)}
@@ -631,10 +634,10 @@ export function AnalisisPage() {
         <div className="glass-card rounded-2xl p-5 shadow-2xl border border-white/5">
           <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
             {category === 'Fiscalidad'
-              ? 'Nº Pagos'
+              ? t('analisis.kpi.num_pagos', 'Nº Pagos')
               : category === 'Trabajadores'
-                ? 'Nº Entradas'
-                : 'Nº Facturas'}
+                ? t('analisis.kpi.num_entradas', 'Nº Entradas')
+                : t('analisis.kpi.num_facturas', 'Nº Facturas')}
           </p>
           <p className="text-2xl font-black text-white leading-none">{topKpis.count}</p>
         </div>
@@ -658,10 +661,10 @@ export function AnalisisPage() {
         >
           <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
             {category === 'Fiscalidad'
-              ? 'Mayor Impuesto'
+              ? t('analisis.kpi.max_impuesto', 'Mayor Impuesto')
               : category === 'Trabajadores'
-                ? 'Mayor Gasto'
-                : 'Top Proveedor'}
+                ? t('analisis.kpi.max_gasto', 'Mayor Gasto')
+                : t('analisis.kpi.top_proveedor', 'Top Proveedor')}
           </p>
           <p className="text-2xl font-black text-white leading-none truncate">
             {topKpis.top}
@@ -670,10 +673,10 @@ export function AnalisisPage() {
         <div className="glass-card rounded-2xl p-5 shadow-2xl border border-white/5">
           <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
             {category === 'Fiscalidad'
-              ? 'Promedio / Pago'
+              ? t('analisis.kpi.avg_pago', 'Promedio / Pago')
               : category === 'Trabajadores'
-                ? 'Promedio / Entrada'
-                : 'Promedio / Factura'}
+                ? t('analisis.kpi.avg_entrada', 'Promedio / Entrada')
+                : t('analisis.kpi.promedio', 'Promedio / Factura')}
           </p>
           <p className="text-2xl font-black text-white leading-none">
             {formatMoney(topKpis.avg)}
@@ -684,7 +687,7 @@ export function AnalisisPage() {
       {/* Selector Ver gráficas de: */}
       <div className="mt-6 flex items-center gap-3 flex-wrap">
         <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-          Ver gráficas de:
+          {t('analisis.show_charts_for', 'Ver gráficas de:')}
         </span>
         {categoriesList.map((c) => (
           <button
@@ -716,14 +719,14 @@ export function AnalisisPage() {
           <div className="flex items-center gap-2 mb-2">
             <span className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_6px_rgba(59,130,246,0.5)]"></span>
             <p className="text-xs font-bold text-blue-400 uppercase tracking-wider">
-              Laboratorios
+              {t('facturas.tab.laboratorios', 'Laboratorios')}
             </p>
           </div>
           <p className="text-2xl font-black text-blue-400 leading-none">
             {formatMoney(labStats.total)}
           </p>
           <p className="text-2xs text-slate-500 font-bold uppercase tracking-wider mt-1.5">
-            {labStats.count} factura{labStats.count !== 1 ? 's' : ''}
+            {labStats.count} {labStats.count !== 1 ? t('nav.facturas', 'facturas').toLowerCase() : t('inicio.factura_singular', 'factura')}
           </p>
         </div>
 
@@ -739,14 +742,14 @@ export function AnalisisPage() {
           <div className="flex items-center gap-2 mb-2">
             <span className="w-2 h-2 rounded-full bg-purple-500 shadow-[0_0_6px_rgba(168,85,247,0.5)]"></span>
             <p className="text-xs font-bold text-purple-400 uppercase tracking-wider">
-              {wholesalers.length > 1 ? 'Mayoristas' : 'Mayorista'}
+              {wholesalers.length > 1 ? t('settings.tab.wholesalers_plural', 'Mayoristas') : t('settings.tab.wholesalers_singular', 'Mayorista')}
             </p>
           </div>
           <p className="text-2xl font-black text-purple-400 leading-none">
             {formatMoney(mayorStats.total)}
           </p>
           <p className="text-2xs text-slate-500 font-bold uppercase tracking-wider mt-1.5">
-            {mayorStats.count} factura{mayorStats.count !== 1 ? 's' : ''}
+            {mayorStats.count} {mayorStats.count !== 1 ? t('nav.facturas', 'facturas').toLowerCase() : t('inicio.factura_singular', 'factura')}
           </p>
         </div>
 
@@ -762,14 +765,14 @@ export function AnalisisPage() {
           <div className="flex items-center gap-2 mb-2">
             <span className="w-2 h-2 rounded-full bg-slate-400 shadow-[0_0_6px_rgba(156,163,175,0.5)]"></span>
             <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-              Otros
+              {t('general.otros', 'Otros')}
             </p>
           </div>
           <p className="text-2xl font-black text-slate-200 leading-none">
             {formatMoney(otroStats.total)}
           </p>
           <p className="text-2xs text-slate-500 font-bold uppercase tracking-wider mt-1.5">
-            {otroStats.count} factura{otroStats.count !== 1 ? 's' : ''}
+            {otroStats.count} {otroStats.count !== 1 ? t('nav.facturas', 'facturas').toLowerCase() : t('inicio.factura_singular', 'factura')}
           </p>
         </div>
 
@@ -785,14 +788,14 @@ export function AnalisisPage() {
           <div className="flex items-center gap-2 mb-2">
             <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.5)]"></span>
             <p className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
-              Fiscalidad
+              {t('nav.fiscalidad', 'Fiscalidad')}
             </p>
           </div>
           <p className="text-2xl font-black text-emerald-400 leading-none">
             {formatMoney(fiscalStats.total)}
           </p>
           <p className="text-2xs text-slate-500 font-bold uppercase tracking-wider mt-1.5">
-            {fiscalStats.count} pago{fiscalStats.count !== 1 ? 's' : ''}
+            {fiscalStats.count} {fiscalStats.count !== 1 ? t('analisis.kpi.num_pagos', 'pagos').split(' ')[1].toLowerCase() : t('analisis.kpi.pago_singular', 'pago')}
           </p>
         </div>
 
@@ -808,14 +811,14 @@ export function AnalisisPage() {
           <div className="flex items-center gap-2 mb-2">
             <span className="w-2 h-2 rounded-full bg-orange-500 shadow-[0_0_6px_rgba(249,115,22,0.5)]"></span>
             <p className="text-xs font-bold text-orange-400 uppercase tracking-wider">
-              Trabajadores
+              {t('nav.trabajadores', 'Trabajadores')}
             </p>
           </div>
           <p className="text-2xl font-black text-orange-400 leading-none">
             {formatMoney(trabStats.total)}
           </p>
           <p className="text-2xs text-slate-500 font-bold uppercase tracking-wider mt-1.5">
-            {trabStats.count} entrada{trabStats.count !== 1 ? 's' : ''}
+            {trabStats.count} {trabStats.count !== 1 ? t('analisis.kpi.num_entradas', 'entradas').split(' ')[1].toLowerCase() : t('analisis.kpi.entrada_singular', 'entrada')}
           </p>
         </div>
       </div>
@@ -831,12 +834,12 @@ export function AnalisisPage() {
           <div className="glass-card rounded-2xl p-6 glow-blue">
             <h3 className="text-base font-extrabold text-white mb-4 flex items-center gap-2">
               <Landmark className="w-5 h-5 text-[#00f2fe]" />
-              Resumen de Gastos Consolidado del Rango
+              {t('analisis.consolidated_summary', 'Resumen de Gastos Consolidado del Rango')}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="glass-card p-4 rounded-xl glow-white">
                 <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">
-                  Facturas Proveedores
+                  {t('analisis.facturas_proveedores', 'Facturas Proveedores')}
                 </p>
                 <p className="text-lg font-black text-white">
                   {formatMoney(totalFacturasCons)}
@@ -844,7 +847,7 @@ export function AnalisisPage() {
               </div>
               <div className="glass-card p-4 rounded-xl glow-emerald">
                 <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">
-                  Impuestos y Tasas
+                  {t('analisis.impuestos_tasas', 'Impuestos y Tasas')}
                 </p>
                 <p className="text-lg font-black text-emerald-400">
                   {formatMoney(totalFiscalCons)}
@@ -852,7 +855,7 @@ export function AnalisisPage() {
               </div>
               <div className="glass-card p-4 rounded-xl glow-orange">
                 <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">
-                  Trabajadores y Nóminas
+                  {t('analisis.trabajadores_nominas', 'Trabajadores y Nóminas')}
                 </p>
                 <p className="text-lg font-black text-orange-400">
                   {formatMoney(totalTrabajadoresCons)}
@@ -860,7 +863,7 @@ export function AnalisisPage() {
               </div>
               <div className="glass-card p-4 rounded-xl glow-blue">
                 <p className="text-xs text-blue-300 font-bold uppercase tracking-wider mb-1">
-                  Gastos Totales Rango
+                  {t('analisis.gastos_totales_rango', 'Gastos Totales Rango')}
                 </p>
                 <p className="text-lg font-black text-[#00f2fe]">
                   {formatMoney(totalGastosConsolidado)}
@@ -875,10 +878,10 @@ export function AnalisisPage() {
               <ChartCard
                 title={
                   category === 'Fiscalidad'
-                    ? 'Gasto por Concepto'
+                    ? t('analisis.gasto_concepto', 'Gasto por Concepto')
                     : category === 'Trabajadores'
-                      ? 'Desglose de Personal'
-                      : 'Gasto por Laboratorio'
+                      ? t('analisis.desglose_personal', 'Desglose de Personal')
+                      : t('analisis.gasto_laboratorio', 'Gasto por Laboratorio')
                 }
               >
                 <Bar
@@ -899,7 +902,7 @@ export function AnalisisPage() {
               </ChartCard>
             </div>
             <div className="lg:col-span-2">
-              <ChartCard title="Distribución del Gasto">
+              <ChartCard title={t('analisis.charts.distribucion', 'Distribución de Gasto')}>
                 <Doughnut
                   key={`donut-${category}`}
                   data={{

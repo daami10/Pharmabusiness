@@ -2,6 +2,7 @@ import { NavLink } from 'react-router-dom'
 import { Lock, LogOut, Settings, ShieldCheck } from 'lucide-react'
 import { useAuth } from '@/features/auth/AuthProvider'
 import { NAV_ITEMS } from './nav'
+import { useTranslation } from '@/lib/i18n'
 
 export function Sidebar({
   open,
@@ -14,6 +15,7 @@ export function Sidebar({
   onSettings: () => void
   onPrivacy: () => void
 }) {
+  const { t } = useTranslation()
   const { signOut, subscriptionTier, userRole, isSuperAdmin } = useAuth()
   const secondaryCls =
     'flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-400 transition-all hover:bg-white/5 hover:text-white'
@@ -98,7 +100,7 @@ export function Sidebar({
                   >
                     <div className="flex items-center gap-3.5">
                       <Icon className="h-5 w-5" />
-                      {label}
+                      {t('nav.' + (to === '/' ? 'inicio' : to.slice(1)), label)}
                     </div>
                     {isLocked && (
                       <Lock className="h-3.5 w-3.5 text-[#00f2fe]/80 shrink-0" />
@@ -122,7 +124,7 @@ export function Sidebar({
               >
                 <div className="flex items-center gap-3.5 text-[#00f2fe] font-black">
                   <ShieldCheck className="h-5 w-5 text-[#00f2fe]" />
-                  Panel Admin
+                  {t('nav.admin', 'Panel Admin')}
                 </div>
               </NavLink>
             )}
@@ -132,11 +134,11 @@ export function Sidebar({
         <div className="space-y-1.5">
           <button type="button" onClick={onSettings} className={secondaryCls}>
             <Settings className="h-5 w-5" />
-            Configuración
+            {t('nav.configuracion', 'Configuración')}
           </button>
           <button type="button" onClick={onPrivacy} className={secondaryCls}>
             <ShieldCheck className="h-5 w-5" />
-            Privacidad
+            {t('nav.privacidad', 'Privacidad')}
           </button>
           <button
             type="button"
@@ -144,7 +146,7 @@ export function Sidebar({
             className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-500 transition-all hover:bg-red-500/10 hover:text-red-400"
           >
             <LogOut className="h-5 w-5" />
-            Salir
+            {t('nav.salir', 'Salir')}
           </button>
         </div>
       </aside>
