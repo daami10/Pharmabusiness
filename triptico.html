@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Tríptico Comercial GFarma - Moderno & Premium</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    * {
+      box-sizing: border-box;
+    }
+    
+    @page {
+      size: A4 landscape;
+      margin: 0;
+    }
+    
+    body {
+      font-family: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #050a12;
+      color: #f1f5f9;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    
+    .page {
+      width: 297mm;
+      height: 210mm;
+      page-break-after: always;
+      background: radial-gradient(circle at 50% 50%, #0d1e36 0%, #050a12 100%);
+      display: flex;
+      padding: 8mm;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    /* Neon background glow accents */
+    .page::before {
+      content: '';
+      position: absolute;
+      top: -20%;
+      left: -20%;
+      width: 60%;
+      height: 60%;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0, 242, 254, 0.08) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 1;
+    }
+    
+    .page::after {
+      content: '';
+      position: absolute;
+      bottom: -20%;
+      right: -20%;
+      width: 60%;
+      height: 60%;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.06) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 1;
+    }
+    
+    .panel {
+      width: 33.333%;
+      height: 100%;
+      padding: 4mm 6mm;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      z-index: 10;
+    }
+    
+    /* Plegadores sutiles para impresión */
+    .panel:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 5%;
+      height: 90%;
+      width: 1px;
+      background: linear-gradient(to bottom, transparent, rgba(0, 242, 254, 0.15), transparent);
+    }
+    
+    .title {
+      font-size: 21px;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: -0.02em;
+      margin: 0 0 6px 0;
+      line-height: 1.2;
+    }
+    
+    .subtitle {
+      font-size: 9.5px;
+      font-weight: 700;
+      color: #00f2fe;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 4px;
+      display: inline-block;
+    }
+    
+    .description {
+      font-size: 11px;
+      color: #94a3b8;
+      line-height: 1.45;
+      margin-bottom: 12px;
+    }
+    
+    /* Portada (Panel 3 - Page 1) */
+    .cover {
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 10mm;
+      position: relative;
+    }
+    
+    .cover .logo-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+    }
+    
+    .cover .logo {
+      width: 55px;
+      height: 55px;
+    }
+    
+    .cover h1 {
+      font-size: 34px;
+      font-weight: 900;
+      margin: 5px 0 0 0;
+      letter-spacing: -0.04em;
+      color: #ffffff;
+    }
+    
+    .cover h1 span {
+      background: linear-gradient(to right, #10b981, #00f2fe);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .cover .tagline {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #00f2fe;
+      margin: 10px 0;
+      line-height: 1.35;
+      text-shadow: 0 0 15px rgba(0, 242, 254, 0.3);
+    }
+    
+    .cover .desc {
+      font-size: 10.5px;
+      color: #94a3b8;
+      line-height: 1.5;
+      max-width: 90%;
+    }
+    
+    .cover .badge-trial {
+      margin-top: 15px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 4px 10px;
+      border-radius: 9999px;
+      font-size: 9px;
+      font-weight: bold;
+      color: #10b981;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    /* Contraportada (Panel 2 - Page 1) */
+    .back {
+      text-align: center;
+      justify-content: center;
+    }
+    
+    .back .cta-box {
+      border: 1px solid rgba(0, 242, 254, 0.25);
+      padding: 16px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(13, 27, 50, 0.8) 0%, rgba(8, 14, 25, 0.9) 100%);
+      box-shadow: 0 0 25px rgba(0, 242, 254, 0.08), inset 0 0 15px rgba(255, 255, 255, 0.02);
+      margin-top: 15px;
+    }
+    
+    .back .code {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 15px;
+      font-weight: 900;
+      color: #050a12;
+      background: linear-gradient(90deg, #10b981, #00f2fe);
+      padding: 5px 12px;
+      border-radius: 6px;
+      display: inline-block;
+      margin: 8px 0;
+      letter-spacing: 0.05em;
+      box-shadow: 0 0 15px rgba(0, 242, 254, 0.3);
+    }
+    
+    /* Solapa de Introducción (Panel 1 - Page 1) */
+    .intro {
+      justify-content: flex-start;
+    }
+    
+    /* Tarjetas de Módulo (Glassmorphism con Neón) */
+    .glass-card {
+      background: linear-gradient(135deg, rgba(13, 27, 50, 0.7) 0%, rgba(8, 14, 25, 0.8) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+      position: relative;
+    }
+    
+    .glass-card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 15%;
+      height: 70%;
+      width: 3px;
+      border-radius: 0 4px 4px 0;
+    }
+    
+    .glass-card.blue::before { background-color: #00f2fe; }
+    .glass-card.emerald::before { background-color: #10b981; }
+    .glass-card.purple::before { background-color: #a855f7; }
+    .glass-card.teal::before { background-color: #14b8a6; }
+    
+    .glass-card h3 {
+      font-size: 11px;
+      font-weight: 700;
+      color: #ffffff;
+      margin: 0 0 4px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .glass-card h3 span.badge {
+      font-size: 8px;
+      padding: 1px 4px;
+      background: rgba(168, 85, 247, 0.2);
+      border: 1px solid rgba(168, 85, 247, 0.4);
+      color: #d8b4fe;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+    
+    .glass-card p {
+      font-size: 9.5px;
+      color: #94a3b8;
+      margin: 0;
+      line-height: 1.35;
+    }
+    
+    /* Mockups de Navegador de la App */
+    .browser-mockup {
+      width: 100%;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      overflow: hidden;
+      background-color: #090d16;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+      margin-bottom: 8px;
+    }
+    
+    .browser-header {
+      background-color: rgba(13, 27, 50, 0.5);
+      border-b: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 4px 8px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .browser-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background-color: #ef4444;
+    }
+    .browser-dot:nth-child(2) { background-color: #eab308; }
+    .browser-dot:nth-child(3) { background-color: #22c55e; }
+    
+    .browser-address {
+      flex: 1;
+      background-color: rgba(5, 10, 18, 0.6);
+      border-radius: 3px;
+      font-size: 7px;
+      color: #64748b;
+      padding: 2px 8px;
+      margin-left: 10px;
+      font-family: monospace;
+    }
+    
+    .app-screenshot {
+      width: 100%;
+      height: 48mm;
+      object-fit: cover;
+      object-position: top center;
+      display: block;
+      border: none;
+      filter: brightness(0.9) contrast(1.05);
+    }
+    
+    .footer-note {
+      font-size: 8.5px;
+      color: #64748b;
+      text-align: center;
+      margin-top: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- PÁGINA 1: CARA EXTERIOR (Plegado. De izq a der: Solapa Interna, Contraportada, Portada) -->
+  <div class="page">
+    
+    <!-- Panel 1: Solapa de Introducción / Propuesta de Valor -->
+    <div class="panel intro">
+      <div>
+        <span class="subtitle">Propuesta de Valor</span>
+        <h2 class="title">El Control que tu Farmacia Necesita</h2>
+        <p class="description">
+          Las oficinas de farmacia operan con márgenes comerciales cada vez más estrechos y una sobrecarga administrativa inmensa. GFarma automatiza y audita tu información financiera para proteger tu dinero.
+        </p>
+        
+        <div style="margin-top: 10px;">
+          <div class="glass-card blue">
+            <h3>Ahorro de Tiempo de Gestión</h3>
+            <p>Automatiza el procesamiento y picado manual de facturas de laboratorios y cooperativas. Ahorra hasta 15 horas de papeleo a la semana.</p>
+          </div>
+          
+          <div class="glass-card emerald">
+            <h3>Recuperación de Faltas y Abonos</h3>
+            <p>Hasta un 8% del capital correspondiente a devoluciones comerciales o faltas se queda sin abonar por descuidos. GFarma audita cada abono pendiente.</p>
+          </div>
+          
+          <div class="glass-card purple">
+            <h3>Negociación Basada en Datos</h3>
+            <p>Compara el rendimiento y cuota de distribución real de tus proveedores y cooperativas con reportes automáticos listos para negociar.</p>
+          </div>
+        </div>
+      </div>
+      <div class="footer-note">GFarma — Software de Control Financiero Inteligente</div>
+    </div>
+    
+    <!-- Panel 2: Contraportada (Centro) -->
+    <div class="panel back">
+      <div>
+        <h2 class="title" style="font-size: 23px;">Comienza Hoy Mismo</h2>
+        <p class="description" style="font-size: 11px; margin-bottom: 12px; padding: 0 10px;">
+          GFarma se ejecuta en la nube de forma segura. Accede sin instalar programas en tu equipo local y configúralo en menos de 5 minutos.
+        </p>
+        
+        <div class="cta-box">
+          <p style="font-size: 9px; font-weight: bold; margin: 0 0 3px 0; color: #94a3b8; tracking-wider: 0.1em; text-transform: uppercase;">Acceso Exclusivo</p>
+          <p style="font-size: 14px; font-weight: 800; margin: 0; color: #ffffff; letter-spacing: -0.01em;">www.gfarma.app</p>
+          <p style="font-size: 9px; color: #64748b; margin: 8px 0 0 0;">Introduce tu código promocional:</p>
+          <span class="code">GFARMA2026</span>
+          <p style="font-size: 8.5px; color: #94a3b8; margin: 8px 0 0 0; line-height: 1.3;">14 días de prueba con acceso **PREMIUM** completo. Sin compromisos.</p>
+        </div>
+      </div>
+      <div class="footer-note" style="margin-top: 30px;">Contacto de soporte: soporte@gfarma.app</div>
+    </div>
+    
+    <!-- Panel 3: Portada (Derecha) -->
+    <div class="panel cover">
+      <div class="logo-container">
+        <svg class="logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <path d="M 76 30 A 33 33 0 1 0 76 70 L 76 50 H 65" stroke="url(#logo-grad-cover)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <path d="M 45 37 H 55 V 45 H 63 V 55 H 55 V 63 H 45 V 55 H 37 V 45 H 45 Z" stroke="url(#logo-grad-cover)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <linearGradient id="logo-grad-cover" x1="0%" y1="100%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#10b981" />
+            <stop offset="100%" stop-color="#00f2fe" />
+          </linearGradient>
+        </svg>
+      </div>
+      <h1><span>G</span>Farma</h1>
+      <p class="tagline">Control Financiero & Auditoría de Compras en tu Farmacia</p>
+      <p class="desc">
+        Digitaliza facturas con Inteligencia Artificial, audita abonos pendientes de laboratorios/mayoristas, prevé tu fiscalidad y gestiona tu equipo en un único entorno digital de última generación.
+      </p>
+      <div class="badge-trial">Incluye 14 días de prueba gratis</div>
+    </div>
+    
+  </div>
+
+  <!-- PÁGINA 2: CARA INTERIOR (Detalles Módulos. De izq a der: Panel 4, Panel 5, Panel 6) -->
+  <div class="page">
+    
+    <!-- Panel 4: Inicio y Facturas -->
+    <div class="panel">
+      <div>
+        <span class="subtitle">Módulos 1 & 2</span>
+        <h2 class="title">KPIs & Facturación IA</h2>
+        <p class="description">
+          Visualiza el estado de tu farmacia en tiempo real y digitaliza documentos sin teclear datos.
+        </p>
+        
+        <!-- Mockup Inicio -->
+        <div class="browser-mockup">
+          <div class="browser-header">
+            <div class="browser-dot"></div><div class="browser-dot"></div><div class="browser-dot"></div>
+            <div class="browser-address">gfarma.app/inicio</div>
+          </div>
+          <img class="app-screenshot" src="file:///C:/Users/Usuario/Desktop/GFarma/screenshots/inicio.png" alt="Pantalla Inicio">
+        </div>
+        <div class="glass-card blue" style="padding: 6px 10px; margin-bottom: 8px;">
+          <h3 style="font-size: 10px; margin-bottom: 2px;">1. Panel de Control (Inicio)</h3>
+          <p>Tu cuadro de mando unificado. Muestra de un vistazo compras netas mensuales, el balance y los vencimientos de pago del mes activo.</p>
+        </div>
+
+        <!-- Mockup Facturas -->
+        <div class="browser-mockup">
+          <div class="browser-header">
+            <div class="browser-dot"></div><div class="browser-dot"></div><div class="browser-dot"></div>
+            <div class="browser-address">gfarma.app/facturas</div>
+          </div>
+          <img class="app-screenshot" src="file:///C:/Users/Usuario/Desktop/GFarma/screenshots/facturas.png" alt="Pantalla Facturas">
+        </div>
+        <div class="glass-card blue" style="padding: 6px 10px; margin-bottom: 0;">
+          <h3 style="font-size: 10px; margin-bottom: 2px;">2. Digitalización de Facturas con IA</h3>
+          <p>Arrastra tus facturas PDF o fotos de laboratorios. La IA lee y autorrellena proveedor, importes y vencimientos sin intervención humana.</p>
+        </div>
+      </div>
+      <div class="footer-note">GFarma — Digitalización Avanzada</div>
+    </div>
+    
+    <!-- Panel 5: Análisis y Abonos -->
+    <div class="panel">
+      <div>
+        <span class="subtitle">Módulos 3 & 4</span>
+        <h2 class="title">Análisis & Abonos</h2>
+        <p class="description">
+          Audita a tus laboratorios/mayoristas y protege tu tesorería contra pérdidas de devoluciones pendientes.
+        </p>
+        
+        <!-- Mockup Análisis -->
+        <div class="browser-mockup">
+          <div class="browser-header">
+            <div class="browser-dot"></div><div class="browser-dot"></div><div class="browser-dot"></div>
+            <div class="browser-address">gfarma.app/analisis</div>
+          </div>
+          <img class="app-screenshot" src="file:///C:/Users/Usuario/Desktop/GFarma/screenshots/analisis.png" alt="Pantalla Análisis">
+        </div>
+        <div class="glass-card emerald" style="padding: 6px 10px; margin-bottom: 8px;">
+          <h3 style="font-size: 10px; margin-bottom: 2px;">3. Gráficas de Análisis Comercial <span class="badge">Premium</span></h3>
+          <p>Gráficos apilados de compras por laboratorio/mayorista. Evalúa cuotas de distribución, evolución mensual de gasto y exporta informes A4 para negociar.</p>
+        </div>
+
+        <!-- Mockup Abonos -->
+        <div class="browser-mockup">
+          <div class="browser-header">
+            <div class="browser-dot"></div><div class="browser-dot"></div><div class="browser-dot"></div>
+            <div class="browser-address">gfarma.app/abonos</div>
+          </div>
+          <img class="app-screenshot" src="file:///C:/Users/Usuario/Desktop/GFarma/screenshots/abonos.png" alt="Pantalla Abonos">
+        </div>
+        <div class="glass-card emerald" style="padding: 6px 10px; margin-bottom: 0;">
+          <h3 style="font-size: 10px; margin-bottom: 2px;">4. Control Activo de Abonos</h3>
+          <p>Audita devoluciones y abonos pendientes de recibir de cooperativas. Evita la pérdida del dinero que te deben por fallos de laboratorios/mayoristas.</p>
+        </div>
+      </div>
+      <div class="footer-note">GFarma — Control e Inteligencia de Compras</div>
+    </div>
+    
+    <!-- Panel 6: Fiscalidad y Trabajadores -->
+    <div class="panel">
+      <div>
+        <span class="subtitle">Módulos 5 & 6</span>
+        <h2 class="title">Fiscalidad & Personal</h2>
+        <p class="description">
+          Estima tus impuestos liquidados trimestralmente y unifica la gestión laboral del equipo.
+        </p>
+        
+        <!-- Mockup Fiscalidad -->
+        <div class="browser-mockup">
+          <div class="browser-header">
+            <div class="browser-dot"></div><div class="browser-dot"></div><div class="browser-dot"></div>
+            <div class="browser-address">gfarma.app/fiscalidad</div>
+          </div>
+          <img class="app-screenshot" src="file:///C:/Users/Usuario/Desktop/GFarma/screenshots/fiscalidad.png" alt="Pantalla Fiscalidad">
+        </div>
+        <div class="glass-card purple" style="padding: 6px 10px; margin-bottom: 8px;">
+          <h3 style="font-size: 10px; margin-bottom: 2px;">5. Planificación Fiscal <span class="badge">Premium</span></h3>
+          <p>Desglose mensual de impuestos. Anticípate al cierre trimestral y planifica compras con previsión de gasto.</p>
+        </div>
+
+        <!-- Mockup Trabajadores -->
+        <div class="browser-mockup">
+          <div class="browser-header">
+            <div class="browser-dot"></div><div class="browser-dot"></div><div class="browser-dot"></div>
+            <div class="browser-address">gfarma.app/trabajadores</div>
+          </div>
+          <img class="app-screenshot" src="file:///C:/Users/Usuario/Desktop/GFarma/screenshots/trabajadores.png" alt="Pantalla Trabajadores">
+        </div>
+        <div class="glass-card teal" style="padding: 6px 10px; margin-bottom: 0;">
+          <h3 style="font-size: 10px; margin-bottom: 2px;">6. Gestión de Trabajadores y Roles <span class="badge">Premium</span></h3>
+          <p>Control de nóminas, cotizaciones sociales y salarios del personal. Invita a trabajadores con permisos específicos para escaneado seguro.</p>
+        </div>
+      </div>
+      <div class="footer-note">GFarma — Seguridad y Cumplimiento</div>
+    </div>
+    
+  </div>
+
+</body>
+</html>
