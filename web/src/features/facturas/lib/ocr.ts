@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { supabase } from '@/lib/supabase'
 
 // Datos que la IA intenta extraer de la imagen de la factura.
 const extractedSchema = z.object({
@@ -28,9 +29,17 @@ function fileToBase64(file: File): Promise<{ base64: string; mime: string }> {
  */
 export async function scanInvoice(file: File): Promise<OcrResult> {
   const { base64, mime } = await fileToBase64(file)
+  // El endpoint /api/scan exige sesión: adjuntamos el JWT del usuario.
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+  const token = session?.access_token
   const res = await fetch('/api/scan', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
     body: JSON.stringify({ mimeType: mime, base64Data: base64 }),
   })
   if (!res.ok) {
