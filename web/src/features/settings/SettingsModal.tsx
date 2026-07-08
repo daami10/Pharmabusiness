@@ -547,7 +547,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
                       />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Email</label>
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">{t('settings.team.label_email', 'Email')}</label>
                       <input
                         type="email"
                         placeholder="juan@farmacia.com"

@@ -7,10 +7,16 @@ interface LanguageState {
   setLanguage: (language: Language) => void
 }
 
+// Acceso seguro a localStorage: no existe en entornos sin navegador (p. ej. el
+// runner de tests en Node), donde acceder a él lanzaría al cargar el módulo.
+const hasLocalStorage = typeof localStorage !== 'undefined'
+
 export const useLanguageStore = create<LanguageState>((set) => ({
-  language: (localStorage.getItem('gfarma_lang') as Language) || 'es',
+  language: (hasLocalStorage
+    ? (localStorage.getItem('gfarma_lang') as Language)
+    : null) || 'es',
   setLanguage: (language) => {
-    localStorage.setItem('gfarma_lang', language)
+    if (hasLocalStorage) localStorage.setItem('gfarma_lang', language)
     set({ language })
   },
 }))
@@ -329,6 +335,19 @@ export const translations: Record<Language, Record<string, string>> = {
     'settings.team.invite_worker': 'Invitar trabajador',
     'settings.team.owner_you': 'Propietario (Tú)',
     'settings.team.owner_badge': 'Propietario',
+    'settings.team.new_invitation': 'Nueva Invitación',
+    'settings.team.label_name': 'Nombre',
+    'settings.team.label_email': 'Email',
+    'settings.team.worker_permissions': 'Permisos del trabajador',
+    'settings.team.send_invitation': 'Enviar Invitación',
+    'general.enviando': 'Enviando...',
+    'settings.permission.facturas_read': 'Ver Facturas',
+    'settings.permission.facturas_write': 'Subir/Editar Facturas',
+    'settings.permission.abonos_read': 'Ver Abonos',
+    'settings.permission.abonos_write': 'Gestionar Abonos',
+    'settings.permission.analisis_read': 'Ver Análisis y Gráficos',
+    'settings.permission.fiscalidad_read': 'Ver Fiscalidad',
+    'settings.permission.trabajadores_read': 'Ver Trabajadores y Nóminas',
   },
   ca: {
     // Navigation
@@ -643,6 +662,19 @@ export const translations: Record<Language, Record<string, string>> = {
     'settings.team.invite_worker': 'Convidar treballador',
     'settings.team.owner_you': 'Propietari (Tu)',
     'settings.team.owner_badge': 'Propietari',
+    'settings.team.new_invitation': 'Nova Invitació',
+    'settings.team.label_name': 'Nom',
+    'settings.team.label_email': 'Email',
+    'settings.team.worker_permissions': 'Permisos del treballador',
+    'settings.team.send_invitation': 'Enviar Invitació',
+    'general.enviando': 'Enviant...',
+    'settings.permission.facturas_read': 'Veure Factures',
+    'settings.permission.facturas_write': 'Penjar/Editar Factures',
+    'settings.permission.abonos_read': 'Veure Abonaments',
+    'settings.permission.abonos_write': 'Gestionar Abonaments',
+    'settings.permission.analisis_read': 'Veure Anàlisi i Gràfics',
+    'settings.permission.fiscalidad_read': 'Veure Fiscalitat',
+    'settings.permission.trabajadores_read': 'Veure Treballadors i Nòmines',
   },
 }
 

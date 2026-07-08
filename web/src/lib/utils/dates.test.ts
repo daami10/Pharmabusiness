@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { getRemainingMonths, getVencStatus, isFuturePeriod } from './dates'
+import { getRemainingMonths, getVencStatus, isFuturePeriod, getRemainingDatesForDate } from './dates'
 
 describe('getVencStatus', () => {
   beforeEach(() => {
@@ -61,5 +61,18 @@ describe('getRemainingMonths', () => {
   })
   it('diciembre genera solo un mes', () => {
     expect(getRemainingMonths(2026, 12)).toEqual(['2026-12-01'])
+  })
+})
+
+describe('getRemainingDatesForDate', () => {
+  it('genera fechas correctamente y maneja meses mas cortos', () => {
+    expect(getRemainingDatesForDate('2026-10-31')).toEqual([
+      '2026-10-31',
+      '2026-11-30',
+      '2026-12-31',
+    ])
+  })
+  it('diciembre genera solo un dia', () => {
+    expect(getRemainingDatesForDate('2026-12-15')).toEqual(['2026-12-15'])
   })
 })

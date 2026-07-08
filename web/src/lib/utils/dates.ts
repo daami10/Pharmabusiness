@@ -63,3 +63,19 @@ export function getRemainingMonths(year: number, startMonth: number): string[] {
   }
   return months
 }
+
+/**
+ * Genera fechas ISO (YYYY-MM-DD) desde la fecha indicada hasta diciembre del mismo año,
+ * manteniendo el mismo día del mes (y ajustándolo si el mes es más corto).
+ */
+export function getRemainingDatesForDate(isoDate: string): string[] {
+  if (!isoDate) return []
+  const [y, m, d] = isoDate.split('-').map(Number)
+  const dates: string[] = []
+  for (let month = m; month <= 12; month++) {
+    const maxDays = new Date(y, month, 0).getDate()
+    const day = Math.min(d, maxDays)
+    dates.push(`${y}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`)
+  }
+  return dates
+}
