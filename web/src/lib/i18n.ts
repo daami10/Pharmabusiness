@@ -7,10 +7,16 @@ interface LanguageState {
   setLanguage: (language: Language) => void
 }
 
+// Acceso seguro a localStorage: no existe en entornos sin navegador (p. ej. el
+// runner de tests en Node), donde acceder a él lanzaría al cargar el módulo.
+const hasLocalStorage = typeof localStorage !== 'undefined'
+
 export const useLanguageStore = create<LanguageState>((set) => ({
-  language: (localStorage.getItem('gfarma_lang') as Language) || 'es',
+  language: (hasLocalStorage
+    ? (localStorage.getItem('gfarma_lang') as Language)
+    : null) || 'es',
   setLanguage: (language) => {
-    localStorage.setItem('gfarma_lang', language)
+    if (hasLocalStorage) localStorage.setItem('gfarma_lang', language)
     set({ language })
   },
 }))
