@@ -5,6 +5,7 @@ import { useTranslation } from '@/lib/i18n'
 import { useFacturas } from '@/lib/queries/facturas'
 import { useFiscalidad } from '@/lib/queries/fiscalidad'
 import { useNominas, useSeguros } from '@/lib/queries/trabajadores'
+import { useAuth } from '@/features/auth/AuthProvider'
 import { AnalisisReport } from './AnalisisReport'
 
 interface ExportPdfModalProps {
@@ -27,6 +28,10 @@ export function ExportPdfModal({
   defaultHasta,
 }: ExportPdfModalProps) {
   const { t, language } = useTranslation()
+  // Un empleado solo ve/incluye las secciones para las que el titular le dio permiso
+  // (los datos ya vienen vacíos por RLS; aquí ocultamos la sección para no mostrar 0).
+  const { permissions, userRole } = useAuth()
+  const can = (p: string) => userRole === 'titular' || permissions?.[p] === true
   const [desde, setDesde] = useState(defaultDesde || '')
   const [hasta, setHasta] = useState(defaultHasta || '')
 
@@ -143,42 +148,50 @@ export function ExportPdfModal({
             {t('pdf.step2', '2. Seleccionar secciones a incluir')}
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <CheckboxOption
-              label={t('analisis.facturas_proveedores', 'Facturas Proveedores')}
-              description={t('pdf.facturas_desc', 'Incluye resumen e informe de laboratorios')}
-              checked={includeFacturas}
-              onChange={setIncludeFacturas}
-              colorClass="bg-blue-600 border-blue-500 text-blue-400"
-              activeBorderClass="border-blue-500/40"
-              activeBgClass="bg-blue-500/5"
-            />
-            <CheckboxOption
-              label={t('pdf.abonos_recibidos', 'Abonos Recibidos')}
-              description={t('pdf.abonos_desc', 'Incluye devoluciones y balance neto')}
-              checked={includeAbonos}
-              onChange={setIncludeAbonos}
-              colorClass="bg-emerald-600 border-emerald-500 text-emerald-400"
-              activeBorderClass="border-emerald-500/40"
-              activeBgClass="bg-emerald-500/5"
-            />
-            <CheckboxOption
-              label={t('nav.fiscalidad', 'Impuestos y Fiscalidad')}
-              description={t('pdf.fiscalidad_desc', 'Incluye desglose de tasas y liquidaciones')}
-              checked={includeFiscalidad}
-              onChange={setIncludeFiscalidad}
-              colorClass="bg-teal-600 border-teal-500 text-teal-400"
-              activeBorderClass="border-teal-500/40"
-              activeBgClass="bg-teal-500/5"
-            />
-            <CheckboxOption
-              label={t('pdf.trabajadores_personal', 'Trabajadores y Personal')}
-              description={t('pdf.trabajadores_desc', 'Incluye nóminas y seguros sociales')}
-              checked={includeTrabajadores}
-              onChange={setIncludeTrabajadores}
-              colorClass="bg-orange-600 border-orange-500 text-orange-400"
-              activeBorderClass="border-orange-500/40"
-              activeBgClass="bg-orange-500/5"
-            />
+            {can('facturas_read') && (
+              <CheckboxOption
+                label={t('analisis.facturas_proveedores', 'Facturas Proveedores')}
+                description={t('pdf.facturas_desc', 'Incluye resumen e informe de laboratorios')}
+                checked={includeFacturas}
+                onChange={setIncludeFacturas}
+                colorClass="bg-blue-600 border-blue-500 text-blue-400"
+                activeBorderClass="border-blue-500/40"
+                activeBgClass="bg-blue-500/5"
+              />
+            )}
+            {can('abonos_read') && (
+              <CheckboxOption
+                label={t('pdf.abonos_recibidos', 'Abonos Recibidos')}
+                description={t('pdf.abonos_desc', 'Incluye devoluciones y balance neto')}
+                checked={includeAbonos}
+                onChange={setIncludeAbonos}
+                colorClass="bg-emerald-600 border-emerald-500 text-emerald-400"
+                activeBorderClass="border-emerald-500/40"
+                activeBgClass="bg-emerald-500/5"
+              />
+            )}
+            {can('fiscalidad_read') && (
+              <CheckboxOption
+                label={t('nav.fiscalidad', 'Impuestos y Fiscalidad')}
+                description={t('pdf.fiscalidad_desc', 'Incluye desglose de tasas y liquidaciones')}
+                checked={includeFiscalidad}
+                onChange={setIncludeFiscalidad}
+                colorClass="bg-teal-600 border-teal-500 text-teal-400"
+                activeBorderClass="border-teal-500/40"
+                activeBgClass="bg-teal-500/5"
+              />
+            )}
+            {can('trabajadores_read') && (
+              <CheckboxOption
+                label={t('pdf.trabajadores_personal', 'Trabajadores y Personal')}
+                description={t('pdf.trabajadores_desc', 'Incluye nóminas y seguros sociales')}
+                checked={includeTrabajadores}
+                onChange={setIncludeTrabajadores}
+                colorClass="bg-orange-600 border-orange-500 text-orange-400"
+                activeBorderClass="border-orange-500/40"
+                activeBgClass="bg-orange-500/5"
+              />
+            )}
           </div>
         </div>
 
@@ -221,10 +234,10 @@ export function ExportPdfModal({
           <AnalisisReport
             period={periodText}
             generatedAt={new Date().toLocaleString(language === 'ca' ? 'ca-ES' : 'es-ES')}
-            includeFacturas={includeFacturas}
-            includeAbonos={includeAbonos}
-            includeFiscalidad={includeFiscalidad}
-            includeTrabajadores={includeTrabajadores}
+            includeFacturas={includeFacturas && can('facturas_read')}
+            includeAbonos={includeAbonos && can('abonos_read')}
+            includeFiscalidad={includeFiscalidad && can('fiscalidad_read')}
+            includeTrabajadores={includeTrabajadores && can('trabajadores_read')}
             facturas={filteredFacturas}
             abonos={filteredAbonos}
             fiscal={filteredFiscal}

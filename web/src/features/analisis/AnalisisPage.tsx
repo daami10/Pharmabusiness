@@ -9,6 +9,7 @@ import { useFiscalidad } from '@/lib/queries/fiscalidad'
 import { useNominas, useSeguros } from '@/lib/queries/trabajadores'
 import { useYearStore } from '@/stores/yearStore'
 import { useWholesalersStore } from '@/stores/wholesalersStore'
+import { useAuth } from '@/features/auth/AuthProvider'
 import { formatMoney } from '@/lib/utils/money'
 import { monthLabel } from '@/lib/utils/dates'
 import { isWholesaler } from '@/lib/config/wholesalers'
@@ -74,6 +75,10 @@ export function AnalisisPage() {
   const seguros = useSeguros()
 
   const wholesalers = useWholesalersStore((s) => s.wholesalers)
+  // Un empleado solo ve las secciones para las que tiene permiso (fiscalidad/trabajadores);
+  // así no se le muestran esos datos a 0 ni en el selector ni en el resumen consolidado.
+  const { permissions, userRole } = useAuth()
+  const can = (p: string) => userRole === 'titular' || permissions?.[p] === true
   const [category, setCategory] = useState<AnalisisCategory>('')
   const [desde, setDesde] = useState('')
   const [hasta, setHasta] = useState('')
@@ -534,8 +539,12 @@ export function AnalisisPage() {
     { value: 'Laboratorio', label: t('facturas.tab.laboratorios', 'Laboratorios') },
     { value: 'Mayorista', label: wholesalers.length > 1 ? t('settings.tab.wholesalers_plural', 'Mayoristas') : t('settings.tab.wholesalers_singular', 'Mayorista') },
     { value: 'Otro', label: t('general.otros', 'Otros') },
-    { value: 'Fiscalidad', label: t('nav.fiscalidad', 'Fiscalidad') },
-    { value: 'Trabajadores', label: t('nav.trabajadores', 'Trabajadores') },
+    ...(can('fiscalidad_read')
+      ? [{ value: 'Fiscalidad' as const, label: t('nav.fiscalidad', 'Fiscalidad') }]
+      : []),
+    ...(can('trabajadores_read')
+      ? [{ value: 'Trabajadores' as const, label: t('nav.trabajadores', 'Trabajadores') }]
+      : []),
   ]
 
   const refetchAll = () => {
@@ -845,22 +854,26 @@ export function AnalisisPage() {
                   {formatMoney(totalFacturasCons)}
                 </p>
               </div>
-              <div className="glass-card p-4 rounded-xl glow-emerald">
-                <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">
-                  {t('analisis.impuestos_tasas', 'Impuestos y Tasas')}
-                </p>
-                <p className="text-lg font-black text-emerald-400">
-                  {formatMoney(totalFiscalCons)}
-                </p>
-              </div>
-              <div className="glass-card p-4 rounded-xl glow-orange">
-                <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">
-                  {t('analisis.trabajadores_nominas', 'Trabajadores y Nóminas')}
-                </p>
-                <p className="text-lg font-black text-orange-400">
-                  {formatMoney(totalTrabajadoresCons)}
-                </p>
-              </div>
+              {can('fiscalidad_read') && (
+                <div className="glass-card p-4 rounded-xl glow-emerald">
+                  <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">
+                    {t('analisis.impuestos_tasas', 'Impuestos y Tasas')}
+                  </p>
+                  <p className="text-lg font-black text-emerald-400">
+                    {formatMoney(totalFiscalCons)}
+                  </p>
+                </div>
+              )}
+              {can('trabajadores_read') && (
+                <div className="glass-card p-4 rounded-xl glow-orange">
+                  <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">
+                    {t('analisis.trabajadores_nominas', 'Trabajadores y Nóminas')}
+                  </p>
+                  <p className="text-lg font-black text-orange-400">
+                    {formatMoney(totalTrabajadoresCons)}
+                  </p>
+                </div>
+              )}
               <div className="glass-card p-4 rounded-xl glow-blue">
                 <p className="text-xs text-blue-300 font-bold uppercase tracking-wider mb-1">
                   {t('analisis.gastos_totales_rango', 'Gastos Totales Rango')}
