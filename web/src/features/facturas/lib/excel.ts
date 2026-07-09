@@ -1,10 +1,15 @@
 import * as XLSX from 'xlsx'
 import type { Factura } from '@/types/domain'
+import { buildExportFilename } from '@/lib/utils/exportName'
 
 /**
  * Generates and downloads an Excel (.xlsx) spreadsheet containing the given invoices.
  */
-export function downloadFacturasExcel(facturas: Factura[], t: (key: string, fallback: string) => string): void {
+export function downloadFacturasExcel(
+  facturas: Factura[],
+  t: (key: string, fallback: string) => string,
+  orgName?: string | null,
+): void {
   const data = facturas.map((f) => ({
     [t('general.fecha', 'Fecha')]: f.fecha ?? '',
     [t('general.laboratorio', 'Laboratorio')]: f.laboratorio,
@@ -34,5 +39,5 @@ export function downloadFacturasExcel(facturas: Factura[], t: (key: string, fall
   worksheet['!cols'] = colWidths
 
   // Write and trigger download in client browser
-  XLSX.writeFile(workbook, `facturas_${new Date().toISOString().slice(0, 10)}.xlsx`)
+  XLSX.writeFile(workbook, buildExportFilename(orgName, 'Facturas', 'xlsx'))
 }
