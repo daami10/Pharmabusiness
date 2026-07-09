@@ -7,6 +7,7 @@ import { useFiscalidad } from '@/lib/queries/fiscalidad'
 import { useNominas, useSeguros } from '@/lib/queries/trabajadores'
 import { useAuth } from '@/features/auth/AuthProvider'
 import { buildExportFilename } from '@/lib/utils/exportName'
+import { DatePicker } from '@/components/ui/DatePicker'
 import { AnalisisReport } from './AnalisisReport'
 
 interface ExportPdfModalProps {
@@ -121,10 +122,9 @@ export function ExportPdfModal({
               <label className="block text-2xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
                 {t('general.desde', 'Desde')}
               </label>
-              <input
-                type="date"
+              <DatePicker
                 value={desde}
-                onChange={(e) => setDesde(e.target.value)}
+                onChange={setDesde}
                 className="w-full px-3 py-2 rounded-xl border border-white/10 bg-slate-950/40 text-sm text-slate-200 focus:border-[#00f2fe]/40 focus:outline-none transition-all cursor-pointer"
               />
             </div>
@@ -132,10 +132,9 @@ export function ExportPdfModal({
               <label className="block text-2xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
                 {t('general.hasta', 'Hasta')}
               </label>
-              <input
-                type="date"
+              <DatePicker
                 value={hasta}
-                onChange={(e) => setHasta(e.target.value)}
+                onChange={setHasta}
                 className="w-full px-3 py-2 rounded-xl border border-white/10 bg-slate-950/40 text-sm text-slate-200 focus:border-[#00f2fe]/40 focus:outline-none transition-all cursor-pointer"
               />
             </div>

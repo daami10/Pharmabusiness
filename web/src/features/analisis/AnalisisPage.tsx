@@ -10,8 +10,9 @@ import { useNominas, useSeguros } from '@/lib/queries/trabajadores'
 import { useYearStore } from '@/stores/yearStore'
 import { useWholesalersStore } from '@/stores/wholesalersStore'
 import { useAuth } from '@/features/auth/AuthProvider'
+import { DatePicker } from '@/components/ui/DatePicker'
 import { formatMoney } from '@/lib/utils/money'
-import { monthLabel } from '@/lib/utils/dates'
+import { monthLabel, monthsAgoISO } from '@/lib/utils/dates'
 import { isWholesaler } from '@/lib/config/wholesalers'
 import { RankingModal } from './RankingModal'
 import { ExportPdfModal } from './ExportPdfModal'
@@ -80,7 +81,8 @@ export function AnalisisPage() {
   const { permissions, userRole } = useAuth()
   const can = (p: string) => userRole === 'titular' || permissions?.[p] === true
   const [category, setCategory] = useState<AnalisisCategory>('')
-  const [desde, setDesde] = useState('')
+  // Por defecto, el rango arranca desde hace un mes.
+  const [desde, setDesde] = useState(() => monthsAgoISO(1))
   const [hasta, setHasta] = useState('')
   const [rankingOpen, setRankingOpen] = useState(false)
   const [exportModalOpen, setExportModalOpen] = useState(false)
@@ -594,17 +596,15 @@ export function AnalisisPage() {
         <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
           {t('general.rango', 'Rango')}:
         </span>
-        <input
-          type="date"
+        <DatePicker
           value={desde}
-          onChange={(e) => setDesde(e.target.value)}
+          onChange={setDesde}
           className="px-3 py-1.5 rounded-lg border border-white/5 text-xs bg-slate-950/40 text-slate-200 focus:border-[#00f2fe]/40 focus:outline-none transition-all"
         />
         <span className="text-slate-600 text-sm">—</span>
-        <input
-          type="date"
+        <DatePicker
           value={hasta}
-          onChange={(e) => setHasta(e.target.value)}
+          onChange={setHasta}
           className="px-3 py-1.5 rounded-lg border border-white/5 text-xs bg-slate-950/40 text-slate-200 focus:border-[#00f2fe]/40 focus:outline-none transition-all"
         />
         {hasRange && (
