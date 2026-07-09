@@ -5,6 +5,8 @@ import { useTranslation } from '@/lib/i18n'
 import { useFacturas } from '@/lib/queries/facturas'
 import { useFiscalidad } from '@/lib/queries/fiscalidad'
 import { useNominas, useSeguros } from '@/lib/queries/trabajadores'
+import { useAuth } from '@/features/auth/AuthProvider'
+import { buildExportFilename } from '@/lib/utils/exportName'
 import { AnalisisReport } from './AnalisisReport'
 
 interface ExportPdfModalProps {
@@ -27,6 +29,7 @@ export function ExportPdfModal({
   defaultHasta,
 }: ExportPdfModalProps) {
   const { t, language } = useTranslation()
+  const { activeOrgName } = useAuth()
   const [desde, setDesde] = useState(defaultDesde || '')
   const [hasta, setHasta] = useState(defaultHasta || '')
 
@@ -80,7 +83,7 @@ export function ExportPdfModal({
       await html2pdf()
         .set({
           margin: 10,
-          filename: `informe_gfarma_${new Date().toISOString().slice(0, 10)}.pdf`,
+          filename: buildExportFilename(activeOrgName, 'Analisis', 'pdf'),
           image: { type: 'jpeg', quality: 0.98 },
           html2canvas: { scale: 2, useCORS: true },
           jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
