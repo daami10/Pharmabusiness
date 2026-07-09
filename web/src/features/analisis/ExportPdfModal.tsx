@@ -31,9 +31,8 @@ export function ExportPdfModal({
   const { t, language } = useTranslation()
   // Un empleado solo ve/incluye las secciones para las que el titular le dio permiso
   // (los datos ya vienen vacíos por RLS; aquí ocultamos la sección para no mostrar 0).
-  const { permissions, userRole } = useAuth()
+  const { permissions, userRole, activeOrgName } = useAuth()
   const can = (p: string) => userRole === 'titular' || permissions?.[p] === true
-  const { activeOrgName } = useAuth()
   const [desde, setDesde] = useState(defaultDesde || '')
   const [hasta, setHasta] = useState(defaultHasta || '')
 
