@@ -22,6 +22,10 @@ import { monthLabel } from '@/lib/utils/dates'
 import { useAuth } from '@/features/auth/AuthProvider'
 import { computeInicioKpis } from './lib/inicio-view'
 import { PrevisionModal } from './PrevisionModal'
+import { FacturaModal } from '@/features/facturas/FacturaModal'
+import { NominaModal } from '@/features/trabajadores/NominaModal'
+import { SeguroModal } from '@/features/trabajadores/SeguroModal'
+import { FiscalModal } from '@/features/fiscalidad/FiscalModal'
 
 export function InicioPage() {
   const { t } = useTranslation()
@@ -36,6 +40,12 @@ export function InicioPage() {
   const [previsionOpen, setPrevisionOpen] = useState(false)
   const [fastActionOpen, setFastActionOpen] = useState(false)
   const [dragging, setDragging] = useState(false)
+  // Modales in-place: las acciones rápidas abren el modal aquí en Inicio; solo se
+  // sale de Inicio si el usuario aplica una acción (no al cancelar/cerrar).
+  const [activeModal, setActiveModal] = useState<
+    null | 'factura' | 'nomina' | 'seguro' | 'fiscal'
+  >(null)
+  const [scanFileForModal, setScanFileForModal] = useState<File | null>(null)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -106,9 +116,11 @@ export function InicioPage() {
       : []),
   ]
 
-  // Lanza el escaneo IA: navega a Facturas abriendo el modal con el archivo.
+  // Lanza el escaneo IA: abre el modal de factura AQUÍ en Inicio con el archivo (OCR).
   const scanFile = (file: File | undefined) => {
-    if (file) navigate('/facturas', { state: { openCreate: true, scanFile: file } })
+    if (!file) return
+    setScanFileForModal(file)
+    setActiveModal('factura')
   }
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -136,15 +148,16 @@ export function InicioPage() {
   const triggerFastAction = (action: string) => {
     setFastActionOpen(false)
     if (action === 'scan-factura') {
-      navigate('/facturas', { state: { openCreate: true, triggerOcr: true } })
+      fileInputRef.current?.click() // al elegir archivo se abre el modal con OCR
     } else if (action === 'add-factura') {
-      navigate('/facturas', { state: { openCreate: true } })
+      setScanFileForModal(null)
+      setActiveModal('factura')
     } else if (action === 'add-nomina') {
-      navigate('/trabajadores', { state: { openNomina: true } })
+      setActiveModal('nomina')
     } else if (action === 'add-seguro') {
-      navigate('/trabajadores', { state: { openSeguro: true } })
+      setActiveModal('seguro')
     } else if (action === 'add-fiscal') {
-      navigate('/fiscalidad', { state: { openFiscal: true } })
+      setActiveModal('fiscal')
     }
   }
 
@@ -406,6 +419,33 @@ export function InicioPage() {
       </div>
 
       <PrevisionModal open={previsionOpen} onClose={() => setPrevisionOpen(false)} />
+
+      {/* Modales in-place: se abren desde las acciones rápidas sin salir de Inicio. */}
+      <FacturaModal
+        open={activeModal === 'factura'}
+        onClose={() => {
+          setActiveModal(null)
+          setScanFileForModal(null)
+        }}
+        factura={null}
+        initialFile={scanFileForModal}
+        activeYear={year}
+      />
+      <NominaModal
+        open={activeModal === 'nomina'}
+        onClose={() => setActiveModal(null)}
+        nomina={null}
+      />
+      <SeguroModal
+        open={activeModal === 'seguro'}
+        onClose={() => setActiveModal(null)}
+        seguro={null}
+      />
+      <FiscalModal
+        open={activeModal === 'fiscal'}
+        onClose={() => setActiveModal(null)}
+        fiscal={null}
+      />
     </div>
   )
 }
