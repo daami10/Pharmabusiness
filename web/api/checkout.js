@@ -82,6 +82,12 @@ export default async function handler(req, res) {
         },
       ],
       mode: 'subscription',
+      automatic_tax: {
+        enabled: true,
+      },
+      tax_id_collection: {
+        enabled: true,
+      },
       success_url: `${req.headers.origin || 'https://gfarma.app'}/?stripe_success=true`,
       cancel_url: `${req.headers.origin || 'https://gfarma.app'}/?stripe_cancel=true`,
       client_reference_id: membership.org_id,
