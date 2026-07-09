@@ -2,6 +2,7 @@ import { useMemo, useState, useEffect } from 'react'
 import { ChevronDown, Download, Pencil, Plus, Search, Trash2 } from 'lucide-react'
 import { useLocation } from 'react-router-dom'
 import { useTranslation } from '@/lib/i18n'
+import { useAuth } from '@/features/auth/AuthProvider'
 import { FacturaModal } from './FacturaModal'
 import { AbonoModal } from '../abonos/AbonoModal'
 import { Calendar } from './Calendar'
@@ -40,6 +41,7 @@ function tipoBadgeClass(tipo: string, wholesalers: string[]): string {
 
 export function FacturasPage() {
   const { t } = useTranslation()
+  const { activeOrgName } = useAuth()
   const translatedMeses = useMemo(() => [
     { value: '', label: t('facturas.filter.all_months', 'Todos los meses') },
     { value: '01', label: t('months.january', 'Enero') },
@@ -231,9 +233,9 @@ export function FacturasPage() {
     })
 
     if (format === 'xlsx') {
-      downloadFacturasExcel(finalList, t)
+      downloadFacturasExcel(finalList, t, activeOrgName)
     } else {
-      downloadFacturasCSV(finalList, t)
+      downloadFacturasCSV(finalList, t, activeOrgName)
     }
   }
 

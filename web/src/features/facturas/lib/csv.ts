@@ -1,4 +1,5 @@
 import type { Factura } from '@/types/domain'
+import { buildExportFilename } from '@/lib/utils/exportName'
 
 function cell(v: string | number): string {
   return `"${String(v).replace(/"/g, '""')}"`
@@ -36,12 +37,16 @@ export function buildFacturasCSV(facturas: Factura[], t: (key: string, fallback:
 }
 
 /** Descarga las facturas como CSV en el navegador. */
-export function downloadFacturasCSV(facturas: Factura[], t: (key: string, fallback: string) => string): void {
+export function downloadFacturasCSV(
+  facturas: Factura[],
+  t: (key: string, fallback: string) => string,
+  orgName?: string | null,
+): void {
   const blob = new Blob([buildFacturasCSV(facturas, t)], { type: 'text/csv;charset=utf-8' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = `facturas_${new Date().toISOString().slice(0, 10)}.csv`
+  a.download = buildExportFilename(orgName, 'Facturas', 'csv')
   a.click()
   URL.revokeObjectURL(url)
 }
