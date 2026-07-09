@@ -88,6 +88,7 @@ export default async function handler(req, res) {
       tax_id_collection: {
         enabled: true,
       },
+      billing_address_collection: 'required',
       success_url: `${req.headers.origin || 'https://gfarma.app'}/?stripe_success=true`,
       cancel_url: `${req.headers.origin || 'https://gfarma.app'}/?stripe_cancel=true`,
       client_reference_id: membership.org_id,
