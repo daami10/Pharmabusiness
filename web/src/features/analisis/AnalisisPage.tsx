@@ -785,51 +785,55 @@ export function AnalisisPage() {
           </p>
         </div>
 
-        {/* Fiscalidad */}
-        <div
-          onClick={() => setCategory('Fiscalidad')}
-          className={`cursor-pointer transition-all select-none glass-card glow-emerald glow-emerald-hover rounded-2xl p-5 ${
-            category === 'Fiscalidad'
-              ? 'ring-2 ring-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.3)]'
-              : ''
-          }`}
-        >
-          <div className="flex items-center gap-2 mb-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.5)]"></span>
-            <p className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
-              {t('nav.fiscalidad', 'Fiscalidad')}
+        {/* Fiscalidad (solo si el usuario tiene permiso; si no, ni se muestra ni es clicable) */}
+        {can('fiscalidad_read') && (
+          <div
+            onClick={() => setCategory('Fiscalidad')}
+            className={`cursor-pointer transition-all select-none glass-card glow-emerald glow-emerald-hover rounded-2xl p-5 ${
+              category === 'Fiscalidad'
+                ? 'ring-2 ring-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.3)]'
+                : ''
+            }`}
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.5)]"></span>
+              <p className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
+                {t('nav.fiscalidad', 'Fiscalidad')}
+              </p>
+            </div>
+            <p className="text-2xl font-black text-emerald-400 leading-none">
+              {formatMoney(fiscalStats.total)}
+            </p>
+            <p className="text-2xs text-slate-500 font-bold uppercase tracking-wider mt-1.5">
+              {fiscalStats.count} {fiscalStats.count !== 1 ? t('analisis.kpi.num_pagos', 'pagos').split(' ')[1].toLowerCase() : t('analisis.kpi.pago_singular', 'pago')}
             </p>
           </div>
-          <p className="text-2xl font-black text-emerald-400 leading-none">
-            {formatMoney(fiscalStats.total)}
-          </p>
-          <p className="text-2xs text-slate-500 font-bold uppercase tracking-wider mt-1.5">
-            {fiscalStats.count} {fiscalStats.count !== 1 ? t('analisis.kpi.num_pagos', 'pagos').split(' ')[1].toLowerCase() : t('analisis.kpi.pago_singular', 'pago')}
-          </p>
-        </div>
+        )}
 
-        {/* Trabajadores */}
-        <div
-          onClick={() => setCategory('Trabajadores')}
-          className={`cursor-pointer transition-all select-none glass-card glow-orange glow-orange-hover rounded-2xl p-5 ${
-            category === 'Trabajadores'
-              ? 'ring-2 ring-orange-500 shadow-[0_0_20px_rgba(249,115,22,0.3)]'
-              : ''
-          }`}
-        >
-          <div className="flex items-center gap-2 mb-2">
-            <span className="w-2 h-2 rounded-full bg-orange-500 shadow-[0_0_6px_rgba(249,115,22,0.5)]"></span>
-            <p className="text-xs font-bold text-orange-400 uppercase tracking-wider">
-              {t('nav.trabajadores', 'Trabajadores')}
+        {/* Trabajadores (solo si el usuario tiene permiso; si no, ni se muestra ni es clicable) */}
+        {can('trabajadores_read') && (
+          <div
+            onClick={() => setCategory('Trabajadores')}
+            className={`cursor-pointer transition-all select-none glass-card glow-orange glow-orange-hover rounded-2xl p-5 ${
+              category === 'Trabajadores'
+                ? 'ring-2 ring-orange-500 shadow-[0_0_20px_rgba(249,115,22,0.3)]'
+                : ''
+            }`}
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <span className="w-2 h-2 rounded-full bg-orange-500 shadow-[0_0_6px_rgba(249,115,22,0.5)]"></span>
+              <p className="text-xs font-bold text-orange-400 uppercase tracking-wider">
+                {t('nav.trabajadores', 'Trabajadores')}
+              </p>
+            </div>
+            <p className="text-2xl font-black text-orange-400 leading-none">
+              {formatMoney(trabStats.total)}
+            </p>
+            <p className="text-2xs text-slate-500 font-bold uppercase tracking-wider mt-1.5">
+              {trabStats.count} {trabStats.count !== 1 ? t('analisis.kpi.num_entradas', 'entradas').split(' ')[1].toLowerCase() : t('analisis.kpi.entrada_singular', 'entrada')}
             </p>
           </div>
-          <p className="text-2xl font-black text-orange-400 leading-none">
-            {formatMoney(trabStats.total)}
-          </p>
-          <p className="text-2xs text-slate-500 font-bold uppercase tracking-wider mt-1.5">
-            {trabStats.count} {trabStats.count !== 1 ? t('analisis.kpi.num_entradas', 'entradas').split(' ')[1].toLowerCase() : t('analisis.kpi.entrada_singular', 'entrada')}
-          </p>
-        </div>
+        )}
       </div>
 
       {/* Gráficas y Resumen Consolidado */}
