@@ -79,13 +79,3 @@ export function getRemainingDatesForDate(isoDate: string): string[] {
   }
   return dates
 }
-
-/**
- * Devuelve la fecha ISO (YYYY-MM-DD) de hace `n` meses desde hoy.
- * Se usa como valor por defecto del filtro "Desde" (por defecto, el último mes).
- */
-export function monthsAgoISO(n: number): string {
-  const d = new Date()
-  d.setMonth(d.getMonth() - n)
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-}

@@ -8,7 +8,7 @@ interface DatePickerProps {
   value: string
   onChange: (value: string) => void
   placeholder?: string
-  /** Clases para el disparador (para imitar el input nativo que reemplaza). */
+  /** Clases para el contenedor (para imitar el input nativo que reemplaza). */
   className?: string
   min?: string
   max?: string
@@ -31,6 +31,19 @@ function formatDisplay(v: string): string {
   return p ? `${pad(p.d)}/${pad(p.m + 1)}/${p.y}` : ''
 }
 
+/** Interpreta lo que el usuario escribe a mano (dd/mm/aaaa; admite - . / y año de 2 cifras). */
+function parseTyped(s: string): string | null {
+  const m = /^\s*(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{2,4})\s*$/.exec(s)
+  if (!m) return null
+  const d = Number(m[1])
+  const mo = Number(m[2])
+  const y = m[3].length <= 2 ? 2000 + Number(m[3]) : Number(m[3])
+  if (mo < 1 || mo > 12) return null
+  const daysInMonth = new Date(y, mo, 0).getDate()
+  if (d < 1 || d > daysInMonth) return null
+  return `${y}-${pad(mo)}-${pad(d)}`
+}
+
 export function DatePicker({
   value,
   onChange,
@@ -45,9 +58,15 @@ export function DatePicker({
   const locale = language === 'ca' ? 'ca-ES' : 'es-ES'
 
   const [open, setOpen] = useState(false)
-  const triggerRef = useRef<HTMLButtonElement>(null)
+  // Texto local mientras se escribe; sin foco se muestra lo derivado de `value`
+  // (evita un effect de sincronización → sin error de lint por setState en effect).
+  const [text, setText] = useState('')
+  const [focused, setFocused] = useState(false)
+  const shown = focused ? text : formatDisplay(value)
+
+  const wrapperRef = useRef<HTMLDivElement>(null)
   const popupRef = useRef<HTMLDivElement>(null)
-  const [pos, setPos] = useState<{ top: number; left: number; width: number } | null>(null)
+  const [pos, setPos] = useState<{ top: number; left: number } | null>(null)
 
   const [view, setView] = useState(() => {
     const p = parseISO(value)
@@ -55,8 +74,19 @@ export function DatePicker({
     return p ? { y: p.y, m: p.m } : { y: now.getFullYear(), m: now.getMonth() }
   })
 
-  // Abrir/cerrar. Al abrir se sincroniza el mes visible con el valor y se calcula
-  // la posición aquí (en el handler, no en un effect, para no encadenar renders).
+  function updatePosition() {
+    const el = wrapperRef.current
+    if (!el) return
+    const r = el.getBoundingClientRect()
+    const popupHeight = 340
+    const below = window.innerHeight - r.bottom
+    const openUp = below < popupHeight && r.top > popupHeight
+    setPos({
+      top: openUp ? r.top - popupHeight - 4 : r.bottom + 4,
+      left: Math.min(r.left, window.innerWidth - 288 - 8),
+    })
+  }
+
   const toggle = () => {
     if (open) {
       setOpen(false)
@@ -68,28 +98,24 @@ export function DatePicker({
     setOpen(true)
   }
 
-  function updatePosition() {
-    const el = triggerRef.current
-    if (!el) return
-    const r = el.getBoundingClientRect()
-    const popupHeight = 340
-    const below = window.innerHeight - r.bottom
-    // Si no cabe abajo pero sí arriba, se despliega hacia arriba.
-    const openUp = below < popupHeight && r.top > popupHeight
-    setPos({
-      top: openUp ? r.top - popupHeight - 4 : r.bottom + 4,
-      left: Math.min(r.left, window.innerWidth - 288 - 8),
-      width: r.width,
-    })
+  // Escritura manual: al teclear intentamos interpretar la fecha.
+  const onType = (raw: string) => {
+    setText(raw)
+    if (raw.trim() === '') {
+      onChange('')
+      return
+    }
+    const iso = parseTyped(raw)
+    if (iso) onChange(iso)
   }
 
-  // Reposicionar en scroll/resize; cerrar al pulsar fuera.
+  // Reposicionar en scroll/resize; cerrar al pulsar fuera o con Escape.
   useEffect(() => {
     if (!open) return
     const onScrollResize = () => updatePosition()
     const onDown = (e: MouseEvent) => {
       const t = e.target as Node
-      if (triggerRef.current?.contains(t) || popupRef.current?.contains(t)) return
+      if (wrapperRef.current?.contains(t) || popupRef.current?.contains(t)) return
       setOpen(false)
     }
     const onKey = (e: KeyboardEvent) => {
@@ -116,7 +142,6 @@ export function DatePicker({
   )
   const weekdays = useMemo(() => {
     const fmt = new Intl.DateTimeFormat(locale, { weekday: 'short' })
-    // 2024-01-01 fue lunes → semana empezando en lunes.
     return Array.from({ length: 7 }, (_, i) =>
       fmt.format(new Date(2024, 0, 1 + i)).replace('.', ''),
     )
@@ -144,24 +169,41 @@ export function DatePicker({
     setView((v) => (v.m === 11 ? { y: v.y + 1, m: 0 } : { y: v.y, m: v.m + 1 }))
   const select = (d: number) => {
     onChange(toISO(view.y, view.m, d))
+    setFocused(false)
     setOpen(false)
   }
 
   return (
     <>
-      <button
-        ref={triggerRef}
-        type="button"
-        id={id}
-        disabled={disabled}
-        onClick={toggle}
-        className={`flex items-center justify-between gap-2 text-left ${className ?? 'w-full rounded-xl border border-white/10 bg-slate-950/40 px-3 py-2 text-sm text-slate-200 focus:border-[#00f2fe]/40 focus:outline-none transition-all'}`}
+      <div
+        ref={wrapperRef}
+        className={`flex items-center gap-2 ${className ?? 'w-full rounded-xl border border-white/10 bg-slate-950/40 px-3 py-2 text-sm text-slate-200 transition-all'}`}
       >
-        <span className={value ? 'text-slate-200' : 'text-slate-500'}>
-          {value ? formatDisplay(value) : (placeholder ?? 'dd/mm/aaaa')}
-        </span>
-        <CalendarIcon className="h-4 w-4 shrink-0 text-[#00f2fe]/70" />
-      </button>
+        <input
+          id={id}
+          type="text"
+          inputMode="numeric"
+          disabled={disabled}
+          value={shown}
+          placeholder={placeholder ?? 'dd/mm/aaaa'}
+          onFocus={() => {
+            setFocused(true)
+            setText(formatDisplay(value))
+          }}
+          onChange={(e) => onType(e.target.value)}
+          onBlur={() => setFocused(false)}
+          className="min-w-0 flex-1 border-0 bg-transparent p-0 text-inherit placeholder-slate-500 focus:outline-none"
+        />
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={toggle}
+          className="shrink-0 text-[#00f2fe]/70 hover:text-[#00f2fe] transition-colors"
+          aria-label="Abrir calendario"
+        >
+          <CalendarIcon className="h-4 w-4" />
+        </button>
+      </div>
 
       {open &&
         pos &&
@@ -171,7 +213,6 @@ export function DatePicker({
             style={{ position: 'fixed', top: pos.top, left: pos.left, zIndex: 100 }}
             className="w-72 rounded-2xl border border-[#00f2fe]/20 bg-[#0b111e] p-3 shadow-[0_0_40px_rgba(0,0,0,0.6)]"
           >
-            {/* Cabecera mes/año */}
             <div className="mb-2 flex items-center justify-between">
               <button
                 type="button"
@@ -194,7 +235,6 @@ export function DatePicker({
               </button>
             </div>
 
-            {/* Días de la semana */}
             <div className="mb-1 grid grid-cols-7 gap-1">
               {weekdays.map((w, i) => (
                 <div
@@ -206,7 +246,6 @@ export function DatePicker({
               ))}
             </div>
 
-            {/* Rejilla de días */}
             <div className="grid grid-cols-7 gap-1">
               {grid.map((d, i) => {
                 if (d === null) return <div key={i} />
@@ -234,12 +273,12 @@ export function DatePicker({
               })}
             </div>
 
-            {/* Pie: Hoy / Limpiar */}
             <div className="mt-2 flex items-center justify-between border-t border-white/5 pt-2">
               <button
                 type="button"
                 onClick={() => {
                   onChange(todayISO)
+                  setFocused(false)
                   setOpen(false)
                 }}
                 className="text-[11px] font-bold text-[#00f2fe] hover:underline"
@@ -250,6 +289,8 @@ export function DatePicker({
                 type="button"
                 onClick={() => {
                   onChange('')
+                  setText('')
+                  setFocused(false)
                   setOpen(false)
                 }}
                 className="text-[11px] font-semibold text-slate-500 hover:text-slate-300"

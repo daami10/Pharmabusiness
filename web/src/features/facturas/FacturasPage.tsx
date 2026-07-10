@@ -15,7 +15,7 @@ import { useYearStore } from '@/stores/yearStore'
 import { isWholesaler } from '@/lib/config/wholesalers'
 import { useWholesalersStore } from '@/stores/wholesalersStore'
 import { formatMoney } from '@/lib/utils/money'
-import { formatDate, monthsAgoISO } from '@/lib/utils/dates'
+import { formatDate } from '@/lib/utils/dates'
 import type { VencStatus } from '@/lib/utils/dates'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import type { Factura } from '@/types/domain'
@@ -71,8 +71,7 @@ export function FacturasPage() {
   const [maxImporte, setMaxImporte] = useState('')
   const [vencStatus, setVencStatus] = useState<'' | VencStatus>('')
   const [csvModalOpen, setCsvModalOpen] = useState(false)
-  // Por defecto, el filtro arranca mostrando desde hace un mes.
-  const [startDate, setStartDate] = useState(() => monthsAgoISO(1))
+  const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
 
   const [overrides, setOverrides] = useState<Record<string, boolean>>({})

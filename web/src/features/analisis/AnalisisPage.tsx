@@ -12,7 +12,7 @@ import { useWholesalersStore } from '@/stores/wholesalersStore'
 import { useAuth } from '@/features/auth/AuthProvider'
 import { DatePicker } from '@/components/ui/DatePicker'
 import { formatMoney } from '@/lib/utils/money'
-import { monthLabel, monthsAgoISO } from '@/lib/utils/dates'
+import { monthLabel } from '@/lib/utils/dates'
 import { isWholesaler } from '@/lib/config/wholesalers'
 import { RankingModal } from './RankingModal'
 import { ExportPdfModal } from './ExportPdfModal'
@@ -81,8 +81,7 @@ export function AnalisisPage() {
   const { permissions, userRole } = useAuth()
   const can = (p: string) => userRole === 'titular' || permissions?.[p] === true
   const [category, setCategory] = useState<AnalisisCategory>('')
-  // Por defecto, el rango arranca desde hace un mes.
-  const [desde, setDesde] = useState(() => monthsAgoISO(1))
+  const [desde, setDesde] = useState('')
   const [hasta, setHasta] = useState('')
   const [rankingOpen, setRankingOpen] = useState(false)
   const [exportModalOpen, setExportModalOpen] = useState(false)
