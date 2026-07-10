@@ -16,7 +16,7 @@ export function Sidebar({
   onPrivacy: () => void
 }) {
   const { t } = useTranslation()
-  const { signOut, subscriptionTier, userRole, isSuperAdmin } = useAuth()
+  const { signOut, subscriptionTier, userRole, permissions, isSuperAdmin } = useAuth()
   const secondaryCls =
     'flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-400 transition-all hover:bg-white/5 hover:text-white'
 
@@ -80,10 +80,16 @@ export function Sidebar({
 
           <nav className="space-y-2.5">
             {NAV_ITEMS.map(
-              ({ to, label, icon: Icon, end, requiredTier, requiredRole }) => {
+              ({ to, label, icon: Icon, end, requiredTier, requiredPermission }) => {
+                // El candado es dinámico con los permisos: el titular siempre puede;
+                // un empleado necesita el permiso concreto que le haya dado el titular.
+                const lacksPermission =
+                  !!requiredPermission &&
+                  userRole !== 'titular' &&
+                  permissions?.[requiredPermission] !== true
                 const isLocked =
                   (requiredTier === 'premium' && subscriptionTier !== 'premium') ||
-                  (requiredRole === 'titular' && userRole !== 'titular')
+                  lacksPermission
                 return (
                   <NavLink
                     key={to}

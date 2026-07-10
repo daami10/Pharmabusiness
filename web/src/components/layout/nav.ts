@@ -7,7 +7,8 @@ export interface NavItem {
   icon: LucideIcon
   end?: boolean
   requiredTier: 'basic' | 'premium'
-  requiredRole?: 'titular' | 'empleado'
+  /** Permiso que el empleado necesita para acceder (el titular siempre puede). */
+  requiredPermission?: string
 }
 
 export const NAV_ITEMS: NavItem[] = [
@@ -18,7 +19,7 @@ export const NAV_ITEMS: NavItem[] = [
     label: 'Análisis',
     icon: BarChart3,
     requiredTier: 'premium',
-    requiredRole: 'titular',
+    requiredPermission: 'analisis_read',
   },
   { to: '/abonos', label: 'Abonos', icon: RefreshCcw, requiredTier: 'basic' },
   {
@@ -26,13 +27,13 @@ export const NAV_ITEMS: NavItem[] = [
     label: 'Fiscalidad',
     icon: Landmark,
     requiredTier: 'premium',
-    requiredRole: 'titular',
+    requiredPermission: 'fiscalidad_read',
   },
   {
     to: '/trabajadores',
     label: 'Trabajadores',
     icon: Users,
     requiredTier: 'premium',
-    requiredRole: 'titular',
+    requiredPermission: 'trabajadores_read',
   },
 ]

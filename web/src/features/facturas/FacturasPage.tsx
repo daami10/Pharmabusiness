@@ -2,10 +2,12 @@ import { useMemo, useState, useEffect } from 'react'
 import { ChevronDown, Download, Pencil, Plus, Search, Trash2 } from 'lucide-react'
 import { useLocation } from 'react-router-dom'
 import { useTranslation } from '@/lib/i18n'
+import { useAuth } from '@/features/auth/AuthProvider'
 import { FacturaModal } from './FacturaModal'
 import { AbonoModal } from '../abonos/AbonoModal'
 import { Calendar } from './Calendar'
 import { CsvExportModal } from './CsvExportModal'
+import { DatePicker } from '@/components/ui/DatePicker'
 import { downloadFacturasCSV } from './lib/csv'
 import { downloadFacturasExcel } from './lib/excel'
 import { useFacturas, useDeleteFactura } from '@/lib/queries/facturas'
@@ -40,6 +42,7 @@ function tipoBadgeClass(tipo: string, wholesalers: string[]): string {
 
 export function FacturasPage() {
   const { t } = useTranslation()
+  const { activeOrgName } = useAuth()
   const translatedMeses = useMemo(() => [
     { value: '', label: t('facturas.filter.all_months', 'Todos los meses') },
     { value: '01', label: t('months.january', 'Enero') },
@@ -231,9 +234,9 @@ export function FacturasPage() {
     })
 
     if (format === 'xlsx') {
-      downloadFacturasExcel(finalList, t)
+      downloadFacturasExcel(finalList, t, activeOrgName)
     } else {
-      downloadFacturasCSV(finalList, t)
+      downloadFacturasCSV(finalList, t, activeOrgName)
     }
   }
 
@@ -403,17 +406,15 @@ export function FacturasPage() {
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
               {t('facturas.filter.issue_date', 'FECHA EMISIÓN')}:
             </span>
-            <input
-              type="date"
+            <DatePicker
               value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
+              onChange={setStartDate}
               className="rounded-xl border border-white/5 bg-slate-950/40 py-2 px-3 text-xs text-slate-100 placeholder-slate-500 focus:border-accent-blue/40 focus:outline-none"
             />
             <span className="text-slate-500">—</span>
-            <input
-              type="date"
+            <DatePicker
               value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
+              onChange={setEndDate}
               className="rounded-xl border border-white/5 bg-slate-950/40 py-2 px-3 text-xs text-slate-100 placeholder-slate-500 focus:border-accent-blue/40 focus:outline-none"
             />
             {(startDate || endDate) && (

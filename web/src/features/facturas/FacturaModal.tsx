@@ -1,10 +1,11 @@
 import { useEffect, useState, useMemo } from 'react'
 import type { ChangeEvent } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Sparkles } from 'lucide-react'
 import { Dialog } from '@/components/ui/Dialog'
+import { DatePicker } from '@/components/ui/DatePicker'
 import { useTranslation } from '@/lib/i18n'
 import { useWholesalersStore } from '@/stores/wholesalersStore'
 import { useUpdateFactura, useCreateFacturas } from '@/lib/queries/facturas'
@@ -93,6 +94,7 @@ export function FacturaModal({
     reset,
     setValue,
     watch,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -384,7 +386,17 @@ export function FacturaModal({
             <label className="mb-1 block text-xs font-semibold text-slate-400">
               {t('general.fecha', 'Fecha')}
             </label>
-            <input type="date" {...register('fecha')} className={inputCls} />
+            <Controller
+              control={control}
+              name="fecha"
+              render={({ field }) => (
+                <DatePicker
+                  value={field.value ?? ''}
+                  onChange={field.onChange}
+                  className={inputCls}
+                />
+              )}
+            />
             {errors.fecha && (
               <p className="mt-1 text-xs text-red-400">{t(errors.fecha.message || '', 'Indica la fecha')}</p>
             )}
@@ -393,7 +405,17 @@ export function FacturaModal({
             <label className="mb-1 block text-xs font-semibold text-slate-400">
               {t('facturas.label.vencimiento', 'Vencimiento')}
             </label>
-            <input type="date" {...register('fecha_vencimiento')} className={inputCls} />
+            <Controller
+              control={control}
+              name="fecha_vencimiento"
+              render={({ field }) => (
+                <DatePicker
+                  value={field.value ?? ''}
+                  onChange={field.onChange}
+                  className={inputCls}
+                />
+              )}
+            />
           </div>
         </div>
 

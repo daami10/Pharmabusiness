@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Dialog } from '@/components/ui/Dialog'
+import { DatePicker } from '@/components/ui/DatePicker'
 
 interface CsvExportModalProps {
   open: boolean
@@ -46,10 +47,9 @@ export function CsvExportModal({ open, onClose, onExport }: CsvExportModalProps)
             <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
               Fecha Desde (Emisión):
             </label>
-            <input
-              type="date"
+            <DatePicker
               value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
+              onChange={setStartDate}
               className="w-full rounded-xl border border-white/10 bg-slate-950/40 px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:border-accent-blue/40 focus:outline-none"
             />
           </div>
@@ -58,10 +58,9 @@ export function CsvExportModal({ open, onClose, onExport }: CsvExportModalProps)
             <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
               Fecha Hasta (Emisión):
             </label>
-            <input
-              type="date"
+            <DatePicker
               value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
+              onChange={setEndDate}
               className="w-full rounded-xl border border-white/10 bg-slate-950/40 px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:border-accent-blue/40 focus:outline-none"
             />
           </div>

@@ -34,7 +34,14 @@ type LoginMode = 'login' | 'register' | 'forgot_password' | 'reset_password'
 
 export function LoginPage() {
   const { session } = useAuth()
-  const [mode, setMode] = useState<LoginMode>('login')
+  // Un trabajador invitado llega por un enlace con un token secreto (?invite_token=...).
+  // Su presencia — no una consulta pública — es lo que marca el registro como invitado.
+  const [inviteToken] = useState(
+    () => new URLSearchParams(window.location.search).get('invite_token') || '',
+  )
+  const isInvitedWorker = inviteToken.length > 0
+  // Si venimos por invitación arrancamos directamente en modo registro.
+  const [mode, setMode] = useState<LoginMode>(inviteToken ? 'register' : 'login')
   const [serverError, setServerError] = useState('')
   const [info, setInfo] = useState('')
 
@@ -51,12 +58,6 @@ export function LoginPage() {
   const [resetError, setResetError] = useState('')
   const [isSubmittingReset, setIsSubmittingReset] = useState(false)
 
-  // Un trabajador invitado llega por un enlace con un token secreto (?invite_token=...).
-  // Su presencia — no una consulta pública — es lo que marca el registro como invitado.
-  const [inviteToken] = useState(
-    () => new URLSearchParams(window.location.search).get('invite_token') || '',
-  )
-  const isInvitedWorker = inviteToken.length > 0
   const [inviteCode, setInviteCode] = useState('')
 
   const {
@@ -64,6 +65,12 @@ export function LoginPage() {
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({ resolver: zodResolver(schema) })
+
+  // Un enlace de invitación (?invite_token=) nunca debe entrar con una sesión ya
+  // abierta (p. ej. la del titular en un PC compartido): la cerramos para registrar limpio.
+  useEffect(() => {
+    if (inviteToken && session) void supabase.auth.signOut()
+  }, [inviteToken, session])
 
   // Listen for Supabase password recovery trigger
   useEffect(() => {
@@ -177,7 +184,8 @@ export function LoginPage() {
     }
   }
 
-  if (session && mode !== 'reset_password') return <Navigate to="/" replace />
+  if (session && mode !== 'reset_password' && !inviteToken)
+    return <Navigate to="/" replace />
 
   return (
     <main className="relative flex min-h-screen flex-col items-center justify-center bg-[#070b13] p-4 sm:p-6 overflow-hidden">
