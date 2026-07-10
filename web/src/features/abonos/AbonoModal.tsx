@@ -1,8 +1,9 @@
 import { useEffect, useState, useMemo } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Dialog } from '@/components/ui/Dialog'
+import { DatePicker } from '@/components/ui/DatePicker'
 import { useCreateFactura, useUpdateFactura } from '@/lib/queries/facturas'
 import type { Factura, FacturaInput } from '@/types/domain'
 import { useWholesalersStore } from '@/stores/wholesalersStore'
@@ -69,6 +70,7 @@ export function AbonoModal({
     reset,
     setValue,
     watch,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -200,7 +202,17 @@ export function AbonoModal({
             <label className="mb-1 block text-xs font-semibold text-slate-400">
               {t('general.fecha', 'Fecha')}
             </label>
-            <input type="date" {...register('fecha')} className={inputCls} />
+            <Controller
+              control={control}
+              name="fecha"
+              render={({ field }) => (
+                <DatePicker
+                  value={field.value ?? ''}
+                  onChange={field.onChange}
+                  className={inputCls}
+                />
+              )}
+            />
             {errors.fecha && (
               <p className="mt-1 text-xs text-red-400">{t(errors.fecha.message || '', 'Indica la fecha')}</p>
             )}

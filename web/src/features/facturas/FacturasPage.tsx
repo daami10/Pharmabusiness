@@ -7,6 +7,7 @@ import { FacturaModal } from './FacturaModal'
 import { AbonoModal } from '../abonos/AbonoModal'
 import { Calendar } from './Calendar'
 import { CsvExportModal } from './CsvExportModal'
+import { DatePicker } from '@/components/ui/DatePicker'
 import { downloadFacturasCSV } from './lib/csv'
 import { downloadFacturasExcel } from './lib/excel'
 import { useFacturas, useDeleteFactura } from '@/lib/queries/facturas'
@@ -405,17 +406,15 @@ export function FacturasPage() {
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
               {t('facturas.filter.issue_date', 'FECHA EMISIÓN')}:
             </span>
-            <input
-              type="date"
+            <DatePicker
               value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
+              onChange={setStartDate}
               className="rounded-xl border border-white/5 bg-slate-950/40 py-2 px-3 text-xs text-slate-100 placeholder-slate-500 focus:border-accent-blue/40 focus:outline-none"
             />
             <span className="text-slate-500">—</span>
-            <input
-              type="date"
+            <DatePicker
               value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
+              onChange={setEndDate}
               className="rounded-xl border border-white/5 bg-slate-950/40 py-2 px-3 text-xs text-slate-100 placeholder-slate-500 focus:border-accent-blue/40 focus:outline-none"
             />
             {(startDate || endDate) && (
