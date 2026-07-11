@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Dialog } from '@/components/ui/Dialog'
+import { DatePicker } from '@/components/ui/DatePicker'
 import { getRemainingMonths } from '@/lib/utils/dates'
 import { useCreateSeguros, useUpdateSeguro } from '@/lib/queries/trabajadores'
 import type { Seguro, SeguroInput } from '@/types/domain'
@@ -38,6 +39,7 @@ export function SeguroModal({
 
   const {
     register,
+    control,
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
@@ -94,7 +96,18 @@ export function SeguroModal({
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="mb-1 block text-xs font-semibold text-slate-400">Mes</label>
-            <input type="month" {...register('mes')} className={inputCls} />
+            <Controller
+              control={control}
+              name="mes"
+              render={({ field }) => (
+                <DatePicker
+                  mode="month"
+                  value={field.value ?? ''}
+                  onChange={field.onChange}
+                  className={inputCls}
+                />
+              )}
+            />
             {errors.mes && (
               <p className="mt-1 text-xs text-red-400">{errors.mes.message}</p>
             )}
