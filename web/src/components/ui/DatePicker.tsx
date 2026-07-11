@@ -112,13 +112,25 @@ export function DatePicker({
     setOpen(true)
   }
 
+  // Máscara: al teclear solo dígitos, coloca las barras automáticamente.
+  // date: dd/mm/aaaa (8 díg.) · month: mm/aaaa (6 díg.). Ej: 01012027 -> 01/01/2027.
+  const maskTyped = (raw: string): string => {
+    const dg = raw.replace(/\D/g, '').slice(0, isMonth ? 6 : 8)
+    if (isMonth) return dg.length > 2 ? `${dg.slice(0, 2)}/${dg.slice(2)}` : dg
+    const parts = [dg.slice(0, 2)]
+    if (dg.length > 2) parts.push(dg.slice(2, 4))
+    if (dg.length > 4) parts.push(dg.slice(4))
+    return parts.join('/')
+  }
+
   const onType = (raw: string) => {
-    setText(raw)
-    if (raw.trim() === '') {
+    const masked = maskTyped(raw)
+    setText(masked)
+    if (masked === '') {
       onChange('')
       return
     }
-    const iso = parseTyped(raw)
+    const iso = parseTyped(masked)
     if (iso) onChange(iso)
   }
 
