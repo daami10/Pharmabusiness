@@ -3,7 +3,7 @@ import { ChevronDown, Pencil, Plus, RefreshCw, Trash2 } from 'lucide-react'
 import { useFacturas, useDeleteFactura } from '@/lib/queries/facturas'
 import { useYearStore } from '@/stores/yearStore'
 import { formatMoney } from '@/lib/utils/money'
-import { formatDate, monthLabel } from '@/lib/utils/dates'
+import { formatDate, monthLabel, isFutureDate } from '@/lib/utils/dates'
 import type { Factura } from '@/types/domain'
 import { AbonoModal } from './AbonoModal'
 import { useTranslation, translateText } from '@/lib/i18n'
@@ -211,7 +211,18 @@ function AbonoGroupRow({
               {formatDate(a.fecha)}
             </td>
             <td className="px-6 py-4 text-sm font-bold text-white">
-              {a.laboratorio || '—'}
+              <span className="flex items-center gap-2">
+                {a.laboratorio || '—'}
+                {isFutureDate(a.fecha) ? (
+                  <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-400">
+                    {t('abonos.badge.pending', 'Pendiente')}
+                  </span>
+                ) : (
+                  <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-400">
+                    {t('abonos.badge.credited', 'Abonado')}
+                  </span>
+                )}
+              </span>
             </td>
             <td className="px-6 py-4 text-right text-sm font-extrabold text-emerald-400">
               + {formatMoney(a.importe)}

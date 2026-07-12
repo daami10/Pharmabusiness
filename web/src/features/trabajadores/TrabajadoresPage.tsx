@@ -9,6 +9,7 @@ import {
 import { useYearStore } from '@/stores/yearStore'
 import { useLocation } from 'react-router-dom'
 import { formatMoney } from '@/lib/utils/money'
+import { formatDate } from '@/lib/utils/dates'
 import { buildMonthSections } from '@/lib/utils/monthGroups'
 import { MonthGroupAccordion } from '@/components/MonthGroupAccordion'
 import type { Nomina, Seguro } from '@/types/domain'
@@ -89,6 +90,7 @@ export function TrabajadoresPage() {
     <tr key={n.id} className="border-b border-white/5 transition-colors hover:bg-white/5">
       <td className="px-6 py-4 text-sm font-extrabold text-white">
         {n.trabajador_nombre || '—'}
+        <span className="mt-0.5 block text-2xs font-normal text-slate-500">{formatDate(n.fecha)}</span>
       </td>
       <td className="px-6 py-4">{badge(isFuture, t('trabajadores.badge.prevista', 'Prevista'), t('trabajadores.badge.registrada', 'Registrada'))}</td>
       <td className="px-6 py-4 text-right text-sm font-extrabold text-white">
@@ -123,7 +125,12 @@ export function TrabajadoresPage() {
 
   const renderSeguro = (s: Seguro, isFuture: boolean) => (
     <tr key={s.id} className="border-b border-white/5 transition-colors hover:bg-white/5">
-      <td className="px-6 py-4">{badge(isFuture, t('trabajadores.badge.previsto', 'Previsto'), t('trabajadores.badge.registrado', 'Registrado'))}</td>
+      <td className="px-6 py-4">
+        <span className="flex items-center gap-2">
+          {badge(isFuture, t('trabajadores.badge.previsto', 'Previsto'), t('trabajadores.badge.registrado', 'Registrado'))}
+          <span className="text-2xs text-slate-500">{formatDate(s.fecha)}</span>
+        </span>
+      </td>
       <td className="px-6 py-4 text-right text-sm font-extrabold text-white">
         {formatMoney(s.importe)}
       </td>
