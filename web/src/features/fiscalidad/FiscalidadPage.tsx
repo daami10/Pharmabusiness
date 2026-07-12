@@ -4,6 +4,7 @@ import { useFiscalidad, useDeleteFiscal } from '@/lib/queries/fiscalidad'
 import { useYearStore } from '@/stores/yearStore'
 import { useLocation } from 'react-router-dom'
 import { formatMoney } from '@/lib/utils/money'
+import { formatDate } from '@/lib/utils/dates'
 import { MonthGroupAccordion } from '@/components/MonthGroupAccordion'
 import type { Fiscal } from '@/types/domain'
 import { fiscalKpis, groupFiscalByMonth } from './lib/fiscalidad-view'
@@ -62,6 +63,7 @@ export function FiscalidadPage() {
             {isFuture ? t('fiscalidad.badge.future', 'Previsto') : t('fiscalidad.badge.paid', 'Pagado')}
           </span>
         </span>
+        <span className="mt-0.5 block text-2xs text-slate-500">{formatDate(f.fecha)}</span>
       </td>
       <td className="px-6 py-4 text-right text-sm font-extrabold text-white">
         {formatMoney(f.importe)}

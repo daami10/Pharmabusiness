@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Dialog } from '@/components/ui/Dialog'
 import { DatePicker } from '@/components/ui/DatePicker'
-import { getRemainingMonths } from '@/lib/utils/dates'
+import { getRemainingDatesForDate } from '@/lib/utils/dates'
 import { useTranslation } from '@/lib/i18n'
 import {
   useCreateNominas,
@@ -15,7 +15,7 @@ import type { Nomina, NominaInput } from '@/types/domain'
 
 const schema = z.object({
   trabajador_id: z.string().min(1, 'trabajadores.error.select_worker'),
-  mes: z.string().min(1, 'trabajadores.error.select_month'),
+  fecha: z.string().min(1, 'facturas.error.select_date'),
   importe: z
     .string()
     .refine(
@@ -61,7 +61,7 @@ export function NominaModal({
     resolver: zodResolver(schema),
     defaultValues: {
       trabajador_id: '',
-      mes: '',
+      fecha: '',
       importe: '',
       concepto: '',
       repetir: false,
@@ -72,7 +72,7 @@ export function NominaModal({
     if (!open) return
     reset({
       trabajador_id: nomina?.trabajador_id ?? '',
-      mes: nomina ? nomina.fecha.slice(0, 7) : new Date().toISOString().slice(0, 7),
+      fecha: nomina ? nomina.fecha : new Date().toISOString().slice(0, 10),
       importe: nomina ? String(nomina.importe) : '',
       concepto: nomina?.concepto ?? '',
       repetir: false,
@@ -95,16 +95,13 @@ export function NominaModal({
         const input: NominaInput = {
           trabajador_id: v.trabajador_id,
           trabajador_nombre: nombre,
-          fecha: `${v.mes}-01`,
+          fecha: v.fecha,
           importe,
           concepto,
         }
         await updateNomina.mutateAsync({ id: nomina.id, input })
       } else {
-        const [y, m] = v.mes.split('-')
-        const fechas = v.repetir
-          ? getRemainingMonths(Number(y), Number(m))
-          : [`${v.mes}-01`]
+        const fechas = v.repetir ? getRemainingDatesForDate(v.fecha) : [v.fecha]
         await createNominas.mutateAsync(
           fechas.map((fecha) => ({
             trabajador_id: v.trabajador_id,
@@ -147,21 +144,20 @@ export function NominaModal({
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="mb-1 block text-xs font-semibold text-slate-400">{t('general.mes', 'Mes')}</label>
+            <label className="mb-1 block text-xs font-semibold text-slate-400">{t('general.fecha', 'Fecha')}</label>
             <Controller
               control={control}
-              name="mes"
+              name="fecha"
               render={({ field }) => (
                 <DatePicker
-                  mode="month"
                   value={field.value ?? ''}
                   onChange={field.onChange}
                   className={inputCls}
                 />
               )}
             />
-            {errors.mes && (
-              <p className="mt-1 text-xs text-red-400">{t(errors.mes.message || '', 'Indica el mes')}</p>
+            {errors.fecha && (
+              <p className="mt-1 text-xs text-red-400">{t(errors.fecha.message || '', 'Indica la fecha')}</p>
             )}
           </div>
           <div>
