@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useRef, useState, useMemo } from 'react'
 import type { ChangeEvent } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -150,29 +150,40 @@ export function FacturaModal({
     if (open) reset(factura ? toForm(factura) : emptyForm(activeYear))
   }, [open, factura, activeYear, reset])
 
-  // Trigger OCR scan automatically if an initial file is provided
+  // OCR automático al recibir un archivo. IMPORTANTE: escanear UNA SOLA VEZ por
+  // archivo. Antes el efecto tenía `t` (y `setValue`) en deps, y como useTranslation
+  // crea una `t` nueva en cada render, el efecto se reejecutaba y lanzaba varias
+  // llamadas concurrentes a Gemini → los valores "bailaban" y se gastaba cuota.
+  const scannedFileRef = useRef<File | null>(null)
   useEffect(() => {
-    if (open && initialFile && !factura) {
-      const runScan = async () => {
-        setOcrError('')
-        setOcrStatus('loading')
-        try {
-          const r = await scanInvoice(initialFile)
-          if (r.laboratorio) setValue('laboratorio', r.laboratorio)
-          if (r.numFactura) setValue('num_factura', r.numFactura)
-          if (r.importe > 0) setValue('importe', String(r.importe))
-          if (/^\d{4}-\d{2}-\d{2}$/.test(r.fecha)) setValue('fecha', r.fecha)
-          if (/^\d{4}-\d{2}-\d{2}$/.test(r.vencimiento))
-            setValue('fecha_vencimiento', r.vencimiento)
-          setOcrStatus('ok')
-        } catch (err) {
-          setOcrStatus('idle')
-          setOcrError(err instanceof Error ? err.message : t('facturas.ocr.error_message', 'Error al analizar la imagen'))
-        }
-      }
-      runScan()
+    if (!open) {
+      scannedFileRef.current = null
+      return
     }
-  }, [open, initialFile, factura, setValue, t])
+    if (!initialFile || factura) return
+    if (scannedFileRef.current === initialFile) return
+    scannedFileRef.current = initialFile
+
+    const runScan = async () => {
+      setOcrError('')
+      setOcrStatus('loading')
+      try {
+        const r = await scanInvoice(initialFile)
+        if (r.laboratorio) setValue('laboratorio', r.laboratorio)
+        if (r.numFactura) setValue('num_factura', r.numFactura)
+        if (r.importe > 0) setValue('importe', String(r.importe))
+        if (/^\d{4}-\d{2}-\d{2}$/.test(r.fecha)) setValue('fecha', r.fecha)
+        if (/^\d{4}-\d{2}-\d{2}$/.test(r.vencimiento))
+          setValue('fecha_vencimiento', r.vencimiento)
+        setOcrStatus('ok')
+      } catch (err) {
+        setOcrStatus('idle')
+        setOcrError(err instanceof Error ? err.message : t('facturas.ocr.error_message', 'Error al analizar la imagen'))
+      }
+    }
+    runScan()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, initialFile, factura])
 
   function handleClose() {
     setServerError('')
