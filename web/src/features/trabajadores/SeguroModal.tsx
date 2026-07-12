@@ -4,12 +4,12 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Dialog } from '@/components/ui/Dialog'
 import { DatePicker } from '@/components/ui/DatePicker'
-import { getRemainingMonths } from '@/lib/utils/dates'
+import { getRemainingDatesForDate } from '@/lib/utils/dates'
 import { useCreateSeguros, useUpdateSeguro } from '@/lib/queries/trabajadores'
 import type { Seguro, SeguroInput } from '@/types/domain'
 
 const schema = z.object({
-  mes: z.string().min(1, 'Indica el mes'),
+  fecha: z.string().min(1, 'Indica la fecha'),
   importe: z
     .string()
     .refine(
@@ -45,13 +45,13 @@ export function SeguroModal({
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { mes: '', importe: '', notas: '', repetir: false },
+    defaultValues: { fecha: '', importe: '', notas: '', repetir: false },
   })
 
   useEffect(() => {
     if (!open) return
     reset({
-      mes: seguro ? seguro.fecha.slice(0, 7) : new Date().toISOString().slice(0, 7),
+      fecha: seguro ? seguro.fecha : new Date().toISOString().slice(0, 10),
       importe: seguro ? String(seguro.importe) : '',
       notas: seguro?.notas ?? '',
       repetir: false,
@@ -69,13 +69,10 @@ export function SeguroModal({
     const notas = v.notas.trim() || null
     try {
       if (seguro) {
-        const input: SeguroInput = { fecha: `${v.mes}-01`, importe, notas }
+        const input: SeguroInput = { fecha: v.fecha, importe, notas }
         await updateSeguro.mutateAsync({ id: seguro.id, input })
       } else {
-        const [y, m] = v.mes.split('-')
-        const fechas = v.repetir
-          ? getRemainingMonths(Number(y), Number(m))
-          : [`${v.mes}-01`]
+        const fechas = v.repetir ? getRemainingDatesForDate(v.fecha) : [v.fecha]
         await createSeguros.mutateAsync(
           fechas.map((fecha) => ({ fecha, importe, notas })),
         )
@@ -95,21 +92,20 @@ export function SeguroModal({
       <form onSubmit={onSubmit} className="space-y-4" noValidate>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="mb-1 block text-xs font-semibold text-slate-400">Mes</label>
+            <label className="mb-1 block text-xs font-semibold text-slate-400">Fecha</label>
             <Controller
               control={control}
-              name="mes"
+              name="fecha"
               render={({ field }) => (
                 <DatePicker
-                  mode="month"
                   value={field.value ?? ''}
                   onChange={field.onChange}
                   className={inputCls}
                 />
               )}
             />
-            {errors.mes && (
-              <p className="mt-1 text-xs text-red-400">{errors.mes.message}</p>
+            {errors.fecha && (
+              <p className="mt-1 text-xs text-red-400">{errors.fecha.message}</p>
             )}
           </div>
           <div>

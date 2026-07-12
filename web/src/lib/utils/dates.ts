@@ -79,3 +79,11 @@ export function getRemainingDatesForDate(isoDate: string): string[] {
   }
   return dates
 }
+
+/** True si la fecha (YYYY-MM-DD) es POSTERIOR a hoy (precisión de día). */
+export function isFutureDate(iso: string | null | undefined): boolean {
+  if (!iso) return false
+  const n = new Date()
+  const today = `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}-${String(n.getDate()).padStart(2, '0')}`
+  return iso.slice(0, 10) > today
+}

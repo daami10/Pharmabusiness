@@ -4,14 +4,14 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Dialog } from '@/components/ui/Dialog'
 import { DatePicker } from '@/components/ui/DatePicker'
-import { getRemainingMonths } from '@/lib/utils/dates'
+import { getRemainingDatesForDate } from '@/lib/utils/dates'
 import { useCreateFiscales, useUpdateFiscal } from '@/lib/queries/fiscalidad'
 import type { Fiscal, FiscalInput } from '@/types/domain'
 import { useTranslation } from '@/lib/i18n'
 
 const schema = z.object({
   concepto: z.string().min(1, 'fiscalidad.error.select_concept'),
-  mes: z.string().min(1, 'facturas.error.select_month'),
+  fecha: z.string().min(1, 'facturas.error.select_date'),
   importe: z
     .string()
     .refine(
@@ -26,7 +26,7 @@ type FormValues = z.infer<typeof schema>
 function emptyForm(): FormValues {
   return {
     concepto: '',
-    mes: new Date().toISOString().slice(0, 7),
+    fecha: new Date().toISOString().slice(0, 10),
     importe: '',
     notas: '',
     repetir: false,
@@ -64,7 +64,7 @@ export function FiscalModal({
       fiscal
         ? {
             concepto: fiscal.concepto,
-            mes: fiscal.fecha.slice(0, 7),
+            fecha: fiscal.fecha,
             importe: String(fiscal.importe),
             notas: fiscal.notas ?? '',
             repetir: false,
@@ -86,16 +86,13 @@ export function FiscalModal({
       if (fiscal) {
         const input: FiscalInput = {
           concepto: v.concepto,
-          fecha: `${v.mes}-01`,
+          fecha: v.fecha,
           importe,
           notas,
         }
         await updateFiscal.mutateAsync({ id: fiscal.id, input })
       } else {
-        const [y, m] = v.mes.split('-')
-        const fechas = v.repetir
-          ? getRemainingMonths(Number(y), Number(m))
-          : [`${v.mes}-01`]
+        const fechas = v.repetir ? getRemainingDatesForDate(v.fecha) : [v.fecha]
         await createFiscales.mutateAsync(
           fechas.map((fecha) => ({ concepto: v.concepto, fecha, importe, notas })),
         )
@@ -130,21 +127,20 @@ export function FiscalModal({
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="mb-1 block text-xs font-semibold text-slate-400">{t('general.mes', 'Mes')}</label>
+            <label className="mb-1 block text-xs font-semibold text-slate-400">{t('general.fecha', 'Fecha')}</label>
             <Controller
               control={control}
-              name="mes"
+              name="fecha"
               render={({ field }) => (
                 <DatePicker
-                  mode="month"
                   value={field.value ?? ''}
                   onChange={field.onChange}
                   className={inputCls}
                 />
               )}
             />
-            {errors.mes && (
-              <p className="mt-1 text-xs text-red-400">{t(errors.mes.message || '', 'Indica el mes')}</p>
+            {errors.fecha && (
+              <p className="mt-1 text-xs text-red-400">{t(errors.fecha.message || '', 'Indica la fecha')}</p>
             )}
           </div>
           <div>
