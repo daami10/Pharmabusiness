@@ -1,9 +1,10 @@
 import { useMemo, useState, useEffect } from 'react'
-import { ChevronDown, Download, Pencil, Plus, Search, Trash2 } from 'lucide-react'
+import { ChevronDown, Download, Pencil, Plus, Search, Trash2, Upload } from 'lucide-react'
 import { useLocation } from 'react-router-dom'
 import { useTranslation } from '@/lib/i18n'
 import { useAuth } from '@/features/auth/AuthProvider'
 import { FacturaModal } from './FacturaModal'
+import { BulkUploadModal } from './BulkUploadModal'
 import { AbonoModal } from '../abonos/AbonoModal'
 import { Calendar } from './Calendar'
 import { CsvExportModal } from './CsvExportModal'
@@ -64,6 +65,15 @@ export function FacturasPage() {
   const location = useLocation()
 
   const wholesalers = useWholesalersStore((s) => s.wholesalers)
+  // Categorías personalizadas ya en uso (tipos distintos de los de sistema y mayoristas).
+  const existingCategories = useMemo(() => {
+    const builtins = new Set(['Laboratorio', 'Otro', 'Abono', ...wholesalers])
+    const set = new Set<string>()
+    ;(data ?? []).forEach((f) => {
+      if (f.tipo && !builtins.has(f.tipo)) set.add(f.tipo)
+    })
+    return Array.from(set).sort()
+  }, [data, wholesalers])
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState<FacturaCategory>('')
   const [month, setMonth] = useState('')
@@ -76,6 +86,7 @@ export function FacturasPage() {
 
   const [overrides, setOverrides] = useState<Record<string, boolean>>({})
   const [modalOpen, setModalOpen] = useState(false)
+  const [bulkOpen, setBulkOpen] = useState(false)
   const [abonoModalOpen, setAbonoModalOpen] = useState(false)
   const [editing, setEditing] = useState<Factura | null>(null)
   const [initialFile, setInitialFile] = useState<File | null>(null)
@@ -265,6 +276,14 @@ export function FacturasPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setBulkOpen(true)}
+            className="flex items-center gap-2 rounded-xl border border-accent-blue/30 bg-accent-blue/10 px-5 py-2.5 text-sm font-bold text-accent-blue transition-all hover:bg-accent-blue/20"
+          >
+            <Upload className="h-4 w-4" strokeWidth={2.5} />
+            {t('facturas.button.bulk', 'Subida masiva')}
+          </button>
           <button
             type="button"
             onClick={openCreate}
@@ -517,6 +536,12 @@ export function FacturasPage() {
         factura={editing}
         initialFile={initialFile}
         activeYear={year}
+      />
+
+      <BulkUploadModal
+        open={bulkOpen}
+        onClose={() => setBulkOpen(false)}
+        existingCategories={existingCategories}
       />
 
       {abonoModalOpen && (

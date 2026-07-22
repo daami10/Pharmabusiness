@@ -2,6 +2,12 @@
 dist/
 node_modules/
 
+# Basura del sistema
+.DS_Store
+
+# Demo / reel promocional (vídeos pesados, no van al repo)
+demo/
+
 # Secretos / credenciales — NUNCA subir
 claves.txt
 .env
