@@ -66,6 +66,23 @@ describe('filterFacturas', () => {
     const r = filterFacturas(data, { ...filters, category: 'Mayorista' }, WHOLESALERS)
     expect(r.map((f) => f.id)).toEqual(['b'])
   })
+  it('categoría personalizada filtra solo su propio tipo', () => {
+    const withCustom = [
+      ...data,
+      mk({ id: 'e', tipo: 'Parafarmacia', laboratorio: 'X', fecha: '2026-05-01' }),
+      mk({ id: 'f', tipo: 'Parafarmacia', laboratorio: 'Y', fecha: '2026-06-01' }),
+    ]
+    const r = filterFacturas(withCustom, { ...filters, category: 'Parafarmacia' }, WHOLESALERS)
+    expect(r.map((f) => f.id).sort()).toEqual(['e', 'f'])
+  })
+  it('la categoría "Otro" no incluye las personalizadas (tipo literal)', () => {
+    const set = [
+      mk({ id: 'o', tipo: 'Otro', fecha: '2026-05-01' }),
+      mk({ id: 'e', tipo: 'Parafarmacia', fecha: '2026-05-02' }),
+    ]
+    const r = filterFacturas(set, { ...filters, category: 'Otro' }, WHOLESALERS)
+    expect(r.map((f) => f.id)).toEqual(['o'])
+  })
   it('búsqueda por laboratorio', () => {
     const r = filterFacturas(data, { ...filters, search: 'alfa' }, WHOLESALERS)
     expect(r.map((f) => f.id)).toEqual(['a'])

@@ -133,13 +133,16 @@ export function FacturasPage() {
 
   const counts = useMemo(() => {
     const c = { all: baseList.length, Laboratorio: 0, Mayorista: 0, Otro: 0, Abono: 0 }
+    // Categorías personalizadas (tipos que no son de sistema ni mayoristas).
+    const custom: Record<string, number> = {}
     for (const f of baseList) {
       if (f.tipo === 'Abono') c.Abono++
       else if (isWholesaler(f.tipo, wholesalers)) c.Mayorista++
       else if (f.tipo === 'Laboratorio') c.Laboratorio++
-      else c.Otro++
+      else if (f.tipo === 'Otro') c.Otro++
+      else custom[f.tipo] = (custom[f.tipo] ?? 0) + 1
     }
-    return c
+    return { ...c, custom }
   }, [baseList, wholesalers])
 
   const visible = useMemo(
@@ -262,6 +265,10 @@ export function FacturasPage() {
     { value: 'Mayorista', label: `${mayoristaLabel} (${counts.Mayorista})` },
     { value: 'Otro', label: `${t('general.otros', 'Otros')} (${counts.Otro})` },
     { value: 'Abono', label: `${t('nav.abonos', 'Abonos')} (${counts.Abono})` },
+    // Categorías personalizadas del cliente (una pestaña por cada tipo en uso).
+    ...Object.entries(counts.custom)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([name, n]) => ({ value: name, label: `${name} (${n})` })),
   ]
 
   return (
