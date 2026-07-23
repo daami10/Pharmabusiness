@@ -15,6 +15,7 @@ import { useFacturas, useDeleteFactura } from '@/lib/queries/facturas'
 import { useYearStore } from '@/stores/yearStore'
 import { isWholesaler } from '@/lib/config/wholesalers'
 import { useWholesalersStore } from '@/stores/wholesalersStore'
+import { useCategoriesStore } from '@/stores/categoriesStore'
 import { formatMoney } from '@/lib/utils/money'
 import { formatDate } from '@/lib/utils/dates'
 import type { VencStatus } from '@/lib/utils/dates'
@@ -65,15 +66,7 @@ export function FacturasPage() {
   const location = useLocation()
 
   const wholesalers = useWholesalersStore((s) => s.wholesalers)
-  // Categorías personalizadas ya en uso (tipos distintos de los de sistema y mayoristas).
-  const existingCategories = useMemo(() => {
-    const builtins = new Set(['Laboratorio', 'Otro', 'Abono', ...wholesalers])
-    const set = new Set<string>()
-    ;(data ?? []).forEach((f) => {
-      if (f.tipo && !builtins.has(f.tipo)) set.add(f.tipo)
-    })
-    return Array.from(set).sort()
-  }, [data, wholesalers])
+  const storeCategories = useCategoriesStore((s) => s.categories)
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState<FacturaCategory>('')
   const [month, setMonth] = useState('')
@@ -133,8 +126,10 @@ export function FacturasPage() {
 
   const counts = useMemo(() => {
     const c = { all: baseList.length, Laboratorio: 0, Mayorista: 0, Otro: 0, Abono: 0 }
-    // Categorías personalizadas (tipos que no son de sistema ni mayoristas).
+    // Categorías personalizadas: se siembran a 0 (para que aparezcan aunque no
+    // tengan facturas) y luego se cuentan; los tipos huérfanos también suman.
     const custom: Record<string, number> = {}
+    for (const cat of storeCategories) custom[cat] = 0
     for (const f of baseList) {
       if (f.tipo === 'Abono') c.Abono++
       else if (isWholesaler(f.tipo, wholesalers)) c.Mayorista++
@@ -143,7 +138,7 @@ export function FacturasPage() {
       else custom[f.tipo] = (custom[f.tipo] ?? 0) + 1
     }
     return { ...c, custom }
-  }, [baseList, wholesalers])
+  }, [baseList, wholesalers, storeCategories])
 
   const visible = useMemo(
     () =>
@@ -545,11 +540,7 @@ export function FacturasPage() {
         activeYear={year}
       />
 
-      <BulkUploadModal
-        open={bulkOpen}
-        onClose={() => setBulkOpen(false)}
-        existingCategories={existingCategories}
-      />
+      <BulkUploadModal open={bulkOpen} onClose={() => setBulkOpen(false)} />
 
       {abonoModalOpen && (
         <AbonoModal

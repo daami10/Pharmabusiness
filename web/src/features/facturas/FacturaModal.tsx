@@ -8,6 +8,9 @@ import { Dialog } from '@/components/ui/Dialog'
 import { DatePicker } from '@/components/ui/DatePicker'
 import { useTranslation } from '@/lib/i18n'
 import { useWholesalersStore } from '@/stores/wholesalersStore'
+import { useCategoriesStore } from '@/stores/categoriesStore'
+import { useAuth } from '@/features/auth/AuthProvider'
+import { isReservedCategory } from '@/lib/config/categories'
 import { useUpdateFactura, useCreateFacturas } from '@/lib/queries/facturas'
 import { scanInvoice } from './lib/ocr'
 import type { Factura, FacturaInput } from '@/types/domain'
@@ -81,7 +84,13 @@ export function FacturaModal({
   activeYear: number
 }) {
   const { t } = useTranslation()
+  const { activeOrgId } = useAuth()
   const wholesalers = useWholesalersStore((s) => s.wholesalers)
+  const categories = useCategoriesStore((s) => s.categories)
+  const addCategory = useCategoriesStore((s) => s.addCategory)
+  const [newCatMode, setNewCatMode] = useState(false)
+  const [newCat, setNewCat] = useState('')
+  const [catError, setCatError] = useState('')
   const createFacturas = useCreateFacturas()
   const updateFactura = useUpdateFactura()
   const [serverError, setServerError] = useState('')
@@ -313,6 +322,14 @@ export function FacturaModal({
             {...register('tipo', {
               onChange: (e) => {
                 const v = e.target.value
+                if (v === '__new__') {
+                  // No es una categoría real: abre el input para crear una nueva.
+                  setValue('tipo', '')
+                  setCatError('')
+                  setNewCatMode(true)
+                  return
+                }
+                setNewCatMode(false)
                 if (wholesalers.includes(v)) setValue('laboratorio', v)
               },
             })}
@@ -326,7 +343,49 @@ export function FacturaModal({
               </option>
             ))}
             <option value="Otro">{t('general.otro', 'Otro')}</option>
+            {categories.length > 0 && (
+              <optgroup label={t('bulk.custom_group', 'Personalizadas')}>
+                {categories.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </optgroup>
+            )}
+            <option value="__new__">➕ {t('bulk.new_category', 'Nueva categoría…')}</option>
           </select>
+          {newCatMode && (
+            <div className="mt-2 flex gap-2">
+              <input
+                type="text"
+                value={newCat}
+                onChange={(e) => setNewCat(e.target.value)}
+                placeholder={t('categories.placeholder', 'Ej: Parafarmacia, Limpieza…')}
+                className={inputCls}
+                autoFocus
+              />
+              <button
+                type="button"
+                onClick={async () => {
+                  const v = newCat.trim()
+                  setCatError('')
+                  if (!v) return
+                  if (isReservedCategory(v, wholesalers)) {
+                    setCatError(t('categories.error.reserved', 'Ese nombre ya es una categoría de sistema o un mayorista.'))
+                    return
+                  }
+                  await addCategory(v, activeOrgId)
+                  setValue('tipo', v, { shouldValidate: true })
+                  setNewCat('')
+                  setNewCatMode(false)
+                }}
+                className="shrink-0 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 px-4 text-sm font-semibold text-white transition-all hover:from-blue-400 hover:to-indigo-500"
+              >
+                {t('general.anadir', 'Añadir')}
+              </button>
+            </div>
+          )}
+          {catError && <p className="mt-1 text-xs text-red-400">{catError}</p>}
           {errors.tipo && (
             <p className="mt-1 text-xs text-red-400">{t(errors.tipo.message || '', 'Selecciona una categoría')}</p>
           )}

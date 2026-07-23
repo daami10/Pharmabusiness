@@ -9,6 +9,7 @@ import { useFiscalidad } from '@/lib/queries/fiscalidad'
 import { useNominas, useSeguros } from '@/lib/queries/trabajadores'
 import { useYearStore } from '@/stores/yearStore'
 import { useWholesalersStore } from '@/stores/wholesalersStore'
+import { useCategoriesStore } from '@/stores/categoriesStore'
 import { useAuth } from '@/features/auth/AuthProvider'
 import { DatePicker } from '@/components/ui/DatePicker'
 import { formatMoney } from '@/lib/utils/money'
@@ -57,6 +58,7 @@ export type AnalisisCategory =
   | 'Otro'
   | 'Fiscalidad'
   | 'Trabajadores'
+  | (string & {}) // categorías personalizadas
 
 function formatMonthLabel(key: string, lang: string): string {
   if (!key || key === '0000-00') return lang === 'ca' ? 'Sense data' : 'Sin fecha'
@@ -76,6 +78,7 @@ export function AnalisisPage() {
   const seguros = useSeguros()
 
   const wholesalers = useWholesalersStore((s) => s.wholesalers)
+  const customCategories = useCategoriesStore((s) => s.categories)
   // Un empleado solo ve las secciones para las que tiene permiso (fiscalidad/trabajadores);
   // así no se le muestran esos datos a 0 ni en el selector ni en el resumen consolidado.
   const { permissions, userRole } = useAuth()
@@ -134,13 +137,30 @@ export function AnalisisPage() {
 
   const otroStats = useMemo(() => {
     const items = facturasOnly.filter(
-      (f) => f.tipo !== 'Laboratorio' && !isWholesaler(f.tipo, wholesalers),
+      (f) =>
+        f.tipo !== 'Laboratorio' &&
+        !isWholesaler(f.tipo, wholesalers) &&
+        !customCategories.includes(f.tipo),
     )
     return {
       total: items.reduce((sum, f) => sum + f.importe, 0),
       count: items.length,
     }
-  }, [facturasOnly, wholesalers])
+  }, [facturasOnly, wholesalers, customCategories])
+
+  // Una caja de resumen por cada categoría personalizada de la organización.
+  const customStats = useMemo(
+    () =>
+      customCategories.map((name) => {
+        const items = facturasOnly.filter((f) => f.tipo === name)
+        return {
+          name,
+          total: items.reduce((sum, f) => sum + f.importe, 0),
+          count: items.length,
+        }
+      }),
+    [facturasOnly, customCategories],
+  )
 
   const fiscalStats = useMemo(() => {
     const items = (fiscal.data ?? []).filter((f) => inRange(f.fecha))
@@ -540,6 +560,7 @@ export function AnalisisPage() {
     { value: 'Laboratorio', label: t('facturas.tab.laboratorios', 'Laboratorios') },
     { value: 'Mayorista', label: wholesalers.length > 1 ? t('settings.tab.wholesalers_plural', 'Mayoristas') : t('settings.tab.wholesalers_singular', 'Mayorista') },
     { value: 'Otro', label: t('general.otros', 'Otros') },
+    ...customCategories.map((name) => ({ value: name, label: name })),
     ...(can('fiscalidad_read')
       ? [{ value: 'Fiscalidad' as const, label: t('nav.fiscalidad', 'Fiscalidad') }]
       : []),
@@ -783,6 +804,35 @@ export function AnalisisPage() {
             {otroStats.count} {otroStats.count !== 1 ? t('nav.facturas', 'facturas').toLowerCase() : t('inicio.factura_singular', 'factura')}
           </p>
         </div>
+
+        {/* Categorías personalizadas: una caja por cada una */}
+        {customStats.map((cs) => (
+          <div
+            key={cs.name}
+            onClick={() => setCategory(cs.name)}
+            className={`cursor-pointer transition-all select-none glass-card glow-blue glow-blue-hover rounded-2xl p-5 ${
+              category === cs.name
+                ? 'ring-2 ring-indigo-500 shadow-[0_0_20px_rgba(99,102,241,0.3)]'
+                : ''
+            }`}
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <span className="w-2 h-2 rounded-full bg-indigo-500 shadow-[0_0_6px_rgba(99,102,241,0.5)]"></span>
+              <p
+                className="text-xs font-bold text-indigo-400 uppercase tracking-wider truncate"
+                title={cs.name}
+              >
+                {cs.name}
+              </p>
+            </div>
+            <p className="text-2xl font-black text-indigo-400 leading-none">
+              {formatMoney(cs.total)}
+            </p>
+            <p className="text-2xs text-slate-500 font-bold uppercase tracking-wider mt-1.5">
+              {cs.count} {cs.count !== 1 ? t('nav.facturas', 'facturas').toLowerCase() : t('inicio.factura_singular', 'factura')}
+            </p>
+          </div>
+        ))}
 
         {/* Fiscalidad (solo si el usuario tiene permiso; si no, ni se muestra ni es clicable) */}
         {can('fiscalidad_read') && (

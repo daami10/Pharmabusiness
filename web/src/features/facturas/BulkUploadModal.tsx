@@ -4,8 +4,11 @@ import { Dialog } from '@/components/ui/Dialog'
 import { DatePicker } from '@/components/ui/DatePicker'
 import { useTranslation } from '@/lib/i18n'
 import { useWholesalersStore } from '@/stores/wholesalersStore'
+import { useCategoriesStore } from '@/stores/categoriesStore'
+import { useAuth } from '@/features/auth/AuthProvider'
 import { useCreateFacturas } from '@/lib/queries/facturas'
 import { isWholesaler } from '@/lib/config/wholesalers'
+import { isReservedCategory } from '@/lib/config/categories'
 import { classifyScan, scanBatch, toFacturaInput, unzipInvoices } from './lib/batch-scan'
 import type { FacturaInput } from '@/types/domain'
 
@@ -33,15 +36,15 @@ const inputCls =
 export function BulkUploadModal({
   open,
   onClose,
-  existingCategories,
 }: {
   open: boolean
   onClose: () => void
-  /** Categorías personalizadas ya usadas (tipos distintos de facturas previas). */
-  existingCategories: string[]
 }) {
   const { t } = useTranslation()
+  const { activeOrgId } = useAuth()
   const wholesalers = useWholesalersStore((s) => s.wholesalers)
+  const categories = useCategoriesStore((s) => s.categories)
+  const addCategory = useCategoriesStore((s) => s.addCategory)
   const createFacturas = useCreateFacturas()
 
   const [step, setStep] = useState<'config' | 'scanning' | 'review'>('config')
@@ -95,6 +98,14 @@ export function BulkUploadModal({
     if (!category) {
       setError(t('bulk.error.no_category', 'Elige o escribe una categoría para el lote.'))
       return
+    }
+    // Categoría nueva: validar y persistirla en la organización antes de escanear.
+    if (categorySel === NEW_CATEGORY) {
+      if (isReservedCategory(category, wholesalers)) {
+        setError(t('categories.error.reserved', 'Ese nombre ya es una categoría de sistema o un mayorista.'))
+        return
+      }
+      await addCategory(category, activeOrgId)
     }
 
     let files: File[]
@@ -178,8 +189,8 @@ export function BulkUploadModal({
   }
 
   const customOptions = useMemo(
-    () => existingCategories.filter((c) => c && !wholesalers.includes(c)),
-    [existingCategories, wholesalers],
+    () => categories.filter((c) => c && !wholesalers.includes(c)),
+    [categories, wholesalers],
   )
 
   return (
