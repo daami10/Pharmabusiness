@@ -23,9 +23,11 @@ describe('classifyScan', () => {
     expect(r.missing).toEqual(['importe', 'fecha', 'num_factura', 'laboratorio'])
   })
 
-  it('bloquea importe a 0 o negativo', () => {
+  it('bloquea importe a 0/vacío pero NO negativo (negativo = abono)', () => {
     expect(classifyScan({ ...complete, importe: 0 }).missing).toContain('importe')
-    expect(classifyScan({ ...complete, importe: -5 }).missing).toContain('importe')
+    const neg = classifyScan({ ...complete, importe: -5 })
+    expect(neg.missing).not.toContain('importe')
+    expect(neg.status).toBe('ready')
   })
 
   it('bloquea fecha vacía o con formato inválido', () => {
@@ -76,7 +78,17 @@ describe('toFacturaInput', () => {
     expect(input.laboratorio).toBe('FedeFarma')
   })
 
-  it('num_factura vacío → null; fecha/venc inválidas → null; importe<=0 → 0', () => {
+  it('importe negativo → se guarda como Abono con importe en positivo y sin vencimiento', () => {
+    const input = toFacturaInput(
+      { ...complete, importe: -30.5 },
+      { category: 'Laboratorio', note: '' },
+    )
+    expect(input.tipo).toBe('Abono')
+    expect(input.importe).toBe(30.5)
+    expect(input.fecha_vencimiento).toBeNull()
+  })
+
+  it('num_factura vacío → null; fecha/venc inválidas → null; importe 0 → 0', () => {
     const input = toFacturaInput(
       { laboratorio: 'X', importe: 0, numFactura: '', fecha: 'malo', vencimiento: '' },
       { category: 'Otro', note: '' },

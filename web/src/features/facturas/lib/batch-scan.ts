@@ -49,7 +49,8 @@ export function classifyScan(result: OcrResult | null): {
   }
 
   const missing: MissingField[] = []
-  if (!(result.importe > 0)) missing.push('importe')
+  // Importe 0/vacío bloquea; un importe NEGATIVO es válido → se guarda como abono.
+  if (result.importe === 0) missing.push('importe')
   if (!DATE_RE.test(result.fecha)) missing.push('fecha')
   if (!result.numFactura.trim()) missing.push('num_factura')
   if (!result.laboratorio.trim()) missing.push('laboratorio')
@@ -140,13 +141,18 @@ export function toFacturaInput(
   result: OcrResult,
   opts: { category: string; note: string; laboratorio?: string },
 ): FacturaInput {
+  // Un importe negativo significa que es un abono (devolución): se guarda como
+  // tipo 'Abono' con el importe en positivo (los abonos se almacenan positivos y
+  // el signo lo aplican los cálculos). Los abonos no tienen vencimiento.
+  const isAbono = result.importe < 0
   return {
-    tipo: opts.category,
+    tipo: isAbono ? 'Abono' : opts.category,
     laboratorio: (opts.laboratorio ?? result.laboratorio).trim(),
     num_factura: result.numFactura.trim() || null,
     fecha: DATE_RE.test(result.fecha) ? result.fecha : null,
-    importe: result.importe > 0 ? result.importe : 0,
-    fecha_vencimiento: DATE_RE.test(result.vencimiento) ? result.vencimiento : null,
+    importe: Math.abs(result.importe),
+    fecha_vencimiento:
+      isAbono || !DATE_RE.test(result.vencimiento) ? null : result.vencimiento,
     notas: opts.note.trim(),
     pagada: false,
   }

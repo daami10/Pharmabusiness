@@ -33,6 +33,8 @@ interface EditRow {
 const inputCls =
   'w-full rounded-lg border border-white/10 bg-slate-950/40 px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:border-accent-blue/40 focus:outline-none'
 
+const fieldLabelCls = 'mb-1 block text-3xs font-bold uppercase tracking-wider text-slate-500'
+
 export function BulkUploadModal({
   open,
   onClose,
@@ -347,6 +349,8 @@ export function BulkUploadModal({
             {active.map((r) => {
               const missing = rowMissing(r)
               const ok = missing.length === 0
+              const importeNum = Number(r.importe.replace(',', '.')) || 0
+              const isAbonoRow = importeNum < 0
               return (
                 <div
                   key={r.key}
@@ -365,47 +369,73 @@ export function BulkUploadModal({
                       )}
                       {r.fileName}
                     </span>
-                    <button
-                      type="button"
-                      onClick={() => updateRow(r.key, { discarded: true })}
-                      className="rounded-lg p-1 text-slate-500 transition-colors hover:bg-white/5 hover:text-red-400"
-                      title={t('bulk.discard', 'Descartar')}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                    <div className="flex shrink-0 items-center gap-2">
+                      {isAbonoRow && (
+                        <span className="rounded-md border border-emerald-500/25 bg-emerald-500/10 px-2 py-0.5 text-2xs font-bold text-emerald-400">
+                          {t('bulk.abono_tag', 'Abono')}
+                        </span>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => updateRow(r.key, { discarded: true })}
+                        className="rounded-lg p-1 text-slate-500 transition-colors hover:bg-white/5 hover:text-red-400"
+                        title={t('bulk.discard', 'Descartar')}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
                   {r.scanError && (
                     <p className="mb-2 text-xs text-red-400">{r.scanError}</p>
                   )}
-                  {/* Solo se muestran los campos editables si hay algo que revisar. */}
+                  {/* Solo se muestran los campos editables si hay algo que revisar.
+                      Cada casilla lleva su título para que se entienda qué falta. */}
                   {!ok && (
                     <div className="grid grid-cols-2 gap-2">
                       {!isWholesalerCat && (
-                        <input
-                          value={r.laboratorio}
-                          onChange={(e) => updateRow(r.key, { laboratorio: e.target.value })}
-                          placeholder={t('facturas.label.lab_supplier', 'Laboratorio / Proveedor')}
-                          className={`${inputCls} ${missing.includes('laboratorio') ? 'border-amber-500/50' : ''}`}
-                        />
+                        <div>
+                          <label className={fieldLabelCls}>
+                            {t('facturas.label.lab_supplier', 'Laboratorio / Proveedor')}
+                          </label>
+                          <input
+                            value={r.laboratorio}
+                            onChange={(e) => updateRow(r.key, { laboratorio: e.target.value })}
+                            placeholder={t('facturas.label.lab_supplier', 'Laboratorio / Proveedor')}
+                            className={`${inputCls} ${missing.includes('laboratorio') ? 'border-amber-500/50' : ''}`}
+                          />
+                        </div>
                       )}
-                      <input
-                        value={r.numFactura}
-                        onChange={(e) => updateRow(r.key, { numFactura: e.target.value })}
-                        placeholder={t('facturas.label.invoice_number', 'Nº factura')}
-                        className={`${inputCls} ${missing.includes('num_factura') ? 'border-amber-500/50' : ''}`}
-                      />
-                      <input
-                        value={r.importe}
-                        onChange={(e) => updateRow(r.key, { importe: e.target.value })}
-                        inputMode="decimal"
-                        placeholder={`${t('general.importe', 'Importe')} (€)`}
-                        className={`${inputCls} ${missing.includes('importe') ? 'border-amber-500/50' : ''}`}
-                      />
-                      <DatePicker
-                        value={r.fecha}
-                        onChange={(v) => updateRow(r.key, { fecha: v })}
-                        className={`${inputCls} ${missing.includes('fecha') ? 'border-amber-500/50' : ''}`}
-                      />
+                      <div>
+                        <label className={fieldLabelCls}>
+                          {t('facturas.label.invoice_number', 'Nº factura')}
+                        </label>
+                        <input
+                          value={r.numFactura}
+                          onChange={(e) => updateRow(r.key, { numFactura: e.target.value })}
+                          placeholder={t('facturas.label.invoice_number', 'Nº factura')}
+                          className={`${inputCls} ${missing.includes('num_factura') ? 'border-amber-500/50' : ''}`}
+                        />
+                      </div>
+                      <div>
+                        <label className={fieldLabelCls}>
+                          {t('general.importe', 'Importe')} (€)
+                        </label>
+                        <input
+                          value={r.importe}
+                          onChange={(e) => updateRow(r.key, { importe: e.target.value })}
+                          inputMode="decimal"
+                          placeholder={`${t('general.importe', 'Importe')} (€)`}
+                          className={`${inputCls} ${missing.includes('importe') ? 'border-amber-500/50' : ''}`}
+                        />
+                      </div>
+                      <div>
+                        <label className={fieldLabelCls}>{t('general.fecha', 'Fecha')}</label>
+                        <DatePicker
+                          value={r.fecha}
+                          onChange={(v) => updateRow(r.key, { fecha: v })}
+                          className={`${inputCls} ${missing.includes('fecha') ? 'border-amber-500/50' : ''}`}
+                        />
+                      </div>
                     </div>
                   )}
                 </div>
