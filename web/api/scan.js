@@ -86,11 +86,24 @@ export default async function handler(req, res) {
         parts: [
           { inline_data: { mime_type: mimeType, data: base64Data } },
           {
-            text: 'Esta es una factura farmacéutica. Extrae los siguientes datos y responde SOLO con un JSON válido (sin markdown, sin texto extra): {"laboratorio":"...","importe":0.00,"numFactura":"...","fecha":"YYYY-MM-DD","vencimiento":"YYYY-MM-DD"}. Si no encuentras algún campo, déjalo vacío o en 0.',
+            text:
+              'Eres un extractor de datos de facturas farmacéuticas españolas. Analiza el documento y devuelve EXCLUSIVAMENTE un objeto JSON con estas claves: {"laboratorio":"","importe":0,"numFactura":"","fecha":"","vencimiento":""}. Reglas por campo: ' +
+              '"laboratorio" = nombre del PROVEEDOR o laboratorio que EMITE la factura (el emisor), NO la farmacia que la recibe. ' +
+              '"importe" = TOTAL a pagar con IVA, como número con punto decimal y sin separador de miles (ejemplo 1234.56). Respeta el signo: si es una devolución o abono y el total es negativo (viene con signo menos delante, entre paréntesis, o con el signo detrás), devuélvelo NEGATIVO (ejemplo -30.50); no lo conviertas a positivo. ' +
+              '"numFactura" = el número de la factura, no el número de cliente ni de pedido. ' +
+              '"fecha" = fecha de expedición en formato YYYY-MM-DD (conviértela desde DD/MM/AAAA si hace falta). ' +
+              '"vencimiento" = fecha de vencimiento o pago en YYYY-MM-DD; si no aparece, déjala vacía. ' +
+              'Si un dato no aparece con claridad, déjalo vacío (o 0 en importe). No inventes valores.',
           },
         ],
       },
     ],
+    // Salida forzada a JSON y determinista: mejora la fiabilidad de la extracción
+    // y evita respuestas envueltas en markdown o con texto extra.
+    generationConfig: {
+      temperature: 0,
+      responseMimeType: 'application/json',
+    },
   })
 
   let apiResponse = null
