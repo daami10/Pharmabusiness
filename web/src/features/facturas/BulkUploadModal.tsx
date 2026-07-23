@@ -99,13 +99,12 @@ export function BulkUploadModal({
       setError(t('bulk.error.no_category', 'Elige o escribe una categoría para el lote.'))
       return
     }
-    // Categoría nueva: validar y persistirla en la organización antes de escanear.
-    if (categorySel === NEW_CATEGORY) {
-      if (isReservedCategory(category, wholesalers)) {
-        setError(t('categories.error.reserved', 'Ese nombre ya es una categoría de sistema o un mayorista.'))
-        return
-      }
-      await addCategory(category, activeOrgId)
+    // Categoría nueva: validar el nombre, pero NO persistirla todavía. Solo se
+    // guarda en la organización si el lote llega a guardarse (en save()), para que
+    // cancelar la subida no deje una categoría huérfana.
+    if (categorySel === NEW_CATEGORY && isReservedCategory(category, wholesalers)) {
+      setError(t('categories.error.reserved', 'Ese nombre ya es una categoría de sistema o un mayorista.'))
+      return
     }
 
     let files: File[]
@@ -182,6 +181,10 @@ export function BulkUploadModal({
     )
     try {
       await createFacturas.mutateAsync(inputs)
+      // La categoría nueva solo se persiste ahora, con las facturas ya guardadas.
+      if (categorySel === NEW_CATEGORY) {
+        await addCategory(category, activeOrgId)
+      }
       handleClose()
     } catch (e) {
       setError(e instanceof Error ? e.message : t('general.save_error', 'Error al guardar'))
