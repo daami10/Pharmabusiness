@@ -6,12 +6,14 @@
 // Internet consumir la GEMINI_KEY gratis y agotar la cuota. Ahora valida el JWT.
 import { createClient } from '@supabase/supabase-js'
 
+// Modelos vigentes. Google retiró las familias 2.0 y 1.5, así que solo quedan
+// las 2.5. El primero que responda OK se usa; el resto son fallback.
+// Verifica los disponibles para tu key con:
+//   GET https://generativelanguage.googleapis.com/v1beta/models?key=<GEMINI_KEY>
 const BASE_MODELS = [
-  'gemini-2.0-flash',
-  'gemini-2.0-flash-lite',
-  'gemini-2.0-flash-001',
   'gemini-2.5-flash',
-  'gemini-1.5-flash',
+  'gemini-2.5-flash-lite',
+  'gemini-2.5-pro',
 ]
 
 // Límite de tamaño del payload base64 (~8 MB de imagen ≈ ~11 MB en base64).
@@ -76,37 +78,52 @@ export default async function handler(req, res) {
       ? [model, ...BASE_MODELS.filter((m) => m !== model)]
       : BASE_MODELS
 
+  const RETRYABLE = new Set([429, 500, 503])
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
+  const requestBody = JSON.stringify({
+    contents: [
+      {
+        parts: [
+          { inline_data: { mime_type: mimeType, data: base64Data } },
+          {
+            text: 'Esta es una factura farmacéutica. Extrae los siguientes datos y responde SOLO con un JSON válido (sin markdown, sin texto extra): {"laboratorio":"...","importe":0.00,"numFactura":"...","fecha":"YYYY-MM-DD","vencimiento":"YYYY-MM-DD"}. Si no encuentras algún campo, déjalo vacío o en 0.',
+          },
+        ],
+      },
+    ],
+  })
+
   let apiResponse = null
   let firstError = ''
 
   for (const m of SCAN_MODELS) {
-    try {
-      apiResponse = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${geminiKey}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [
-              {
-                parts: [
-                  { inline_data: { mime_type: mimeType, data: base64Data } },
-                  {
-                    text: 'Esta es una factura farmacéutica. Extrae los siguientes datos y responde SOLO con un JSON válido (sin markdown, sin texto extra): {"laboratorio":"...","importe":0.00,"numFactura":"...","fecha":"YYYY-MM-DD","vencimiento":"YYYY-MM-DD"}. Si no encuentras algún campo, déjalo vacío o en 0.',
-                  },
-                ],
-              },
-            ],
-          }),
-        },
-      )
-      if (apiResponse.ok) break
-      const errData = await apiResponse.json().catch(() => ({}))
-      if (!firstError)
-        firstError = `[${m}] ${errData.error?.message || apiResponse.statusText}`
-    } catch (e) {
-      if (!firstError) firstError = `[${m}] ${e.message}`
+    // Reintenta ante errores transitorios (rate limit / 5xx), habituales en la
+    // subida masiva donde se escanean varias facturas casi a la vez.
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        apiResponse = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${geminiKey}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: requestBody,
+          },
+        )
+        if (apiResponse.ok) break
+        if (RETRYABLE.has(apiResponse.status) && attempt < 2) {
+          await sleep(600 * 2 ** attempt) // 600ms, 1200ms
+          continue
+        }
+        const errData = await apiResponse.json().catch(() => ({}))
+        if (!firstError)
+          firstError = `[${m}] ${errData.error?.message || apiResponse.statusText}`
+        break
+      } catch (e) {
+        if (!firstError) firstError = `[${m}] ${e.message}`
+        break
+      }
     }
+    if (apiResponse && apiResponse.ok) break
   }
 
   if (!apiResponse || !apiResponse.ok) {
