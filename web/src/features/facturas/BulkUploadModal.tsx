@@ -33,7 +33,9 @@ interface EditRow {
 const inputCls =
   'w-full rounded-lg border border-white/10 bg-slate-950/40 px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:border-accent-blue/40 focus:outline-none'
 
-const fieldLabelCls = 'mb-1 block text-3xs font-bold uppercase tracking-wider text-slate-500'
+// text-2xs/3xs no están definidos en este proyecto (no generan CSS), así que se
+// usa un tamaño explícito pequeño y real.
+const fieldLabelCls = 'mb-1 block text-[10px] font-semibold uppercase tracking-wide text-slate-500'
 
 export function BulkUploadModal({
   open,
@@ -385,6 +387,14 @@ export function BulkUploadModal({
                       </button>
                     </div>
                   </div>
+                  {isAbonoRow && (
+                    <p className="mb-2 rounded-lg border border-emerald-500/15 bg-emerald-500/5 px-2.5 py-1.5 text-[11px] text-emerald-300">
+                      {t(
+                        'bulk.abono_note',
+                        'Detectada como abono (importe negativo): se guardará como devolución, no como factura.',
+                      )}
+                    </p>
+                  )}
                   {r.scanError && (
                     <p className="mb-2 text-xs text-red-400">{r.scanError}</p>
                   )}
@@ -429,11 +439,23 @@ export function BulkUploadModal({
                         />
                       </div>
                       <div>
-                        <label className={fieldLabelCls}>{t('general.fecha', 'Fecha')}</label>
+                        <label className={fieldLabelCls}>
+                          {t('facturas.label.fecha_exp', 'Fecha de expedición')}
+                        </label>
                         <DatePicker
                           value={r.fecha}
                           onChange={(v) => updateRow(r.key, { fecha: v })}
                           className={`${inputCls} ${missing.includes('fecha') ? 'border-amber-500/50' : ''}`}
+                        />
+                      </div>
+                      <div>
+                        <label className={fieldLabelCls}>
+                          {t('facturas.label.vencimiento', 'Vencimiento')}
+                        </label>
+                        <DatePicker
+                          value={r.vencimiento}
+                          onChange={(v) => updateRow(r.key, { vencimiento: v })}
+                          className={inputCls}
                         />
                       </div>
                     </div>
