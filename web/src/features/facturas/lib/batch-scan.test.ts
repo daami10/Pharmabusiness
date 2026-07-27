@@ -8,6 +8,7 @@ const complete: OcrResult = {
   numFactura: 'F-001',
   fecha: '2026-02-10',
   vencimiento: '2026-03-10',
+  esAbono: false,
 }
 
 describe('classifyScan', () => {
@@ -51,7 +52,7 @@ describe('classifyScan', () => {
   })
 
   it('acumula varios campos que faltan', () => {
-    const r = classifyScan({ laboratorio: '', importe: 0, numFactura: '', fecha: '', vencimiento: '' })
+    const r = classifyScan({ laboratorio: '', importe: 0, numFactura: '', fecha: '', vencimiento: '', esAbono: false })
     expect(r.status).toBe('review')
     expect(r.missing.sort()).toEqual(['fecha', 'importe', 'laboratorio', 'num_factura'])
   })
@@ -88,9 +89,19 @@ describe('toFacturaInput', () => {
     expect(input.fecha_vencimiento).toBeNull()
   })
 
+  it('esAbono=true (con importe positivo) → se guarda como Abono', () => {
+    const input = toFacturaInput(
+      { ...complete, importe: 30.5, esAbono: true },
+      { category: 'Laboratorio', note: '' },
+    )
+    expect(input.tipo).toBe('Abono')
+    expect(input.importe).toBe(30.5)
+    expect(input.fecha_vencimiento).toBeNull()
+  })
+
   it('num_factura vacío → null; fecha/venc inválidas → null; importe 0 → 0', () => {
     const input = toFacturaInput(
-      { laboratorio: 'X', importe: 0, numFactura: '', fecha: 'malo', vencimiento: '' },
+      { laboratorio: 'X', importe: 0, numFactura: '', fecha: 'malo', vencimiento: '', esAbono: false },
       { category: 'Otro', note: '' },
     )
     expect(input.num_factura).toBeNull()

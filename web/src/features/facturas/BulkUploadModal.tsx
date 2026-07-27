@@ -27,6 +27,7 @@ interface EditRow {
   importe: string
   fecha: string
   vencimiento: string
+  esAbono: boolean
   discarded: boolean
 }
 
@@ -140,9 +141,13 @@ export function BulkUploadModal({
           ? category
           : (it.result?.laboratorio ?? ''),
         numFactura: it.result?.numFactura ?? '',
-        importe: it.result && it.result.importe > 0 ? String(it.result.importe) : '',
+        // El importe se muestra siempre en positivo (magnitud); el signo/abono se
+        // captura aparte en esAbono.
+        importe: it.result && it.result.importe !== 0 ? String(Math.abs(it.result.importe)) : '',
         fecha: it.result?.fecha ?? '',
         vencimiento: it.result?.vencimiento ?? '',
+        // Abono si la IA lo marcó (esAbono) o si el importe salió negativo (fallback).
+        esAbono: (it.result?.esAbono ?? false) || (it.result ? it.result.importe < 0 : false),
         discarded: false,
       })),
     )
@@ -161,6 +166,7 @@ export function BulkUploadModal({
       numFactura: r.numFactura,
       fecha: r.fecha,
       vencimiento: r.vencimiento,
+      esAbono: r.esAbono,
     }).missing
   }
 
@@ -179,6 +185,7 @@ export function BulkUploadModal({
           numFactura: r.numFactura,
           fecha: r.fecha,
           vencimiento: r.vencimiento,
+          esAbono: r.esAbono,
         },
         { category, note, laboratorio: r.laboratorio },
       ),
@@ -352,7 +359,7 @@ export function BulkUploadModal({
               const missing = rowMissing(r)
               const ok = missing.length === 0
               const importeNum = Number(r.importe.replace(',', '.')) || 0
-              const isAbonoRow = importeNum < 0
+              const isAbonoRow = r.esAbono || importeNum < 0
               return (
                 <div
                   key={r.key}

@@ -8,6 +8,9 @@ const extractedSchema = z.object({
   numFactura: z.string().optional().default(''),
   fecha: z.string().optional().default(''),
   vencimiento: z.string().optional().default(''),
+  // La IA marca esAbono=true cuando el total es negativo / es una devolución.
+  // Preprocess seguro: solo true real o "true" cuentan (evita Boolean("false")===true).
+  esAbono: z.preprocess((v) => v === true || v === 'true', z.boolean()),
 })
 export type OcrResult = z.infer<typeof extractedSchema>
 

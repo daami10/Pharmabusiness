@@ -87,9 +87,10 @@ export default async function handler(req, res) {
           { inline_data: { mime_type: mimeType, data: base64Data } },
           {
             text:
-              'Eres un extractor de datos de facturas farmacéuticas españolas. Analiza el documento y devuelve EXCLUSIVAMENTE un objeto JSON con estas claves: {"laboratorio":"","importe":0,"numFactura":"","fecha":"","vencimiento":""}. Reglas por campo: ' +
+              'Eres un extractor de datos de facturas farmacéuticas españolas. Analiza el documento y devuelve EXCLUSIVAMENTE un objeto JSON con estas claves: {"laboratorio":"","importe":0,"numFactura":"","fecha":"","vencimiento":"","esAbono":false}. Reglas por campo: ' +
               '"laboratorio" = nombre del PROVEEDOR o laboratorio que EMITE la factura (el emisor), NO la farmacia que la recibe. ' +
-              '"importe" = TOTAL a pagar con IVA, como número con punto decimal y sin separador de miles (ejemplo 1234.56). Respeta el signo: si es una devolución o abono y el total es negativo (viene con signo menos delante, entre paréntesis, o con el signo detrás), devuélvelo NEGATIVO (ejemplo -30.50); no lo conviertas a positivo. ' +
+              '"importe" = TOTAL a pagar con IVA, SIEMPRE en positivo (la magnitud, sin signo), como número con punto decimal y sin separador de miles (ejemplo 1234.56). ' +
+              '"esAbono" = true si el documento es una devolución o abono; es decir, si el total aparece en NEGATIVO (con signo menos delante, entre paréntesis, o con el signo detrás) o el concepto indica devolución, abono o factura rectificativa. En cualquier otro caso false. Míralo con atención: es habitual que los abonos se vean como una factura normal salvo por el total en negativo. ' +
               '"numFactura" = el número de la factura, no el número de cliente ni de pedido. ' +
               '"fecha" = fecha de expedición en formato YYYY-MM-DD (conviértela desde DD/MM/AAAA si hace falta). ' +
               '"vencimiento" = fecha de vencimiento o pago en YYYY-MM-DD; si no aparece, déjala vacía. ' +

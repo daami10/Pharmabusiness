@@ -141,10 +141,11 @@ export function toFacturaInput(
   result: OcrResult,
   opts: { category: string; note: string; laboratorio?: string },
 ): FacturaInput {
-  // Un importe negativo significa que es un abono (devolución): se guarda como
-  // tipo 'Abono' con el importe en positivo (los abonos se almacenan positivos y
-  // el signo lo aplican los cálculos). Los abonos no tienen vencimiento.
-  const isAbono = result.importe < 0
+  // Es un abono (devolución) si la IA lo marcó (esAbono) o si el importe salió
+  // negativo (fallback). Se guarda como tipo 'Abono' con el importe en positivo
+  // (los abonos se almacenan positivos y el signo lo aplican los cálculos). Los
+  // abonos no tienen vencimiento.
+  const isAbono = result.esAbono === true || result.importe < 0
   return {
     tipo: isAbono ? 'Abono' : opts.category,
     laboratorio: (opts.laboratorio ?? result.laboratorio).trim(),
