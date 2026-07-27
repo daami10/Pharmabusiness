@@ -198,6 +198,9 @@ export function FacturaModal({
     setServerError('')
     setOcrError('')
     setOcrStatus('idle')
+    setNewCatMode(false)
+    setNewCat('')
+    setCatError('')
     onClose()
   }
 

@@ -31,6 +31,10 @@ describe('classifyScan', () => {
     expect(neg.status).toBe('ready')
   })
 
+  it('bloquea importe no numérico (NaN)', () => {
+    expect(classifyScan({ ...complete, importe: NaN }).missing).toContain('importe')
+  })
+
   it('bloquea fecha vacía o con formato inválido', () => {
     expect(classifyScan({ ...complete, fecha: '' }).missing).toContain('fecha')
     expect(classifyScan({ ...complete, fecha: '10/02/2026' }).missing).toContain('fecha')

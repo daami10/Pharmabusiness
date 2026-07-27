@@ -57,8 +57,9 @@ export function classifyScan(result: OcrResult | null): {
   }
 
   const missing: MissingField[] = []
-  // Importe 0/vacío bloquea; un importe NEGATIVO es válido → se guarda como abono.
-  if (result.importe === 0) missing.push('importe')
+  // Importe 0/vacío o no numérico (NaN) bloquea; un importe NEGATIVO es válido
+  // → se guarda como abono.
+  if (result.importe === 0 || Number.isNaN(result.importe)) missing.push('importe')
   if (!DATE_RE.test(result.fecha)) missing.push('fecha')
   // El vencimiento es obligatorio en facturas y abonos (marca cuándo pagar/cobrar
   // y se usa en el calendario).

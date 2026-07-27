@@ -36,7 +36,6 @@ export function VencListModal({
 
   const q = search.toLowerCase().trim()
   const rows = (data ?? [])
-    .filter((f) => f.tipo !== 'Abono')
     .filter((f) => (f.fecha_vencimiento ?? f.fecha ?? '').startsWith(String(year)))
     .filter((f) => {
       if (!status) return false
@@ -55,7 +54,11 @@ export function VencListModal({
       return status === 'paid' ? db.localeCompare(da) : da.localeCompare(db)
     })
 
-  const total = rows.reduce((sum, f) => sum + f.importe, 0)
+  // Los abonos restan (dinero que vuelve), coherente con el calendario.
+  const total = rows.reduce(
+    (sum, f) => sum + (f.tipo === 'Abono' ? -f.importe : f.importe),
+    0,
+  )
 
   return (
     <Dialog
@@ -88,17 +91,28 @@ export function VencListModal({
               className="flex items-center justify-between gap-3 rounded-xl border border-white/5 bg-white/5 px-4 py-3"
             >
               <div className="min-w-0">
-                <p className="truncate text-sm font-bold text-white">
-                  {f.laboratorio || '—'}
-                </p>
+                <div className="flex items-center gap-1.5">
+                  <p className="truncate text-sm font-bold text-white">
+                    {f.laboratorio || '—'}
+                  </p>
+                  {f.tipo === 'Abono' && (
+                    <span className="shrink-0 rounded-md border border-emerald-500/25 bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-bold text-emerald-400">
+                      {t('facturas.tag.abono', 'Abono')}
+                    </span>
+                  )}
+                </div>
                 <p className="text-xs text-slate-400">
                   {f.num_factura ? `${f.num_factura} · ` : ''}
                   {formatDate(f.fecha_vencimiento ?? f.fecha)}
                 </p>
               </div>
               <div className="flex shrink-0 items-center gap-1.5">
-                <span className="text-sm font-extrabold text-white mr-1.5">
-                  {formatMoney(f.importe)}
+                <span
+                  className={`text-sm font-extrabold mr-1.5 ${
+                    f.tipo === 'Abono' ? 'text-emerald-400' : 'text-white'
+                  }`}
+                >
+                  {f.tipo === 'Abono' ? `-${formatMoney(f.importe)}` : formatMoney(f.importe)}
                 </span>
                 <button
                   type="button"
