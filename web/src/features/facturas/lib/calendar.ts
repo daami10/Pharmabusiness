@@ -21,25 +21,22 @@ export function buildCalendarGrid(year: number, month0: number): CalCell[] {
   return cells
 }
 
-/** Facturas (no abonos) cuyo vencimiento cae en el mes indicado. */
+/** Facturas y abonos cuyo vencimiento cae en el mes indicado. */
 export function getMonthVencimientos(
   facturas: Factura[],
   year: number,
   month0: number,
 ): Factura[] {
   const key = `${year}-${String(month0 + 1).padStart(2, '0')}`
-  return facturas.filter(
-    (f) => f.tipo !== 'Abono' && (f.fecha_vencimiento ?? '').startsWith(key),
-  )
+  return facturas.filter((f) => (f.fecha_vencimiento ?? '').startsWith(key))
 }
 
 export type VencStats = Record<VencStatus, number>
 
-/** Conteo de facturas (no abonos) por estado de vencimiento efectivo. */
+/** Conteo de facturas y abonos por estado de vencimiento efectivo. */
 export function vencStats(facturas: Factura[]): VencStats {
   const c: VencStats = { overdue: 0, neardue: 0, pending: 0, paid: 0 }
   for (const f of facturas) {
-    if (f.tipo === 'Abono') continue
     const s = getEffectiveVencStatus(f)
     if (s !== 'none') c[s]++
   }

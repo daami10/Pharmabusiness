@@ -25,9 +25,9 @@ export interface FacturaFilters {
   endDate?: string
 }
 
-/** Estado de vencimiento efectivo (los abonos no vencen; sin fecha de venc. = pagada). */
+/** Estado de vencimiento efectivo (sin fecha de venc. = pagada). Facturas y abonos
+ *  se tratan igual: ambos pueden tener vencimiento y aparecer en el calendario. */
 export function getEffectiveVencStatus(f: Factura): VencStatus | 'none' {
-  if (f.tipo === 'Abono') return 'none'
   if (!f.fecha_vencimiento) return 'paid'
   return getVencStatus(f.fecha_vencimiento, f.pagada)
 }

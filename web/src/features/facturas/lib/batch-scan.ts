@@ -56,14 +56,13 @@ export function classifyScan(result: OcrResult | null): {
     }
   }
 
-  const isAbono = result.esAbono === true || result.importe < 0
   const missing: MissingField[] = []
   // Importe 0/vacío bloquea; un importe NEGATIVO es válido → se guarda como abono.
   if (result.importe === 0) missing.push('importe')
   if (!DATE_RE.test(result.fecha)) missing.push('fecha')
-  // El vencimiento marca cuándo pagar la factura → obligatorio. Los abonos no
-  // vencen (son devoluciones), así que en ese caso no bloquea.
-  if (!isAbono && !DATE_RE.test(result.vencimiento)) missing.push('vencimiento')
+  // El vencimiento es obligatorio en facturas y abonos (marca cuándo pagar/cobrar
+  // y se usa en el calendario).
+  if (!DATE_RE.test(result.vencimiento)) missing.push('vencimiento')
   if (!result.numFactura.trim()) missing.push('num_factura')
   if (!result.laboratorio.trim()) missing.push('laboratorio')
 
@@ -156,7 +155,7 @@ export function toFacturaInput(
   // Es un abono (devolución) si la IA lo marcó (esAbono) o si el importe salió
   // negativo (fallback). Se guarda como tipo 'Abono' con el importe en positivo
   // (los abonos se almacenan positivos y el signo lo aplican los cálculos). Los
-  // abonos no tienen vencimiento.
+  // abonos también conservan su vencimiento (se muestran en el calendario).
   const isAbono = result.esAbono === true || result.importe < 0
   return {
     tipo: isAbono ? 'Abono' : opts.category,
@@ -164,8 +163,7 @@ export function toFacturaInput(
     num_factura: result.numFactura.trim() || null,
     fecha: DATE_RE.test(result.fecha) ? result.fecha : null,
     importe: Math.abs(result.importe),
-    fecha_vencimiento:
-      isAbono || !DATE_RE.test(result.vencimiento) ? null : result.vencimiento,
+    fecha_vencimiento: DATE_RE.test(result.vencimiento) ? result.vencimiento : null,
     notas: opts.note.trim(),
     pagada: false,
   }

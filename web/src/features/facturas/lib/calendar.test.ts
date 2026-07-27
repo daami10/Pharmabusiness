@@ -38,12 +38,12 @@ describe('getMonthVencimientos', () => {
     mk({ id: 'c', fecha_vencimiento: '2026-06-25' }),
     mk({ id: 'd', tipo: 'Abono', fecha_vencimiento: '2026-06-15' }),
   ]
-  it('filtra por mes y excluye abonos', () => {
+  it('filtra por mes, incluyendo abonos', () => {
     expect(
       getMonthVencimientos(data, 2026, 5)
         .map((f) => f.id)
         .sort(),
-    ).toEqual(['a', 'c'])
+    ).toEqual(['a', 'c', 'd'])
   })
 })
 
@@ -54,14 +54,14 @@ describe('vencStats', () => {
   })
   afterEach(() => vi.useRealTimers())
 
-  it('cuenta por estado efectivo, ignorando abonos', () => {
+  it('cuenta por estado efectivo, incluyendo abonos', () => {
     const stats = vencStats([
       mk({ fecha_vencimiento: '2026-01-01' }), // overdue
       mk({ fecha_vencimiento: '2026-06-18' }), // neardue (≤7d)
       mk({ fecha_vencimiento: '2026-12-01' }), // pending
       mk({ fecha_vencimiento: null }), // paid (sin venc.)
-      mk({ tipo: 'Abono' }), // ignorado
+      mk({ tipo: 'Abono', fecha_vencimiento: '2026-12-05' }), // pending (abono, ahora cuenta)
     ])
-    expect(stats).toEqual({ overdue: 1, neardue: 1, pending: 1, paid: 1 })
+    expect(stats).toEqual({ overdue: 1, neardue: 1, pending: 2, paid: 1 })
   })
 })

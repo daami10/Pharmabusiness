@@ -19,6 +19,7 @@ const schema = z.object({
       (v) => v.trim() !== '' && Number(v.replace(',', '.')) > 0,
       'trabajadores.error.min_importe',
     ),
+  fecha_vencimiento: z.string(),
   notas: z.string(),
 })
 type FormValues = z.infer<typeof schema>
@@ -32,6 +33,7 @@ function emptyForm(year?: number): FormValues {
     laboratorio: '',
     fecha: `${y}-${m}-${d}`,
     importe: '',
+    fecha_vencimiento: '',
     notas: '',
   }
 }
@@ -41,6 +43,7 @@ function toForm(f: Factura): FormValues {
     laboratorio: f.laboratorio,
     fecha: f.fecha ?? '',
     importe: String(f.importe),
+    fecha_vencimiento: f.fecha_vencimiento ?? '',
     notas: f.notas ?? '',
   }
 }
@@ -140,7 +143,7 @@ export function AbonoModal({
       num_factura: null,
       fecha: v.fecha || null,
       importe: Number(v.importe.replace(',', '.')),
-      fecha_vencimiento: null,
+      fecha_vencimiento: v.fecha_vencimiento || null,
       notas: v.notas.trim(),
       pagada: false,
     }
@@ -231,6 +234,23 @@ export function AbonoModal({
               <p className="mt-1 text-xs text-red-400">{t(errors.importe.message || '', 'Importe mayor que 0')}</p>
             )}
           </div>
+        </div>
+
+        <div>
+          <label className="mb-1 block text-xs font-semibold text-slate-400">
+            {t('facturas.label.vencimiento', 'Vencimiento')}
+          </label>
+          <Controller
+            control={control}
+            name="fecha_vencimiento"
+            render={({ field }) => (
+              <DatePicker
+                value={field.value ?? ''}
+                onChange={field.onChange}
+                className={inputCls}
+              />
+            )}
+          />
         </div>
 
         <div>

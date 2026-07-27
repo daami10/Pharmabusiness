@@ -31,8 +31,10 @@ describe('getEffectiveVencStatus', () => {
   })
   afterEach(() => vi.useRealTimers())
 
-  it('abono → none', () => {
-    expect(getEffectiveVencStatus(mk({ tipo: 'Abono' }))).toBe('none')
+  it('abono con vencimiento se evalúa igual que una factura', () => {
+    expect(
+      getEffectiveVencStatus(mk({ tipo: 'Abono', fecha_vencimiento: '2026-01-01' })),
+    ).toBe('overdue')
   })
   it('sin fecha de vencimiento → paid', () => {
     expect(getEffectiveVencStatus(mk({ fecha_vencimiento: null }))).toBe('paid')

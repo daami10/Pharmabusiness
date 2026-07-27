@@ -51,10 +51,10 @@ describe('classifyScan', () => {
     expect(r.missing).toContain('vencimiento')
   })
 
-  it('vencimiento ausente NO bloquea en abonos (no vencen)', () => {
+  it('vencimiento ausente también bloquea en abonos (ahora vencen igual que facturas)', () => {
     const r = classifyScan({ ...complete, vencimiento: '', esAbono: true })
-    expect(r.missing).not.toContain('vencimiento')
-    expect(r.status).toBe('ready')
+    expect(r.missing).toContain('vencimiento')
+    expect(r.status).toBe('review')
   })
 
   it('acumula varios campos que faltan', () => {
@@ -91,24 +91,24 @@ describe('toFacturaInput', () => {
     expect(input.laboratorio).toBe('FedeFarma')
   })
 
-  it('importe negativo → se guarda como Abono con importe en positivo y sin vencimiento', () => {
+  it('importe negativo → se guarda como Abono con importe en positivo, conservando el vencimiento', () => {
     const input = toFacturaInput(
       { ...complete, importe: -30.5 },
       { category: 'Laboratorio', note: '' },
     )
     expect(input.tipo).toBe('Abono')
     expect(input.importe).toBe(30.5)
-    expect(input.fecha_vencimiento).toBeNull()
+    expect(input.fecha_vencimiento).toBe('2026-03-10')
   })
 
-  it('esAbono=true (con importe positivo) → se guarda como Abono', () => {
+  it('esAbono=true (con importe positivo) → se guarda como Abono conservando el vencimiento', () => {
     const input = toFacturaInput(
       { ...complete, importe: 30.5, esAbono: true },
       { category: 'Laboratorio', note: '' },
     )
     expect(input.tipo).toBe('Abono')
     expect(input.importe).toBe(30.5)
-    expect(input.fecha_vencimiento).toBeNull()
+    expect(input.fecha_vencimiento).toBe('2026-03-10')
   })
 
   it('num_factura vacío → null; fecha/venc inválidas → null; importe 0 → 0', () => {
