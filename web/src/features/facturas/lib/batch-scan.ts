@@ -21,7 +21,12 @@ const MIME_BY_EXT: Record<string, string> = {
 }
 
 /** Campos cuya ausencia manda la factura a revisión manual. */
-export type MissingField = 'importe' | 'fecha' | 'num_factura' | 'laboratorio'
+export type MissingField =
+  | 'importe'
+  | 'fecha'
+  | 'vencimiento'
+  | 'num_factura'
+  | 'laboratorio'
 
 export interface BatchItem {
   fileName: string
@@ -45,13 +50,20 @@ export function classifyScan(result: OcrResult | null): {
 } {
   // Escaneo fallido → todo pendiente, siempre a revisión.
   if (!result) {
-    return { status: 'review', missing: ['importe', 'fecha', 'num_factura', 'laboratorio'] }
+    return {
+      status: 'review',
+      missing: ['importe', 'fecha', 'vencimiento', 'num_factura', 'laboratorio'],
+    }
   }
 
+  const isAbono = result.esAbono === true || result.importe < 0
   const missing: MissingField[] = []
   // Importe 0/vacío bloquea; un importe NEGATIVO es válido → se guarda como abono.
   if (result.importe === 0) missing.push('importe')
   if (!DATE_RE.test(result.fecha)) missing.push('fecha')
+  // El vencimiento marca cuándo pagar la factura → obligatorio. Los abonos no
+  // vencen (son devoluciones), así que en ese caso no bloquea.
+  if (!isAbono && !DATE_RE.test(result.vencimiento)) missing.push('vencimiento')
   if (!result.numFactura.trim()) missing.push('num_factura')
   if (!result.laboratorio.trim()) missing.push('laboratorio')
 

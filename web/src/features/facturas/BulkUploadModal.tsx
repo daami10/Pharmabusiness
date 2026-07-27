@@ -462,7 +462,7 @@ export function BulkUploadModal({
                         <DatePicker
                           value={r.vencimiento}
                           onChange={(v) => updateRow(r.key, { vencimiento: v })}
-                          className={inputCls}
+                          className={`${inputCls} ${missing.includes('vencimiento') ? 'border-amber-500/50' : ''}`}
                         />
                       </div>
                   </div>

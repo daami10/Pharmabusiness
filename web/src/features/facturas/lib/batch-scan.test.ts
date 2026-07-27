@@ -21,7 +21,7 @@ describe('classifyScan', () => {
   it('un escaneo fallido (null) siempre va a revisión con todo pendiente', () => {
     const r = classifyScan(null)
     expect(r.status).toBe('review')
-    expect(r.missing).toEqual(['importe', 'fecha', 'num_factura', 'laboratorio'])
+    expect(r.missing).toEqual(['importe', 'fecha', 'vencimiento', 'num_factura', 'laboratorio'])
   })
 
   it('bloquea importe a 0/vacío pero NO negativo (negativo = abono)', () => {
@@ -45,16 +45,28 @@ describe('classifyScan', () => {
     expect(classifyScan({ ...complete, laboratorio: '' }).missing).toContain('laboratorio')
   })
 
-  it('vencimiento ausente NO bloquea (no está en la lista)', () => {
+  it('vencimiento ausente bloquea en una factura normal', () => {
     const r = classifyScan({ ...complete, vencimiento: '' })
+    expect(r.status).toBe('review')
+    expect(r.missing).toContain('vencimiento')
+  })
+
+  it('vencimiento ausente NO bloquea en abonos (no vencen)', () => {
+    const r = classifyScan({ ...complete, vencimiento: '', esAbono: true })
+    expect(r.missing).not.toContain('vencimiento')
     expect(r.status).toBe('ready')
-    expect(r.missing).toEqual([])
   })
 
   it('acumula varios campos que faltan', () => {
     const r = classifyScan({ laboratorio: '', importe: 0, numFactura: '', fecha: '', vencimiento: '', esAbono: false })
     expect(r.status).toBe('review')
-    expect(r.missing.sort()).toEqual(['fecha', 'importe', 'laboratorio', 'num_factura'])
+    expect(r.missing.sort()).toEqual([
+      'fecha',
+      'importe',
+      'laboratorio',
+      'num_factura',
+      'vencimiento',
+    ])
   })
 })
 
