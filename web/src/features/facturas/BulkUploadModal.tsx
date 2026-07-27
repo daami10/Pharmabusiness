@@ -405,10 +405,10 @@ export function BulkUploadModal({
                   {r.scanError && (
                     <p className="mb-2 text-xs text-red-400">{r.scanError}</p>
                   )}
-                  {/* Solo se muestran los campos editables si hay algo que revisar.
-                      Cada casilla lleva su título para que se entienda qué falta. */}
-                  {!ok && (
-                    <div className="grid grid-cols-2 gap-2">
+                  {/* Se muestran SIEMPRE los campos escaneados (editables) para poder
+                      confirmar los datos de cada factura/abono antes de guardar; los
+                      que bloquean se resaltan en ámbar. */}
+                  <div className="grid grid-cols-2 gap-2">
                       {!isWholesalerCat && (
                         <div>
                           <label className={fieldLabelCls}>
@@ -465,8 +465,7 @@ export function BulkUploadModal({
                           className={inputCls}
                         />
                       </div>
-                    </div>
-                  )}
+                  </div>
                 </div>
               )
             })}
