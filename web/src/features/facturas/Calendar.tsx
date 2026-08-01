@@ -109,7 +109,11 @@ export function Calendar({
     .slice()
     .sort((a, b) => (a.fecha_vencimiento ?? '').localeCompare(b.fecha_vencimiento ?? ''))
 
-  const listTotal = listItems.reduce((sum, f) => sum + f.importe, 0)
+  // Los abonos restan (dinero que vuelve), como en el resto de la app.
+  const listTotal = listItems.reduce(
+    (sum, f) => sum + (f.tipo === 'Abono' ? -f.importe : f.importe),
+    0,
+  )
   const todayStr = new Date().toISOString().slice(0, 10)
 
   function prevMonth() {
@@ -324,12 +328,23 @@ export function Calendar({
                       <p className="truncate text-sm font-bold text-white">
                         {f.laboratorio || '—'}
                       </p>
+                      {f.tipo === 'Abono' && (
+                        <span className="ml-1.5 shrink-0 rounded-md border border-emerald-500/25 bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-bold text-emerald-400">
+                          {t('facturas.tag.abono', 'Abono')}
+                        </span>
+                      )}
                     </div>
                     <p className="text-xs text-slate-400 mt-0.5">
                       Venc: {formatDate(f.fecha_vencimiento)}
                     </p>
-                    <p className="text-sm font-black text-white mt-0.5">
-                      {formatMoney(f.importe)}
+                    <p
+                      className={`text-sm font-black mt-0.5 ${
+                        f.tipo === 'Abono' ? 'text-emerald-400' : 'text-white'
+                      }`}
+                    >
+                      {f.tipo === 'Abono'
+                        ? `-${formatMoney(f.importe)}`
+                        : formatMoney(f.importe)}
                     </p>
                   </div>
                   <div className="flex items-center gap-1.5 shrink-0">

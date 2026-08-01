@@ -1,9 +1,10 @@
 import { useMemo, useState, useEffect } from 'react'
-import { ChevronDown, Download, Pencil, Plus, Search, Trash2 } from 'lucide-react'
+import { ChevronDown, Download, Pencil, Plus, Search, Trash2, Upload } from 'lucide-react'
 import { useLocation } from 'react-router-dom'
 import { useTranslation } from '@/lib/i18n'
 import { useAuth } from '@/features/auth/AuthProvider'
 import { FacturaModal } from './FacturaModal'
+import { BulkUploadModal } from './BulkUploadModal'
 import { AbonoModal } from '../abonos/AbonoModal'
 import { Calendar } from './Calendar'
 import { CsvExportModal } from './CsvExportModal'
@@ -14,6 +15,7 @@ import { useFacturas, useDeleteFactura } from '@/lib/queries/facturas'
 import { useYearStore } from '@/stores/yearStore'
 import { isWholesaler } from '@/lib/config/wholesalers'
 import { useWholesalersStore } from '@/stores/wholesalersStore'
+import { useCategoriesStore } from '@/stores/categoriesStore'
 import { formatMoney } from '@/lib/utils/money'
 import { formatDate } from '@/lib/utils/dates'
 import type { VencStatus } from '@/lib/utils/dates'
@@ -64,6 +66,7 @@ export function FacturasPage() {
   const location = useLocation()
 
   const wholesalers = useWholesalersStore((s) => s.wholesalers)
+  const storeCategories = useCategoriesStore((s) => s.categories)
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState<FacturaCategory>('')
   const [month, setMonth] = useState('')
@@ -76,6 +79,7 @@ export function FacturasPage() {
 
   const [overrides, setOverrides] = useState<Record<string, boolean>>({})
   const [modalOpen, setModalOpen] = useState(false)
+  const [bulkOpen, setBulkOpen] = useState(false)
   const [abonoModalOpen, setAbonoModalOpen] = useState(false)
   const [editing, setEditing] = useState<Factura | null>(null)
   const [initialFile, setInitialFile] = useState<File | null>(null)
@@ -122,14 +126,19 @@ export function FacturasPage() {
 
   const counts = useMemo(() => {
     const c = { all: baseList.length, Laboratorio: 0, Mayorista: 0, Otro: 0, Abono: 0 }
+    // Categorías personalizadas: se siembran a 0 (para que aparezcan aunque no
+    // tengan facturas) y luego se cuentan; los tipos huérfanos también suman.
+    const custom: Record<string, number> = {}
+    for (const cat of storeCategories) custom[cat] = 0
     for (const f of baseList) {
       if (f.tipo === 'Abono') c.Abono++
       else if (isWholesaler(f.tipo, wholesalers)) c.Mayorista++
       else if (f.tipo === 'Laboratorio') c.Laboratorio++
-      else c.Otro++
+      else if (f.tipo === 'Otro') c.Otro++
+      else custom[f.tipo] = (custom[f.tipo] ?? 0) + 1
     }
-    return c
-  }, [baseList, wholesalers])
+    return { ...c, custom }
+  }, [baseList, wholesalers, storeCategories])
 
   const visible = useMemo(
     () =>
@@ -251,6 +260,10 @@ export function FacturasPage() {
     { value: 'Mayorista', label: `${mayoristaLabel} (${counts.Mayorista})` },
     { value: 'Otro', label: `${t('general.otros', 'Otros')} (${counts.Otro})` },
     { value: 'Abono', label: `${t('nav.abonos', 'Abonos')} (${counts.Abono})` },
+    // Categorías personalizadas del cliente (una pestaña por cada tipo en uso).
+    ...Object.entries(counts.custom)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([name, n]) => ({ value: name, label: `${name} (${n})` })),
   ]
 
   return (
@@ -265,6 +278,14 @@ export function FacturasPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setBulkOpen(true)}
+            className="flex items-center gap-2 rounded-xl border border-accent-blue/30 bg-accent-blue/10 px-5 py-2.5 text-sm font-bold text-accent-blue transition-all hover:bg-accent-blue/20"
+          >
+            <Upload className="h-4 w-4" strokeWidth={2.5} />
+            {t('facturas.button.bulk', 'Subida masiva')}
+          </button>
           <button
             type="button"
             onClick={openCreate}
@@ -518,6 +539,8 @@ export function FacturasPage() {
         initialFile={initialFile}
         activeYear={year}
       />
+
+      <BulkUploadModal open={bulkOpen} onClose={() => setBulkOpen(false)} />
 
       {abonoModalOpen && (
         <AbonoModal

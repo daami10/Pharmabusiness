@@ -12,6 +12,8 @@ import {
   Sparkles,
   ChevronRight,
   FileUp,
+  Upload,
+  Tag,
 } from 'lucide-react'
 import { useFacturas } from '@/lib/queries/facturas'
 import { useFiscalidad } from '@/lib/queries/fiscalidad'
@@ -23,6 +25,8 @@ import { useAuth } from '@/features/auth/AuthProvider'
 import { computeInicioKpis } from './lib/inicio-view'
 import { PrevisionModal } from './PrevisionModal'
 import { FacturaModal } from '@/features/facturas/FacturaModal'
+import { BulkUploadModal } from '@/features/facturas/BulkUploadModal'
+import { CategoryManagerModal } from '@/features/facturas/CategoryManagerModal'
 import { NominaModal } from '@/features/trabajadores/NominaModal'
 import { SeguroModal } from '@/features/trabajadores/SeguroModal'
 import { FiscalModal } from '@/features/fiscalidad/FiscalModal'
@@ -39,6 +43,8 @@ export function InicioPage() {
 
   const [previsionOpen, setPrevisionOpen] = useState(false)
   const [fastActionOpen, setFastActionOpen] = useState(false)
+  const [bulkOpen, setBulkOpen] = useState(false)
+  const [categoryModalOpen, setCategoryModalOpen] = useState(false)
   const [dragging, setDragging] = useState(false)
   // Modales in-place: las acciones rápidas abren el modal aquí en Inicio; solo se
   // sale de Inicio si el usuario aplica una acción (no al cancelar/cerrar).
@@ -158,6 +164,10 @@ export function InicioPage() {
       setActiveModal('seguro')
     } else if (action === 'add-fiscal') {
       setActiveModal('fiscal')
+    } else if (action === 'bulk-upload') {
+      setBulkOpen(true)
+    } else if (action === 'add-category') {
+      setCategoryModalOpen(true)
     }
   }
 
@@ -292,8 +302,10 @@ export function InicioPage() {
 
       {/* Quick Actions & Drag-and-drop zone */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Cajas grandes: escaneo individual + subida masiva */}
+        <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Drag and drop card */}
-        <div className="lg:col-span-2 bg-[#0d1b32]/40 backdrop-blur-md border border-[#00f2fe]/10 rounded-2xl p-6 shadow-2xl flex flex-col justify-between min-h-[250px] glass-card">
+        <div className="bg-[#0d1b32]/40 backdrop-blur-md border border-[#00f2fe]/10 rounded-2xl p-6 shadow-2xl flex flex-col justify-between min-h-[250px] glass-card">
           <div>
             <div className="flex items-center gap-2 mb-3">
               <span className="w-2 h-6 bg-gradient-to-b from-[#00f2fe] to-blue-500 rounded-full"></span>
@@ -337,6 +349,36 @@ export function InicioPage() {
           </div>
         </div>
 
+        {/* Subida masiva card */}
+        <div className="bg-[#0d1b32]/40 backdrop-blur-md border border-indigo-500/15 rounded-2xl p-6 shadow-2xl flex flex-col justify-between min-h-[250px] glass-card">
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <span className="w-2 h-6 bg-gradient-to-b from-indigo-400 to-purple-500 rounded-full"></span>
+              <h3 className="text-lg font-extrabold text-slate-100 tracking-tight">
+                {t('inicio.bulk_title', 'Subida Masiva')}
+              </h3>
+            </div>
+            <p className="text-sm text-slate-400 leading-relaxed mb-4">
+              {t('inicio.bulk_desc', '¿Tienes muchas facturas juntas? Sube un ZIP con fotos o PDFs y la IA las procesará todas de una vez. Eliges una categoría común y solo revisas las que queden incompletas.')}
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setBulkOpen(true)}
+            className="border-2 border-dashed border-indigo-500/25 rounded-xl p-5 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-2 py-8 group hover:border-indigo-500/50 hover:bg-indigo-500/5"
+          >
+            <Upload className="h-8 w-8 text-slate-500 transition-colors group-hover:text-indigo-400" />
+            <span className="text-xs text-slate-300 group-hover:text-white transition-colors font-bold">
+              {t('inicio.bulk_cta', 'Subir un ZIP de facturas')}
+            </span>
+            <span className="text-3xs text-slate-500">
+              {t('inicio.bulk_supported', 'Fotos o PDFs comprimidos en .zip (Gemini IA)')}
+            </span>
+          </button>
+        </div>
+        </div>
+
         {/* Quick actions list card */}
         <div className="glass-card border border-white/5 rounded-2xl p-6 shadow-2xl flex flex-col justify-between">
           <div>
@@ -367,6 +409,30 @@ export function InicioPage() {
                 <span className="flex items-center gap-2.5">
                   <FileText className="h-4.5 w-4.5 text-blue-400" />
                   {t('inicio.new_invoice_manual', 'Nueva Factura Manual')}
+                </span>
+                <ChevronRight className="h-4.5 w-4.5 text-slate-500 group-hover:text-white transition-colors" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => triggerFastAction('bulk-upload')}
+                className="w-full flex items-center justify-between p-3.5 bg-white/3 hover:bg-white/8 rounded-xl border border-white/5 transition-all text-left text-sm font-semibold text-slate-200 hover:text-white group"
+              >
+                <span className="flex items-center gap-2.5">
+                  <Upload className="h-4.5 w-4.5 text-indigo-400" />
+                  {t('inicio.bulk_action', 'Subida Masiva (ZIP)')}
+                </span>
+                <ChevronRight className="h-4.5 w-4.5 text-slate-500 group-hover:text-white transition-colors" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => triggerFastAction('add-category')}
+                className="w-full flex items-center justify-between p-3.5 bg-white/3 hover:bg-white/8 rounded-xl border border-white/5 transition-all text-left text-sm font-semibold text-slate-200 hover:text-white group"
+              >
+                <span className="flex items-center gap-2.5">
+                  <Tag className="h-4.5 w-4.5 text-accent-blue" />
+                  {t('inicio.add_category_action', 'Añadir Categoría')}
                 </span>
                 <ChevronRight className="h-4.5 w-4.5 text-slate-500 group-hover:text-white transition-colors" />
               </button>
@@ -445,6 +511,11 @@ export function InicioPage() {
         open={activeModal === 'fiscal'}
         onClose={() => setActiveModal(null)}
         fiscal={null}
+      />
+      <BulkUploadModal open={bulkOpen} onClose={() => setBulkOpen(false)} />
+      <CategoryManagerModal
+        open={categoryModalOpen}
+        onClose={() => setCategoryModalOpen(false)}
       />
     </div>
   )

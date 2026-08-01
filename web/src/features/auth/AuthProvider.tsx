@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import type { Session, User } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 import { useWholesalersStore } from '@/stores/wholesalersStore'
+import { useCategoriesStore } from '@/stores/categoriesStore'
 
 interface AuthContextValue {
   session: Session | null
@@ -86,7 +87,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const { data: membership, error } = await supabase
           .from('memberships')
           .select(
-            'org_id, role, custom_name, permissions, organizations(nombre, plan, subscription_status, trial_ends_at, wholesalers)',
+            'org_id, role, custom_name, permissions, organizations(nombre, plan, subscription_status, trial_ends_at, wholesalers, categories)',
           )
           .eq('user_id', user.id)
           .maybeSingle()
@@ -133,6 +134,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             subscription_status: string | null
             trial_ends_at: string | null
             wholesalers: string[] | null
+            categories: string[] | null
           } | null
           if (org) {
             const plan: 'basic' | 'premium' = org.plan === 'premium' ? 'premium' : 'basic'
@@ -160,6 +162,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             // Sync wholesalers reactively to store
             if (Array.isArray(org.wholesalers)) {
               useWholesalersStore.getState().initWholesalers(org.wholesalers)
+            }
+            // Sync categorías personalizadas reactively to store
+            if (Array.isArray(org.categories)) {
+              useCategoriesStore.getState().initCategories(org.categories)
             }
           }
         }

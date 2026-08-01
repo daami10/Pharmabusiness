@@ -31,8 +31,10 @@ describe('getEffectiveVencStatus', () => {
   })
   afterEach(() => vi.useRealTimers())
 
-  it('abono → none', () => {
-    expect(getEffectiveVencStatus(mk({ tipo: 'Abono' }))).toBe('none')
+  it('abono con vencimiento se evalúa igual que una factura', () => {
+    expect(
+      getEffectiveVencStatus(mk({ tipo: 'Abono', fecha_vencimiento: '2026-01-01' })),
+    ).toBe('overdue')
   })
   it('sin fecha de vencimiento → paid', () => {
     expect(getEffectiveVencStatus(mk({ fecha_vencimiento: null }))).toBe('paid')
@@ -65,6 +67,23 @@ describe('filterFacturas', () => {
   it('categoría Mayorista incluye los tipos de mayorista configurados', () => {
     const r = filterFacturas(data, { ...filters, category: 'Mayorista' }, WHOLESALERS)
     expect(r.map((f) => f.id)).toEqual(['b'])
+  })
+  it('categoría personalizada filtra solo su propio tipo', () => {
+    const withCustom = [
+      ...data,
+      mk({ id: 'e', tipo: 'Parafarmacia', laboratorio: 'X', fecha: '2026-05-01' }),
+      mk({ id: 'f', tipo: 'Parafarmacia', laboratorio: 'Y', fecha: '2026-06-01' }),
+    ]
+    const r = filterFacturas(withCustom, { ...filters, category: 'Parafarmacia' }, WHOLESALERS)
+    expect(r.map((f) => f.id).sort()).toEqual(['e', 'f'])
+  })
+  it('la categoría "Otro" no incluye las personalizadas (tipo literal)', () => {
+    const set = [
+      mk({ id: 'o', tipo: 'Otro', fecha: '2026-05-01' }),
+      mk({ id: 'e', tipo: 'Parafarmacia', fecha: '2026-05-02' }),
+    ]
+    const r = filterFacturas(set, { ...filters, category: 'Otro' }, WHOLESALERS)
+    expect(r.map((f) => f.id)).toEqual(['o'])
   })
   it('búsqueda por laboratorio', () => {
     const r = filterFacturas(data, { ...filters, search: 'alfa' }, WHOLESALERS)
