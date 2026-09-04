@@ -1,5 +1,5 @@
-import { useMemo, useRef, useState } from 'react'
-import { AlertTriangle, CheckCircle2, FileUp, Sparkles, Trash2 } from 'lucide-react'
+import { useCallback, useMemo, useRef, useState } from 'react'
+import { AlertTriangle, CheckCircle2, FileUp, FolderOpen, Sparkles, Trash2 } from 'lucide-react'
 import { Dialog } from '@/components/ui/Dialog'
 import { DatePicker } from '@/components/ui/DatePicker'
 import { useTranslation } from '@/lib/i18n'
@@ -9,12 +9,27 @@ import { useAuth } from '@/features/auth/AuthProvider'
 import { useCreateFacturas } from '@/lib/queries/facturas'
 import { isWholesaler } from '@/lib/config/wholesalers'
 import { isReservedCategory } from '@/lib/config/categories'
-import { classifyScan, scanBatch, toFacturaInput, unzipInvoices } from './lib/batch-scan'
+import {
+  classifyScan,
+  loadTanda,
+  MAX_ZIP_BYTES,
+  readFolderSource,
+  readZipSource,
+  scanBatch,
+  splitTandas,
+  TANDA_SIZE,
+  toFacturaInput,
+  ZipTooLargeError,
+} from './lib/batch-scan'
+import type { BatchSource, SourceEntry } from './lib/batch-scan'
 import type { FacturaInput } from '@/types/domain'
 
-// Subida masiva desde un ZIP (fotos/PDFs). Categoría + nota comunes al lote.
+// Subida masiva desde una carpeta o un ZIP (fotos/PDFs). Categoría + nota comunes
+// al lote. El lote se procesa por TANDAS de TANDA_SIZE: se escanea una tanda, el
+// usuario la revisa y se guarda antes de pasar a la siguiente. Así la memoria y la
+// bandeja quedan acotadas, y lo ya guardado no se pierde si algo falla a mitad.
 // Las facturas que la IA lee completas se guardan directas; las dudosas se editan
-// en una mini-bandeja antes de guardar (opción B: red de seguridad).
+// en la mini-bandeja antes de guardar (opción B: red de seguridad).
 
 const NEW_CATEGORY = '__new__'
 
@@ -38,6 +53,9 @@ const inputCls =
 // usa un tamaño explícito pequeño y real.
 const fieldLabelCls = 'mb-1 block text-[10px] font-semibold uppercase tracking-wide text-slate-500'
 
+const pickerCls =
+  'flex flex-1 cursor-pointer flex-col items-center gap-1.5 rounded-xl border border-dashed p-4 text-center transition-colors'
+
 export function BulkUploadModal({
   open,
   onClose,
@@ -52,13 +70,26 @@ export function BulkUploadModal({
   const addCategory = useCategoriesStore((s) => s.addCategory)
   const createFacturas = useCreateFacturas()
 
-  const [step, setStep] = useState<'config' | 'scanning' | 'review'>('config')
-  const [zipName, setZipName] = useState('')
-  const zipRef = useRef<File | null>(null)
+  const [step, setStep] = useState<'config' | 'scanning' | 'review' | 'done'>('config')
+
+  // El origen y las tandas viven en refs: el buffer del ZIP puede pesar cientos de
+  // MB y no debe entrar en el estado de React (provocaría copias en cada render).
+  const sourceRef = useRef<BatchSource | null>(null)
+  const tandasRef = useRef<SourceEntry[][]>([])
+  const categorySavedRef = useRef(false)
+
+  const [pickLabel, setPickLabel] = useState('')
+  const [pickCount, setPickCount] = useState(0)
+  const [pickTandas, setPickTandas] = useState(0)
 
   const [categorySel, setCategorySel] = useState('')
   const [newCategory, setNewCategory] = useState('')
   const [note, setNote] = useState('')
+
+  const [tandaIndex, setTandaIndex] = useState(0)
+  const [totalTandas, setTotalTandas] = useState(0)
+  const [savedCount, setSavedCount] = useState(0)
+  const [totalCount, setTotalCount] = useState(0)
 
   const [progress, setProgress] = useState({ done: 0, total: 0 })
   const [rows, setRows] = useState<EditRow[]>([])
@@ -69,13 +100,28 @@ export function BulkUploadModal({
     categorySel === NEW_CATEGORY ? newCategory.trim() : categorySel.trim()
   const isWholesalerCat = isWholesaler(category, wholesalers)
 
+  // webkitdirectory no está en los tipos de React; se pone como atributo suelto.
+  const folderInputRef = useCallback((el: HTMLInputElement | null) => {
+    if (!el) return
+    el.setAttribute('webkitdirectory', '')
+    el.setAttribute('directory', '')
+  }, [])
+
   function resetAll() {
     setStep('config')
-    setZipName('')
-    zipRef.current = null
+    sourceRef.current = null
+    tandasRef.current = []
+    categorySavedRef.current = false
+    setPickLabel('')
+    setPickCount(0)
+    setPickTandas(0)
     setCategorySel('')
     setNewCategory('')
     setNote('')
+    setTandaIndex(0)
+    setTotalTandas(0)
+    setSavedCount(0)
+    setTotalCount(0)
     setProgress({ done: 0, total: 0 })
     setRows([])
     setError('')
@@ -86,46 +132,84 @@ export function BulkUploadModal({
     onClose()
   }
 
-  function pickZip(e: React.ChangeEvent<HTMLInputElement>) {
-    const f = e.target.files?.[0] ?? null
-    e.target.value = ''
-    zipRef.current = f
-    setZipName(f?.name ?? '')
-    setError('')
+  function clearPick() {
+    sourceRef.current = null
+    setPickLabel('')
+    setPickCount(0)
+    setPickTandas(0)
   }
 
-  async function startScan() {
+  async function pickZip(e: React.ChangeEvent<HTMLInputElement>) {
+    const f = e.target.files?.[0] ?? null
+    e.target.value = ''
+    if (!f) return
     setError('')
-    if (!zipRef.current) {
-      setError(t('bulk.error.no_zip', 'Selecciona un archivo ZIP.'))
+    try {
+      // Solo lee el índice del ZIP: no descomprime ni una factura todavía.
+      const source = await readZipSource(f)
+      if (source.entries.length === 0) {
+        clearPick()
+        setError(t('bulk.error.no_files', 'El ZIP no contiene imágenes ni PDFs.'))
+        return
+      }
+      sourceRef.current = source
+      setPickLabel(f.name)
+      setPickCount(source.entries.length)
+      setPickTandas(splitTandas(source.entries).length)
+    } catch (err) {
+      clearPick()
+      if (err instanceof ZipTooLargeError) {
+        setError(
+          t(
+            'bulk.error.zip_too_big',
+            `Este ZIP pesa ${Math.round(err.size / 1048576)} MB y el máximo es ${Math.round(
+              MAX_ZIP_BYTES / 1048576,
+            )} MB. Divídelo en varios, o mejor: sube la carpeta directamente (sin límite).`,
+          ),
+        )
+      } else {
+        setError(t('bulk.error.bad_zip', 'No se pudo abrir el ZIP. ¿Está dañado?'))
+      }
+    }
+  }
+
+  function pickFolder(e: React.ChangeEvent<HTMLInputElement>) {
+    const list = Array.from(e.target.files ?? [])
+    e.target.value = ''
+    if (list.length === 0) return
+    setError('')
+    const source = readFolderSource(list)
+    if (source.entries.length === 0) {
+      clearPick()
+      setError(t('bulk.error.no_files_folder', 'La carpeta no contiene imágenes ni PDFs.'))
       return
     }
-    if (!category) {
-      setError(t('bulk.error.no_category', 'Elige o escribe una categoría para el lote.'))
-      return
-    }
-    // Categoría nueva: validar el nombre, pero NO persistirla todavía. Solo se
-    // guarda en la organización si el lote llega a guardarse (en save()), para que
-    // cancelar la subida no deje una categoría huérfana.
-    if (categorySel === NEW_CATEGORY && isReservedCategory(category, wholesalers)) {
-      setError(t('categories.error.reserved', 'Ese nombre ya es una categoría de sistema o un mayorista.'))
-      return
-    }
+    sourceRef.current = source
+    const folderName = list[0].webkitRelativePath?.split('/')[0] ?? ''
+    setPickLabel(folderName || t('bulk.folder_picked', 'Carpeta seleccionada'))
+    setPickCount(source.entries.length)
+    setPickTandas(splitTandas(source.entries).length)
+  }
+
+  /** Escanea la tanda `i`: materializa solo esos archivos y los pasa por la IA. */
+  async function scanTanda(i: number) {
+    const source = sourceRef.current
+    const tanda = tandasRef.current[i]
+    if (!source || !tanda) return
+
+    setTandaIndex(i)
+    setStep('scanning')
+    setProgress({ done: 0, total: tanda.length })
 
     let files: File[]
     try {
-      files = await unzipInvoices(zipRef.current)
+      files = loadTanda(source, tanda)
     } catch {
       setError(t('bulk.error.bad_zip', 'No se pudo abrir el ZIP. ¿Está dañado?'))
-      return
-    }
-    if (files.length === 0) {
-      setError(t('bulk.error.no_files', 'El ZIP no contiene imágenes ni PDFs.'))
+      setStep('config')
       return
     }
 
-    setStep('scanning')
-    setProgress({ done: 0, total: files.length })
     const items = await scanBatch(files, {
       concurrency: 4,
       onProgress: (done, total) => setProgress({ done, total }),
@@ -133,8 +217,8 @@ export function BulkUploadModal({
 
     // Para mayoristas, el nombre = la categoría; si no, lo que leyó la IA.
     setRows(
-      items.map((it, i) => ({
-        key: i,
+      items.map((it, idx) => ({
+        key: idx,
         fileName: it.fileName,
         scanError: it.error,
         laboratorio: isWholesalerCat
@@ -152,6 +236,34 @@ export function BulkUploadModal({
       })),
     )
     setStep('review')
+  }
+
+  async function startScan() {
+    setError('')
+    const source = sourceRef.current
+    if (!source) {
+      setError(t('bulk.error.no_source', 'Selecciona una carpeta o un archivo ZIP.'))
+      return
+    }
+    if (!category) {
+      setError(t('bulk.error.no_category', 'Elige o escribe una categoría para el lote.'))
+      return
+    }
+    // Categoría nueva: validar el nombre, pero NO persistirla todavía. Solo se
+    // guarda en la organización cuando se guarda la primera tanda (en save()), para
+    // que cancelar la subida no deje una categoría huérfana.
+    if (categorySel === NEW_CATEGORY && isReservedCategory(category, wholesalers)) {
+      setError(t('categories.error.reserved', 'Ese nombre ya es una categoría de sistema o un mayorista.'))
+      return
+    }
+
+    const tandas = splitTandas(source.entries)
+    tandasRef.current = tandas
+    categorySavedRef.current = false
+    setTotalTandas(tandas.length)
+    setTotalCount(source.entries.length)
+    setSavedCount(0)
+    await scanTanda(0)
   }
 
   function updateRow(key: number, patch: Partial<EditRow>) {
@@ -173,8 +285,12 @@ export function BulkUploadModal({
   const active = rows.filter((r) => !r.discarded)
   const pending = active.filter((r) => rowMissing(r).length > 0)
   const readyCount = active.length - pending.length
-  const canSave = active.length > 0 && pending.length === 0
+  const isLastTanda = tandaIndex >= totalTandas - 1
+  // Se puede continuar aunque no quede ninguna activa (todas descartadas): la
+  // tanda simplemente se salta.
+  const canSave = pending.length === 0
 
+  /** Guarda la tanda actual y encadena con la siguiente (o termina). */
   async function save() {
     setError('')
     const inputs: FacturaInput[] = active.map((r) =>
@@ -191,13 +307,24 @@ export function BulkUploadModal({
       ),
     )
     try {
-      await createFacturas.mutateAsync(inputs)
-      // La categoría nueva solo se persiste ahora, con las facturas ya guardadas.
-      if (categorySel === NEW_CATEGORY) {
-        await addCategory(category, activeOrgId)
+      if (inputs.length > 0) {
+        await createFacturas.mutateAsync(inputs)
       }
-      handleClose()
+      // La categoría nueva solo se persiste con la primera tanda ya guardada.
+      if (categorySel === NEW_CATEGORY && !categorySavedRef.current) {
+        await addCategory(category, activeOrgId)
+        categorySavedRef.current = true
+      }
+      setSavedCount((n) => n + inputs.length)
+
+      const next = tandaIndex + 1
+      if (next < tandasRef.current.length) {
+        await scanTanda(next)
+      } else {
+        setStep('done')
+      }
     } catch (e) {
+      // Se queda en la tanda actual: lo guardado en tandas anteriores se conserva.
       setError(e instanceof Error ? e.message : t('general.save_error', 'Error al guardar'))
     }
   }
@@ -206,6 +333,8 @@ export function BulkUploadModal({
     () => categories.filter((c) => c && !wholesalers.includes(c)),
     [categories, wholesalers],
   )
+
+  const tandaLabel = `${t('bulk.tanda', 'Tanda')} ${tandaIndex + 1} ${t('general.de', 'de')} ${totalTandas} · ${savedCount} ${t('general.de', 'de')} ${totalCount} ${t('bulk.saved', 'guardadas')}`
 
   return (
     <Dialog
@@ -219,21 +348,57 @@ export function BulkUploadModal({
           <p className="text-sm text-slate-400">
             {t(
               'bulk.intro',
-              'Sube un ZIP con fotos o PDFs. La IA extraerá los datos de cada factura. Las que queden incompletas se marcarán para que las revises.',
+              `Sube una carpeta o un ZIP con fotos o PDFs. La IA extraerá los datos de cada factura y te las irá presentando en tandas de ${TANDA_SIZE} para que las revises y guardes.`,
             )}
           </p>
 
-          {/* ZIP */}
-          <label className="flex cursor-pointer flex-col items-center gap-2 rounded-xl border border-dashed border-accent-blue/30 bg-accent-blue/5 p-6 text-center">
-            <FileUp className="h-6 w-6 text-accent-blue" />
-            <span className="text-sm font-semibold text-accent-blue">
-              {zipName || t('bulk.pick_zip', 'Seleccionar archivo ZIP')}
-            </span>
-            <span className="text-xs text-slate-500">
-              {t('bulk.zip_hint', 'Fotos (JPG/PNG) o PDFs comprimidos en .zip')}
-            </span>
-            <input type="file" accept=".zip,application/zip" className="hidden" onChange={pickZip} />
-          </label>
+          {/* Origen: carpeta (recomendada, sin límite) o ZIP */}
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <label className={`${pickerCls} border-accent-blue/30 bg-accent-blue/5 hover:bg-accent-blue/10`}>
+              <FolderOpen className="h-6 w-6 text-accent-blue" />
+              <span className="text-sm font-semibold text-accent-blue">
+                {t('bulk.pick_folder', 'Seleccionar carpeta')}
+              </span>
+              <span className="text-xs text-slate-500">
+                {t('bulk.folder_hint', 'Recomendado · sin límite de facturas')}
+              </span>
+              <input
+                ref={folderInputRef}
+                type="file"
+                multiple
+                className="hidden"
+                onChange={pickFolder}
+              />
+            </label>
+
+            <label className={`${pickerCls} border-white/10 bg-white/[0.02] hover:bg-white/5`}>
+              <FileUp className="h-6 w-6 text-slate-400" />
+              <span className="text-sm font-semibold text-slate-300">
+                {t('bulk.pick_zip', 'Seleccionar archivo ZIP')}
+              </span>
+              <span className="text-xs text-slate-500">
+                {t('bulk.zip_hint_max', `Máximo ${Math.round(MAX_ZIP_BYTES / 1048576)} MB`)}
+              </span>
+              <input
+                type="file"
+                accept=".zip,application/zip"
+                className="hidden"
+                onChange={pickZip}
+              />
+            </label>
+          </div>
+
+          {pickCount > 0 && (
+            <p className="flex items-center gap-1.5 rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-400">
+              <CheckCircle2 className="h-4 w-4 shrink-0" />
+              <span className="truncate">
+                <span className="font-semibold">{pickCount}</span>{' '}
+                {t('bulk.detected', 'facturas detectadas en')} {pickLabel} ·{' '}
+                {pickTandas}{' '}
+                {t('bulk.tandas_of', `tandas de ${TANDA_SIZE}`)}
+              </span>
+            </p>
+          )}
 
           {/* Categoría común */}
           <div>
@@ -325,11 +490,25 @@ export function BulkUploadModal({
           <p className="text-xs text-slate-500">
             {progress.done} / {progress.total}
           </p>
+          {totalTandas > 1 && <p className="text-xs text-slate-500">{tandaLabel}</p>}
         </div>
       )}
 
       {step === 'review' && (
         <div className="space-y-4">
+          {/* Progreso global del lote */}
+          {totalTandas > 1 && (
+            <div className="space-y-1.5">
+              <p className="text-xs font-semibold text-slate-400">{tandaLabel}</p>
+              <div className="h-1.5 overflow-hidden rounded-full bg-slate-800">
+                <div
+                  className="h-full bg-accent-blue transition-all"
+                  style={{ width: `${totalCount ? (savedCount / totalCount) * 100 : 0}%` }}
+                />
+              </div>
+            </div>
+          )}
+
           {/* Resumen */}
           <div className="flex flex-wrap gap-3 text-sm">
             <span className="flex items-center gap-1.5 rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 py-1.5 text-emerald-400">
@@ -476,10 +655,12 @@ export function BulkUploadModal({
           <div className="flex gap-3 pt-1">
             <button
               type="button"
-              onClick={() => setStep('config')}
+              onClick={handleClose}
               className="flex-1 rounded-xl border border-white/10 py-3 text-sm font-semibold text-slate-300 transition-all hover:bg-white/5"
             >
-              {t('general.atras', 'Atrás')}
+              {savedCount > 0
+                ? t('bulk.finish_here', 'Terminar aquí')
+                : t('general.cancelar', 'Cancelar')}
             </button>
             <button
               type="button"
@@ -489,14 +670,42 @@ export function BulkUploadModal({
             >
               {createFacturas.isPending
                 ? t('general.guardando', 'Guardando…')
-                : `${t('bulk.save', 'Guardar')} ${active.length} ${t('bulk.invoices', 'facturas')}`}
+                : isLastTanda
+                  ? `${t('bulk.save', 'Guardar')} ${active.length} ${t('bulk.invoices', 'facturas')}`
+                  : `${t('bulk.save_continue', 'Guardar y continuar')} (${active.length})`}
             </button>
           </div>
-          {!canSave && active.length > 0 && (
+          {!canSave && (
             <p className="text-center text-xs text-amber-400">
               {t('bulk.blocked', 'Completa las facturas marcadas para poder guardar.')}
             </p>
           )}
+          {savedCount > 0 && (
+            <p className="text-center text-xs text-slate-500">
+              {t('bulk.kept_hint', 'Las facturas ya guardadas se conservan aunque salgas ahora.')}
+            </p>
+          )}
+        </div>
+      )}
+
+      {step === 'done' && (
+        <div className="space-y-5 py-8 text-center">
+          <CheckCircle2 className="mx-auto h-10 w-10 text-emerald-400" />
+          <div className="space-y-1">
+            <p className="text-base font-semibold text-slate-100">
+              {savedCount} {t('bulk.done_title', 'facturas guardadas')}
+            </p>
+            <p className="text-sm text-slate-400">
+              {t('bulk.done_hint', 'Ya están en tu listado de facturas y en el calendario de vencimientos.')}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={handleClose}
+            className="w-full rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:from-blue-400 hover:to-indigo-500"
+          >
+            {t('general.cerrar', 'Cerrar')}
+          </button>
         </div>
       )}
     </Dialog>

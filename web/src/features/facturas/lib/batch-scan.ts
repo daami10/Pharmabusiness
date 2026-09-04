@@ -3,14 +3,16 @@ import type { FacturaInput } from '@/types/domain'
 import { scanInvoice } from './ocr'
 import type { OcrResult } from './ocr'
 
-// Subida masiva de facturas desde un ZIP (fotos o PDFs). Cada archivo se escanea
-// con la IA (Gemini, vía /api/scan) y se clasifica con una "red de seguridad":
-// las que la IA leyó completas se guardan directas; las que tienen campos que
-// bloquean van a una mini-bandeja de revisión (opción B acordada con el usuario).
+// Subida masiva de facturas desde una carpeta o un ZIP (fotos o PDFs). El lote se
+// procesa por TANDAS: solo se materializan y escanean unas pocas facturas a la vez
+// y cada tanda se guarda antes de pasar a la siguiente. Cada archivo se escanea con
+// la IA (Gemini, vía /api/scan) y se clasifica con una "red de seguridad": las que
+// la IA leyó completas se guardan directas; las que tienen campos que bloquean van
+// a una mini-bandeja de revisión (opción B acordada con el usuario).
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/
 
-/** Extensiones aceptadas dentro del zip → su mime type para Gemini. */
+/** Extensiones aceptadas → su mime type para Gemini. */
 const MIME_BY_EXT: Record<string, string> = {
   jpg: 'image/jpeg',
   jpeg: 'image/jpeg',
@@ -19,6 +21,48 @@ const MIME_BY_EXT: Record<string, string> = {
   gif: 'image/gif',
   pdf: 'application/pdf',
 }
+
+/**
+ * Facturas por tanda. Acota tres cosas a la vez: la memoria (solo estas se
+ * descomprimen), el DOM de la bandeja de revisión y el radio de daño si el
+ * guardado falla. Además, el rato que el usuario tarda en revisar una tanda deja
+ * respirar el límite por minuto de Gemini.
+ */
+export const TANDA_SIZE = 25
+
+/**
+ * Tope de tamaño del ZIP. Un ZIP de fotos NO comprime nada (un JPEG ya viene
+ * comprimido), así que el archivo entero se queda en memoria mientras dura la
+ * subida. La carpeta no tiene este problema: sus File apuntan al disco y solo se
+ * lee la tanda en curso, por eso es la entrada recomendada para lotes grandes.
+ */
+export const MAX_ZIP_BYTES = 200 * 1024 * 1024
+
+export class ZipTooLargeError extends Error {
+  /** Tamaño real del ZIP rechazado, en bytes. */
+  size: number
+
+  constructor(size: number) {
+    super(`ZIP demasiado grande: ${Math.round(size / 1048576)} MB`)
+    this.name = 'ZipTooLargeError'
+    this.size = size
+  }
+}
+
+/** Una factura del lote, todavía sin descomprimir ni leer del disco. */
+export interface SourceEntry {
+  /** Clave única dentro de la fuente (ruta dentro del ZIP o de la carpeta). */
+  path: string
+  /** Nombre visible del archivo. */
+  name: string
+  /** Tamaño original en bytes. */
+  size: number
+}
+
+/** Origen del lote: un ZIP en memoria o una carpeta (File respaldados por disco). */
+export type BatchSource =
+  | { kind: 'zip'; entries: SourceEntry[]; buffer: Uint8Array }
+  | { kind: 'folder'; entries: SourceEntry[]; files: Map<string, File> }
 
 /** Campos cuya ausencia manda la factura a revisión manual. */
 export type MissingField =
@@ -70,26 +114,96 @@ export function classifyScan(result: OcrResult | null): {
   return { status: missing.length === 0 ? 'ready' : 'review', missing }
 }
 
-/** Descomprime un ZIP en memoria y devuelve los archivos de imagen/PDF como File[]. */
-export async function unzipInvoices(zipFile: File): Promise<File[]> {
-  const buf = new Uint8Array(await zipFile.arrayBuffer())
-  const entries = unzipSync(buf)
-  const files: File[] = []
+/**
+ * Devuelve el mime type si la ruta es una factura admitida, o null si hay que
+ * ignorarla (directorios, metadatos de macOS, ocultos y cualquier otra extensión).
+ */
+export function invoiceMime(path: string): string | null {
+  if (path.endsWith('/')) return null
+  const parts = path.split('/')
+  if (parts.includes('__MACOSX')) return null
+  const base = parts.pop() ?? path
+  if (base.startsWith('.')) return null
+  const ext = base.split('.').pop()?.toLowerCase() ?? ''
+  return MIME_BY_EXT[ext] ?? null
+}
 
-  for (const [name, bytes] of Object.entries(entries)) {
-    // Saltar directorios, metadatos de macOS y archivos ocultos.
-    if (name.endsWith('/')) continue
-    const base = name.split('/').pop() ?? name
-    if (name.startsWith('__MACOSX') || base.startsWith('.')) continue
+/**
+ * Lee el índice de un ZIP SIN descomprimir nada: fflate llama al filtro para cada
+ * entrada y, devolviendo false, no infla ni un byte. Así se sabe cuántas facturas
+ * hay (y cuánto pesan) antes de gastar una sola llamada a la IA.
+ */
+export async function readZipSource(zipFile: File): Promise<BatchSource> {
+  // El tamaño se comprueba ANTES de leer: arrayBuffer() copiaría el archivo entero
+  // a memoria, que es justo lo que hay que evitar con un ZIP enorme.
+  if (zipFile.size > MAX_ZIP_BYTES) throw new ZipTooLargeError(zipFile.size)
 
-    const ext = base.split('.').pop()?.toLowerCase() ?? ''
-    const mime = MIME_BY_EXT[ext]
-    if (!mime) continue // ignorar cualquier otra cosa (txt, xlsx, etc.)
+  const buffer = new Uint8Array(await zipFile.arrayBuffer())
+  const entries: SourceEntry[] = []
+  unzipSync(buffer, {
+    filter: (f) => {
+      if (invoiceMime(f.name)) {
+        entries.push({
+          path: f.name,
+          name: f.name.split('/').pop() ?? f.name,
+          size: f.originalSize,
+        })
+      }
+      return false // nunca se descomprime aquí: esto es solo el inventario
+    },
+  })
+  return { kind: 'zip', entries, buffer }
+}
 
-    // `bytes` es un Uint8Array; File acepta BlobPart.
-    files.push(new File([bytes as BlobPart], base, { type: mime }))
+/**
+ * Construye la fuente a partir de una carpeta elegida por el usuario. Los File ya
+ * apuntan al disco, así que no hay que descomprimir nada ni acotar el tamaño: el
+ * navegador solo carga en memoria el archivo que se está leyendo.
+ */
+export function readFolderSource(picked: File[]): BatchSource {
+  const files = new Map<string, File>()
+  const entries: SourceEntry[] = []
+  for (const f of picked) {
+    const path = f.webkitRelativePath || f.name
+    if (!invoiceMime(path) || files.has(path)) continue
+    files.set(path, f)
+    entries.push({ path, name: f.name, size: f.size })
+  }
+  return { kind: 'folder', entries, files }
+}
+
+/** Parte el lote en tandas del tamaño indicado, conservando el orden. */
+export function splitTandas(entries: SourceEntry[], size = TANDA_SIZE): SourceEntry[][] {
+  const out: SourceEntry[][] = []
+  for (let i = 0; i < entries.length; i += size) out.push(entries.slice(i, i + size))
+  return out
+}
+
+/**
+ * Materializa SOLO las facturas de una tanda. En un ZIP se descomprimen únicamente
+ * esas entradas (el resto se queda comprimido); en una carpeta los File ya sirven
+ * tal cual.
+ */
+export function loadTanda(source: BatchSource, tanda: SourceEntry[]): File[] {
+  if (source.kind === 'folder') {
+    return tanda
+      .map((e) => source.files.get(e.path))
+      .filter((f): f is File => f !== undefined)
   }
 
+  const wanted = new Set(tanda.map((e) => e.path))
+  const unzipped = unzipSync(source.buffer, { filter: (f) => wanted.has(f.name) })
+  const files: File[] = []
+  for (const e of tanda) {
+    const bytes = unzipped[e.path]
+    if (!bytes) continue
+    // `bytes` es un Uint8Array; File acepta BlobPart.
+    files.push(
+      new File([bytes as BlobPart], e.name, {
+        type: invoiceMime(e.path) ?? 'application/octet-stream',
+      }),
+    )
+  }
   return files
 }
 
